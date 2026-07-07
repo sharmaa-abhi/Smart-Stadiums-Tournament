@@ -62,6 +62,31 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (venue_id) REFERENCES venues(id)
   );
+
+  CREATE TABLE IF NOT EXISTS broadcast_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    channel TEXT NOT NULL DEFAULT 'all',
+    priority TEXT NOT NULL DEFAULT 'normal',
+    status TEXT NOT NULL DEFAULT 'active',
+    venue_id TEXT,
+    created_by INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME,
+    FOREIGN KEY (venue_id) REFERENCES venues(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS ai_conversations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    role TEXT NOT NULL,
+    content TEXT NOT NULL,
+    user_id INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 // ── Seed Venues ──
@@ -132,6 +157,28 @@ if (incidentCount.count === 0) {
   });
   insertManyIncidents(incidents);
   console.log('✅ Seeded 5 incidents');
+}
+
+// ── Seed Broadcast Messages ──
+const broadcastCount = db.prepare('SELECT COUNT(*) as count FROM broadcast_messages').get();
+if (broadcastCount.count === 0) {
+  const insertBroadcast = db.prepare(`
+    INSERT INTO broadcast_messages (title, message, channel, priority, status, venue_id) VALUES (?, ?, ?, ?, ?, ?)
+  `);
+
+  const broadcasts = [
+    ['Match Day Welcome', 'Welcome to MetLife Stadium! FIFA World Cup 2026. Gates open — enjoy the match!', 'all', 'normal', 'active', 'metlife'],
+    ['Transport Advisory', 'Parking Lot D is 92% full. Overflow parking available in Lot F. Shuttle service active every 10 minutes.', 'screens', 'normal', 'active', 'metlife'],
+    ['Medical Notice', 'Medical assistance stations located at Sections 101, 210, 308. Staff available 24/7.', 'pa', 'high', 'active', 'metlife'],
+    ['Concession Offer', 'Happy Hour at Craft Beer Garden — 20% off selected beverages until 16:00.', 'app', 'normal', 'scheduled', 'metlife'],
+    ['Security Alert', 'Enhanced bag checks at Gate B. Please allow extra time for entry.', 'pa', 'urgent', 'active', 'metlife'],
+  ];
+
+  const insertManyBroadcasts = db.transaction((msgs) => {
+    for (const b of msgs) insertBroadcast.run(...b);
+  });
+  insertManyBroadcasts(broadcasts);
+  console.log('✅ Seeded 5 broadcast messages');
 }
 
 export default db;

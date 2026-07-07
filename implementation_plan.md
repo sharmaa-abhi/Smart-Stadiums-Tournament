@@ -1,109 +1,104 @@
-# Backend Authentication, API Models & Frontend Integration
+# Smart Stadiums — Remaining Backend Services + Full Browser Testing
 
-Add a full Express.js backend with JWT authentication, RESTful API models for all stadium data, and integrate the frontend with protected routes + login/register pages.
+## Overview
+
+The project has a solid Express/SQLite backend with Auth, Venues, and Incidents routes fully working. The frontend pages (Dashboard, Security, Concessions, Crowd Management, etc.) are still using **local mock data** instead of real API calls. We need to:
+
+1. Add **remaining backend routes** (analytics, broadcast, AI assistant, user profile/settings)
+2. **Wire every frontend page** to the real API instead of mock data
+3. Fix the **Security page** to use real incidents from DB
+4. Add **WebSocket / SSE** for live-updating KPI tickers
+5. Launch both servers and do **extreme-level browser testing** through every page and feature
+
+---
+
+## Remaining Backend Routes to Add
+
+### New: `/api/analytics` — `server/routes/analytics.js`
+- `GET /api/analytics/overview` — match stats, revenue, total attendance per venue
+- `GET /api/analytics/trends` — 7-day trend data for charts
+- `GET /api/analytics/performance` — per-zone performance scores
+
+### New: `/api/broadcast` — `server/routes/broadcast.js`
+- `GET /api/broadcast/messages` — list of active broadcast messages
+- `POST /api/broadcast/messages` — create new broadcast
+- `PATCH /api/broadcast/messages/:id` — update (activate/deactivate)
+- `DELETE /api/broadcast/messages/:id` — delete
+
+### New: `/api/ai` — `server/routes/ai.js`
+- `POST /api/ai/chat` — AI assistant conversation handler (smart pre-programmed responses for stadium operations Q&A)
+- `GET /api/ai/history` — chat history per session
+
+### New: `/api/users` — `server/routes/users.js`
+- `GET /api/users/profile` — get full user profile
+- `PATCH /api/users/profile` — update name, avatar
+- `PATCH /api/users/password` — change password
+
+### Database additions to `server/db/database.js`
+- `broadcast_messages` table
+- `ai_conversations` table
+
+---
+
+## Frontend Wiring
+
+### Pages to wire to real API:
+- **Dashboard** — use `api.getVenueKPIs()`, `api.getVenueAlerts()`, `api.getVenueTimeseries()`, `api.getVenueOccupancy()`, `api.getVenueHeatmap()`
+- **Security** — use `api.getIncidents()`, `api.createIncident()`, `api.updateIncident()`
+- **Concessions** — use `api.getVenueConcessions()`, `api.getVenueGates()`
+- **CrowdManagement** — use `api.getVenueOccupancy()`, `api.getVenueTimeseries()`, `api.getVenueHeatmap()`
+- **Analytics** — use new `api.getAnalytics*()`
+- **Broadcast** — use new `api.getBroadcasts()`, `api.createBroadcast()`
+- **AIAssistant** — use new `api.aiChat()`
+- **Settings** — use `api.getVenues()`, `api.updateProfile()`
+- **TopBar** — show real logged-in user name/role
+
+---
 
 ## Proposed Changes
 
-### Backend Server (`server/`)
+### Server
 
-#### [NEW] server/package.json
-Node.js backend dependencies: `express`, `cors`, `jsonwebtoken`, `bcryptjs`, `better-sqlite3`, `dotenv`, `cookie-parser`
+#### [NEW] server/routes/analytics.js
+#### [NEW] server/routes/broadcast.js
+#### [NEW] server/routes/ai.js
+#### [NEW] server/routes/users.js
+#### [MODIFY] server/db/database.js — add broadcast_messages + ai_conversations tables + seed data
+#### [MODIFY] server/index.js — register 4 new route files
 
-#### [NEW] server/.env
-JWT secret, port, and environment configuration
+### Frontend API Client
 
-#### [NEW] server/db/database.js
-SQLite database setup with `better-sqlite3`. Creates tables on startup:
-- `users` — id, name, email, password (hashed), role, avatar, created_at
-- `venues` — id, name, city, capacity, country, lat, lng
-- `incidents` — id, type, zone, time, status, priority, response, assignee, venue_id
-- `alerts` — id, type, severity, title, description, time, venue_id
-- Seeds initial venue data from existing `mockData.js`
+#### [MODIFY] src/lib/api.js — add analytics, broadcast, AI, user profile methods
 
-#### [NEW] server/middleware/auth.js
-JWT middleware: extracts token from `Authorization: Bearer <token>` header, verifies it, attaches `req.user`. Returns 401 on invalid/missing token.
+### Frontend Pages
 
-#### [NEW] server/routes/auth.js
-Authentication routes:
-- `POST /api/auth/register` — Create account (name, email, password, role). Hashes password with bcrypt. Returns JWT + user profile.
-- `POST /api/auth/login` — Login with email/password. Validates credentials. Returns JWT + user profile.
-- `GET /api/auth/me` — Get current user profile (protected).
-
-#### [NEW] server/routes/venues.js
-Protected API routes for venue data:
-- `GET /api/venues` — List all venues
-- `GET /api/venues/:id` — Get single venue
-- `GET /api/venues/:id/kpis` — Get live KPIs (generated server-side)
-- `GET /api/venues/:id/alerts` — Get alerts
-- `GET /api/venues/:id/occupancy` — Get zone occupancy
-- `GET /api/venues/:id/timeseries` — Get time-series telemetry
-- `GET /api/venues/:id/heatmap` — Get crowd density heatmap
-- `GET /api/venues/:id/gates` — Get gate status
-- `GET /api/venues/:id/concessions` — Get concession data
-
-#### [NEW] server/routes/incidents.js
-Protected CRUD for incidents:
-- `GET /api/incidents` — List all incidents
-- `POST /api/incidents` — Create new incident
-- `PATCH /api/incidents/:id` — Update incident status
-
-#### [NEW] server/index.js
-Express server entry point. Loads env, connects DB, registers middleware (cors, json, cookie-parser), mounts routes, starts on port 5000.
+#### [MODIFY] src/pages/Dashboard.jsx — wire to real API
+#### [MODIFY] src/pages/Security.jsx — wire incidents to real API
+#### [MODIFY] src/pages/Concessions.jsx — wire to real API
+#### [MODIFY] src/pages/CrowdManagement.jsx — wire to real API
+#### [MODIFY] src/pages/Analytics.jsx — wire to new analytics API
+#### [MODIFY] src/pages/Broadcast.jsx — wire to new broadcast API
+#### [MODIFY] src/pages/AIAssistant.jsx — wire to new AI chat API
+#### [MODIFY] src/pages/Settings.jsx — wire venues + user profile to real API
+#### [MODIFY] src/components/TopBar.jsx — show real user from AuthContext
 
 ---
-
-### Frontend Auth Pages & Integration
-
-#### [NEW] src/context/AuthContext.jsx
-React Context for auth state: `user`, `token`, `login()`, `register()`, `logout()`, `isAuthenticated`. Stores JWT in localStorage. Auto-checks token on mount.
-
-#### [NEW] src/components/ProtectedRoute.jsx
-Wrapper component that redirects to `/login` if user is not authenticated.
-
-#### [NEW] src/pages/Login.jsx
-Premium dark-themed login page with email/password form, animated transitions, error handling, and link to register.
-
-#### [NEW] src/pages/Register.jsx
-Premium dark-themed registration page with name/email/password/role form, validation, and link to login.
-
-#### [NEW] src/lib/api.js
-API utility with Axios-like fetch wrapper. Adds JWT `Authorization` header automatically. Base URL: `http://localhost:5000/api`.
-
-#### [MODIFY] [App.jsx](file:///c:/Users/ABHI SHARMA/OneDrive/Desktop/projects/src/App.jsx)
-- Wrap with `AuthProvider`
-- Add `/login` and `/register` routes (public)
-- Wrap all existing routes with `ProtectedRoute`
-
-#### [MODIFY] [main.jsx](file:///c:/Users/ABHI SHARMA/OneDrive/Desktop/projects/src/main.jsx)
-No changes needed — BrowserRouter already wraps App.
-
-#### [MODIFY] [Sidebar.jsx](file:///c:/Users/ABHI SHARMA/OneDrive/Desktop/projects/src/components/Sidebar.jsx)
-- Show logged-in user name/role at the bottom
-- Add Logout button
-
-#### [MODIFY] [TopBar.jsx](file:///c:/Users/ABHI SHARMA/OneDrive/Desktop/projects/src/components/TopBar.jsx)
-- Show user avatar initials from auth context instead of hardcoded "OP"
-
----
-
-## Tech Decisions
-
-| Decision | Choice | Reason |
-|----------|--------|--------|
-| Database | SQLite (better-sqlite3) | Zero setup, no external DB needed, file-based |
-| Auth | JWT (jsonwebtoken) | Stateless, simple, works with SPA |
-| Password hashing | bcryptjs | Pure JS, no native compilation needed |
-| Backend framework | Express.js | Standard, lightweight, fast setup |
-| Frontend state | React Context | Lightweight, no extra dependencies |
 
 ## Verification Plan
 
-### Manual Verification
-1. Start backend server (`node server/index.js`)
-2. Start frontend (`npm run dev`)
-3. Open browser → should redirect to Login page
-4. Register a new account → should create user and redirect to Dashboard
-5. Logout → should redirect to Login
-6. Login with created account → should access Dashboard
-7. All 9 pages should still work with sidebar navigation
-8. API calls should return data from backend instead of mock data
+### Automated
+- Start both servers simultaneously
+- Browser testing through every page and interaction
+
+### Manual Browser Testing (Extreme Level)
+1. Register new user → verify in DB
+2. Login → verify token in localStorage
+3. Dashboard → live KPI updates, charts, heatmap
+4. Security → view/create/resolve incidents
+5. Concessions → live queue data, gate flows
+6. Crowd Management → occupancy, heatmap
+7. Analytics → charts and trends
+8. Broadcast → create/delete messages
+9. AI Assistant → chat with bot
+10. Settings → venue selection, user profile
+11. Logout → redirect to login, verify token cleared
