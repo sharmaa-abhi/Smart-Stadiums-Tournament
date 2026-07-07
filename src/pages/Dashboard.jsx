@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar
+  BarChart, Bar, Cell
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
@@ -175,7 +175,7 @@ export default function Dashboard() {
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="occupancy" name="Occupancy %" radius={[6, 6, 0, 0]}>
                   {occupancy.map((entry, index) => (
-                    <rect key={index} fill={entry.occupancy > 80 ? '#f43f5e' : entry.occupancy > 65 ? '#f59e0b' : '#3378ff'} />
+                    <Cell key={index} fill={entry.occupancy > 80 ? '#f43f5e' : entry.occupancy > 65 ? '#f59e0b' : '#3378ff'} />
                   ))}
                 </Bar>
               </BarChart>
