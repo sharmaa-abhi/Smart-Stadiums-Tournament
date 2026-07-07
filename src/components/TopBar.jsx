@@ -65,11 +65,17 @@ export default function TopBar({ title, subtitle }) {
             flex items-center justify-center text-white pulse-dot">3</span>
         </button>
 
-        {/* Avatar */}
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500
-          flex items-center justify-center text-xs font-bold text-white cursor-pointer
-          hover:shadow-lg hover:shadow-brand-500/20 transition-all duration-200">
-          {initials}
+        {/* Avatar & User Details */}
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:block text-right">
+            <p className="text-xs font-semibold text-white/85">{user?.name || 'Operations Operator'}</p>
+            <p className="text-[9px] text-white/45 capitalize">{user?.role || 'operator'}</p>
+          </div>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500
+            flex items-center justify-center text-xs font-bold text-white cursor-pointer
+            hover:shadow-lg hover:shadow-brand-500/20 transition-all duration-200">
+            {initials}
+          </div>
         </div>
       </div>
     </header>

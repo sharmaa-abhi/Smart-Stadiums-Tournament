@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
-import { generateConcessions } from '../data/mockData';
+import api from '../lib/api';
 
 const COLORS = ['#3378ff', '#22d3ee', '#34d399', '#f59e0b', '#f43f5e', '#a78bfa'];
 
@@ -42,17 +42,38 @@ const topItems = [
 ];
 
 export default function Concessions() {
-  const [concessions, setConcessions] = useState(generateConcessions());
+  const [concessions, setConcessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchConcessions = async () => {
+    try {
+      const res = await api.getVenueConcessions('metlife');
+      setConcessions(res.concessions || []);
+    } catch (err) {
+      console.error('Failed to fetch concessions:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setConcessions(generateConcessions());
-    }, 8000);
+    fetchConcessions();
+    const interval = setInterval(fetchConcessions, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   const totalRevenue = concessions.reduce((sum, c) => sum + c.revenue, 0);
-  const avgWaitAll = (concessions.reduce((sum, c) => sum + parseFloat(c.avgWait), 0) / concessions.length).toFixed(1);
+  const avgWaitAll = concessions.length > 0
+    ? (concessions.reduce((sum, c) => sum + parseFloat(c.avgWait), 0) / concessions.length).toFixed(1)
+    : '0.0';
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;

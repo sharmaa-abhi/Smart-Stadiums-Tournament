@@ -10,23 +10,45 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
-import { generateOccupancy, generateTimeSeriesData, ZONES } from '../data/mockData';
+import api from '../lib/api';
 
 export default function CrowdManagement() {
-  const [occupancy, setOccupancy] = useState(generateOccupancy());
-  const [timeData, setTimeData] = useState(generateTimeSeriesData(30));
+  const [occupancy, setOccupancy] = useState([]);
+  const [timeData, setTimeData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const [occRes, timeRes] = await Promise.all([
+        api.getVenueOccupancy('metlife'),
+        api.getVenueTimeseries('metlife', 30),
+      ]);
+      setOccupancy(occRes.occupancy || []);
+      setTimeData(timeRes.timeseries || []);
+    } catch (err) {
+      console.error('Failed to fetch crowd management data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setOccupancy(generateOccupancy());
-      setTimeData(generateTimeSeriesData(30));
-    }, 6000);
+    fetchData();
+    const interval = setInterval(fetchData, 6000);
     return () => clearInterval(interval);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   const totalFans = occupancy.reduce((sum, z) => sum + z.current, 0);
   const totalCapacity = occupancy.reduce((sum, z) => sum + z.capacity, 0);
-  const overallOccupancy = ((totalFans / totalCapacity) * 100).toFixed(1);
+  const overallOccupancy = totalCapacity > 0 ? ((totalFans / totalCapacity) * 100).toFixed(1) : '0.0';
 
   const radialData = occupancy.slice(0, 6).map((z, i) => ({
     name: `Zone ${z.zone}`,
