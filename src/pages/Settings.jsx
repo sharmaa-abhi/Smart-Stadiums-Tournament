@@ -1,0 +1,178 @@
+import { motion } from 'framer-motion';
+import {
+  Settings as SettingsIcon, Globe, Bell, Shield, Monitor, Palette,
+  Database, Wifi, Server, Key, Users, ToggleLeft, ToggleRight, ChevronRight
+} from 'lucide-react';
+import TopBar from '../components/TopBar';
+import { VENUES } from '../data/mockData';
+
+const settingSections = [
+  {
+    title: 'Venue Configuration',
+    icon: Globe,
+    items: [
+      { label: 'Active Venue', value: 'MetLife Stadium', type: 'select' },
+      { label: 'Edge Node Auto-Discovery', value: true, type: 'toggle' },
+      { label: 'Telemetry Refresh Rate', value: '5 seconds', type: 'select' },
+      { label: 'Digital Twin Sync Mode', value: 'Real-time', type: 'select' },
+    ],
+  },
+  {
+    title: 'Notifications & Alerts',
+    icon: Bell,
+    items: [
+      { label: 'Push Notifications', value: true, type: 'toggle' },
+      { label: 'SMS Alerts (Critical)', value: true, type: 'toggle' },
+      { label: 'Email Digest', value: false, type: 'toggle' },
+      { label: 'Alert Sound', value: true, type: 'toggle' },
+      { label: 'Crowd Density Threshold', value: '85%', type: 'input' },
+      { label: 'Queue Alert Threshold', value: '8 min wait', type: 'input' },
+    ],
+  },
+  {
+    title: 'AI & Model Settings',
+    icon: Server,
+    items: [
+      { label: 'AI Model', value: 'StadiumGPT-4o', type: 'select' },
+      { label: 'Inference Mode', value: 'Edge + Cloud Hybrid', type: 'select' },
+      { label: 'Confidence Threshold', value: '85%', type: 'input' },
+      { label: 'Human-in-the-Loop', value: true, type: 'toggle' },
+      { label: 'Auto-generate Incident Reports', value: true, type: 'toggle' },
+      { label: 'PII Filter', value: true, type: 'toggle' },
+    ],
+  },
+  {
+    title: 'Security & Privacy',
+    icon: Shield,
+    items: [
+      { label: 'mTLS Encryption', value: true, type: 'toggle' },
+      { label: 'Audit Logging', value: true, type: 'toggle' },
+      { label: 'CCTV Face Blur', value: true, type: 'toggle' },
+      { label: 'Session Timeout', value: '30 minutes', type: 'select' },
+      { label: 'Two-Factor Auth', value: true, type: 'toggle' },
+    ],
+  },
+];
+
+export default function Settings() {
+  return (
+    <div className="min-h-screen">
+      <TopBar title="Settings" subtitle="Platform configuration & preferences" />
+
+      <div className="p-6 space-y-6 max-w-4xl">
+        {/* Venue Selection */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card rounded-2xl p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Globe className="w-4 h-4 text-brand-400" />
+            <h3 className="text-sm font-semibold text-white/90">Active Venue Selection</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {VENUES.slice(0, 6).map((venue, i) => (
+              <motion.div
+                key={venue.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.06 }}
+                className={`p-3 rounded-xl cursor-pointer transition-all duration-200
+                  ${i === 0
+                    ? 'bg-brand-500/15 border border-brand-500/30 shadow-lg shadow-brand-500/5'
+                    : 'bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.10]'
+                  }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`text-sm font-semibold ${i === 0 ? 'text-brand-400' : 'text-white/70'}`}>
+                    {venue.name}
+                  </span>
+                  {i === 0 && <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />}
+                </div>
+                <p className="text-[10px] text-white/30">{venue.city}, {venue.country} • {venue.capacity.toLocaleString()} capacity</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Settings Sections */}
+        {settingSections.map((section, sIdx) => {
+          const SectionIcon = section.icon;
+          return (
+            <motion.div
+              key={sIdx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: sIdx * 0.1 + 0.2 }}
+              className="glass-card rounded-2xl p-5"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <SectionIcon className="w-4 h-4 text-brand-400" />
+                <h3 className="text-sm font-semibold text-white/90">{section.title}</h3>
+              </div>
+              <div className="divide-y divide-white/[0.04]">
+                {section.items.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 group">
+                    <span className="text-sm text-white/60">{item.label}</span>
+                    {item.type === 'toggle' ? (
+                      <button className="relative">
+                        {item.value ? (
+                          <ToggleRight className="w-8 h-8 text-brand-400" />
+                        ) : (
+                          <ToggleLeft className="w-8 h-8 text-white/20" />
+                        )}
+                      </button>
+                    ) : item.type === 'select' ? (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]
+                        text-xs text-white/60 cursor-pointer hover:bg-white/[0.06] transition-all">
+                        {item.value}
+                        <ChevronRight className="w-3 h-3 text-white/30" />
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        defaultValue={item.value}
+                        className="w-32 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]
+                          text-xs text-white/60 text-right focus:outline-none focus:border-brand-500/40 transition-all"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })}
+
+        {/* System Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="glass-card rounded-2xl p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Monitor className="w-4 h-4 text-brand-400" />
+            <h3 className="text-sm font-semibold text-white/90">System Information</h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'Platform Version', value: 'v2.4.1-beta' },
+              { label: 'API Version', value: 'v3.1.0' },
+              { label: 'Edge SDK', value: 'v1.8.2' },
+              { label: 'Last Sync', value: 'Just now' },
+              { label: 'Database', value: 'TimescaleDB + Neo4j' },
+              { label: 'Streaming', value: 'Kafka 3.7' },
+              { label: 'AI Runtime', value: 'CUDA 12.3' },
+              { label: 'Uptime', value: '99.97% (30d)' },
+            ].map((info, i) => (
+              <div key={i} className="p-3 rounded-lg bg-white/[0.02]">
+                <p className="text-[9px] text-white/30 uppercase tracking-wider">{info.label}</p>
+                <p className="text-xs font-semibold text-white/70 mt-1">{info.value}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

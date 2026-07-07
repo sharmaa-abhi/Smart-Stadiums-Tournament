@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* ── Custom Theme ── */
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+
+  /* Stadium Genius brand palette */
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #d9e8ff;
+  --color-brand-200: #bcd7ff;
+  --color-brand-300: #8ec0ff;
+  --color-brand-400: #599eff;
+  --color-brand-500: #3378ff;
+  --color-brand-600: #1b57f5;
+  --color-brand-700: #1443e1;
+  --color-brand-800: #1736b6;
+  --color-brand-900: #19318f;
+  --color-brand-950: #142057;
+
+  --color-accent-400: #22d3ee;
+  --color-accent-500: #06b6d4;
+  --color-accent-600: #0891b2;
+
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+
+  --color-rose-400: #fb7185;
+  --color-rose-500: #f43f5e;
+
+  --color-surface-950: #0a0a1a;
+  --color-surface-900: #0f1029;
+  --color-surface-800: #161838;
+  --color-surface-700: #1e2148;
+  --color-surface-600: #282c5a;
+}
+
+/* ── Base Styles ── */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1e2148 transparent;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    background: #0a0a1a;
+    color: white;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    text-align: left;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+}
+
+/* ── Component Utilities ── */
+@layer components {
+  .glass-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .glass-card-hover:hover {
+    background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+    border-color: rgba(255,255,255,0.14);
+  }
+
+  .glow-brand {
+    box-shadow: 0 0 30px rgba(51, 120, 255, 0.15), 0 0 60px rgba(51, 120, 255, 0.08);
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.15), 0 0 60px rgba(6, 182, 212, 0.08);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  }
+
+  .glow-amber {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+  }
+
+  .glow-rose {
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.2);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #3378ff 0%, #22d3ee 50%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-warm {
+    background: linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pulse-dot {
+    animation: pulse-ring 2s ease-out infinite;
+  }
+
+  .stadium-grid {
+    background-image:
+      linear-gradient(rgba(51, 120, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(51, 120, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* ── Keyframes ── */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(51, 120, 255, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(51, 120, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(51, 120, 255, 0); }
+}
