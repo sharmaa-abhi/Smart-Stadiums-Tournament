@@ -109,6 +109,85 @@ class ApiClient {
     });
   }
 
+  // ── Analytics ──
+  async getAnalyticsOverview() {
+    return this.request('/analytics/overview');
+  }
+
+  async getAnalyticsTrends() {
+    return this.request('/analytics/trends');
+  }
+
+  async getAnalyticsPerformance() {
+    return this.request('/analytics/performance');
+  }
+
+  async getAnalyticsRevenue() {
+    return this.request('/analytics/revenue');
+  }
+
+  // ── Broadcast ──
+  async getBroadcasts(venueId, status) {
+    const params = new URLSearchParams();
+    if (venueId) params.set('venue_id', venueId);
+    if (status) params.set('status', status);
+    const qs = params.toString();
+    return this.request(`/broadcast/messages${qs ? `?${qs}` : ''}`);
+  }
+
+  async createBroadcast(data) {
+    return this.request('/broadcast/messages', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateBroadcast(id, data) {
+    return this.request(`/broadcast/messages/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBroadcast(id) {
+    return this.request(`/broadcast/messages/${id}`, { method: 'DELETE' });
+  }
+
+  // ── AI Assistant ──
+  async aiChat(message, sessionId) {
+    return this.request('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, session_id: sessionId }),
+    });
+  }
+
+  async aiHistory(sessionId) {
+    return this.request(`/ai/history?session_id=${sessionId}`);
+  }
+
+  async aiSuggestions() {
+    return this.request('/ai/suggestions');
+  }
+
+  // ── Users ──
+  async getUserProfile() {
+    return this.request('/users/profile');
+  }
+
+  async updateUserProfile(data) {
+    return this.request('/users/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(currentPassword, newPassword) {
+    return this.request('/users/password', {
+      method: 'PATCH',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
+
   // ── Health ──
   async health() {
     return this.request('/health');

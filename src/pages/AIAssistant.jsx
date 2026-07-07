@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, Bot, User, Sparkles, AlertTriangle, CheckCircle2,
@@ -6,24 +6,22 @@ import {
   Zap, Brain, Radio, History
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
-import { CHAT_MESSAGES, INCIDENT_TEMPLATES } from '../data/mockData';
-
-const aiResponses = [
-  `Based on current telemetry, I'm observing the following key metrics:\n\n**Crowd Status:**\n- Overall occupancy: 87.3% (72,140 / 82,500)\n- Zones above threshold: Zone B (92%), Zone D (89%)\n- 3 gates operating above 80% throughput capacity\n\n**Recommendations:**\n1. ⚡ Activate overflow routing for Gate B → Gate C\n2. 📢 Push notifications to 2,100 incoming fans with alternative routes\n3. 👥 Redeploy 4 ushers from Zone H to Zone B corridor\n\nShall I execute these recommendations?`,
-
-  `✅ **Incident Report Generated — INC-2026-0852**\n\n**Type:** Crowd density anomaly\n**Location:** Gate B / North Concourse\n**Severity:** Medium\n**Time:** ${new Date().toLocaleTimeString()}\n\n**Summary:** Crowd density at Gate B exceeded safe threshold (4.5 persons/m²) for 3 consecutive minutes. Automated reroute protocol activated at 15:12. Gate C overflow opened. Digital signage updated at 4 waypoints.\n\n**Resolution:** Density reduced to 2.8 persons/m² within 6 minutes of intervention. No injuries. Staff response time: 23 seconds.\n\n**AI Confidence:** 94% — based on 128 CCTV frames + 12 LiDAR readings + 3 turnstile sensors.`,
-
-  `🔍 **Fan Wayfinding Query — Zone 108**\n\nBased on the current venue state, here are the optimal routes for the family arriving at Gate D:\n\n**Primary Route (fastest):** Gate D → Concourse West → Ramp W3 → Section 108\n- 📏 Distance: 180m\n- ⏱️ Est. time: 2m 45s\n- 👥 Corridor density: Low (1.2 persons/m²)\n\n**Alternative Route:** Gate D → Elevator E2 → Level 2 → Section 108\n- 📏 Distance: 210m\n- ⏱️ Est. time: 3m 15s\n- ♿ Accessible: Yes\n\nI've notified Usher Team 7 to assist at the Gate D entrance. A 10% concession voucher has been queued for their ticket account.`,
-
-  `📊 **Half-time Prediction Summary**\n\nBased on historical patterns and current match state:\n\n**Concession demand surge expected in T-3 minutes:**\n- Food Court North: +180% demand predicted → **Activating 2 express lanes**\n- Beverage Bar East: +220% demand predicted → **Pre-staging inventory**\n- Restroom Level 2: +150% predicted → **Deploying additional cleaning crew**\n\n**Transport (post-match):**\n- Parking utilization: 94% — Lot D overflow active\n- Subway demand: ~18,000 passengers estimated → Transit authority notified\n- Ride-share staging: 340 vehicles queued\n\nAll predictions have 88-93% confidence based on 14 prior matches at this venue.`,
-];
+import api from '../lib/api';
 
 export default function AIAssistant() {
-  const [messages, setMessages] = useState(CHAT_MESSAGES);
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: "Hello! I'm StadiumAI, your intelligent stadium operations assistant. I'm monitoring MetLife Stadium in real-time. Ask me about crowd density, security incidents, concession queues, or anything match day related!" },
+  ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId] = useState(() => crypto.randomUUID());
+  const [suggestions, setSuggestions] = useState([]);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    api.aiSuggestions().then(d => setSuggestions(d.suggestions || [])).catch(() => {});
+  }, []);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,30 +31,25 @@ export default function AIAssistant() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = useCallback(async (text) => {
+    const msg = text || input;
+    if (!msg.trim()) return;
 
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
+    setMessages(prev => [...prev, { role: 'user', content: msg }]);
     setInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      const response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+    try {
+      const res = await api.aiChat(msg, sessionId);
+      setMessages(prev => [...prev, { role: 'assistant', content: res.content }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error connecting to the AI service. Please try again.' }]);
+    } finally {
       setIsTyping(false);
-    }, 1500 + Math.random() * 1500);
-  };
+    }
+  }, [input, sessionId]);
 
-  const handleQuickAction = (template) => {
-    setMessages(prev => [...prev, { role: 'user', content: template }]);
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-      setIsTyping(false);
-    }, 1500 + Math.random() * 1500);
-  };
+  const handleQuickAction = (template) => handleSend(template);
 
   const formatContent = (content) => {
     return content.split('\n').map((line, i) => {
@@ -201,8 +194,8 @@ export default function AIAssistant() {
                 <Mic className="w-4 h-4 text-white/40" />
               </button>
               <button
-                onClick={handleSend}
-                disabled={!input.trim()}
+                onClick={() => handleSend()}
+                disabled={!input.trim() || isTyping}
                 className="p-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-30 disabled:hover:bg-brand-500
                   transition-all duration-200 glow-brand"
               >
@@ -250,7 +243,7 @@ export default function AIAssistant() {
           >
             <h4 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3">Quick Prompts</h4>
             <div className="space-y-2">
-              {INCIDENT_TEMPLATES.map((template, i) => (
+              {suggestions.map((template, i) => (
                 <button
                   key={i}
                   onClick={() => handleQuickAction(template)}

@@ -10,6 +10,10 @@ import './db/database.js';
 import authRoutes from './routes/auth.js';
 import venueRoutes from './routes/venues.js';
 import incidentRoutes from './routes/incidents.js';
+import analyticsRoutes from './routes/analytics.js';
+import broadcastRoutes from './routes/broadcast.js';
+import aiRoutes from './routes/ai.js';
+import userRoutes from './routes/users.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +30,10 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/venues', venueRoutes);
 app.use('/api/incidents', incidentRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/broadcast', broadcastRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/users', userRoutes);
 
 // ── Health Check ──
 app.get('/api/health', (req, res) => {

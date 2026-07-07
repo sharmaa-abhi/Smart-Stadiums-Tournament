@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
+import api from '../lib/api';
 
 // ── Security zone data with expanded detail ──
 const securityZones = [
@@ -23,13 +24,7 @@ const securityZones = [
   { id: 6, name: 'Field Perimeter', status: 'secure', cameras: 12, alerts: 0, level: 'green', patrols: 4, lastSweep: '1 min ago' },
 ];
 
-const incidents = [
-  { id: 'INC-2026-0847', type: 'Unauthorized Access', zone: 'VIP Level 3', time: '14:32', status: 'resolved', priority: 'high', response: '47s', assignee: 'Team Alpha' },
-  { id: 'INC-2026-0848', type: 'Lost Child', zone: 'Section 204', time: '14:45', status: 'active', priority: 'critical', response: '12s', assignee: 'Team Delta' },
-  { id: 'INC-2026-0849', type: 'Crowd Surge', zone: 'Gate B', time: '14:51', status: 'monitoring', priority: 'high', response: '23s', assignee: 'Team Bravo' },
-  { id: 'INC-2026-0850', type: 'Suspicious Package', zone: 'Concourse E', time: '15:02', status: 'investigating', priority: 'critical', response: '8s', assignee: 'K9 Unit' },
-  { id: 'INC-2026-0851', type: 'Medical Emergency', zone: 'Section 108', time: '15:08', status: 'active', priority: 'high', response: '15s', assignee: 'Medic-3' },
-];
+const VENUE_ID = 'metlife';
 
 const accessLog = [
   { time: '15:10:23', event: 'VIP credential scan — authorized', zone: 'VIP-3', type: 'success' },
@@ -83,6 +78,26 @@ export default function Security() {
   const [showIncidentModal, setShowIncidentModal] = useState(false);
   const [threatData] = useState(generateThreatTimeline());
   const [liveAccessLog, setLiveAccessLog] = useState(accessLog);
+  const [incidents, setIncidents] = useState([]);
+  const [loadingIncidents, setLoadingIncidents] = useState(true);
+  const [newIncidentForm, setNewIncidentForm] = useState({ type: '', zone: '', priority: 'medium', description: '' });
+
+  const fetchIncidents = useCallback(async () => {
+    try {
+      const res = await api.getIncidents(VENUE_ID);
+      setIncidents(res.incidents || []);
+    } catch (err) {
+      console.error('Failed to fetch incidents:', err);
+    } finally {
+      setLoadingIncidents(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchIncidents();
+    const interval = setInterval(fetchIncidents, 10000);
+    return () => clearInterval(interval);
+  }, [fetchIncidents]);
 
   // Simulate live access log updates
   useEffect(() => {

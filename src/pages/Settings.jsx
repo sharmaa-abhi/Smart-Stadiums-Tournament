@@ -1,10 +1,11 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Settings as SettingsIcon, Globe, Bell, Shield, Monitor, Palette,
   Database, Wifi, Server, Key, Users, ToggleLeft, ToggleRight, ChevronRight
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
-import { VENUES } from '../data/mockData';
+import api from '../lib/api';
 
 const settingSections = [
   {
@@ -55,6 +56,16 @@ const settingSections = [
 ];
 
 export default function Settings() {
+  const [venues, setVenues] = useState([]);
+  const [activeVenueIdx, setActiveVenueIdx] = useState(0);
+  const [loadingVenues, setLoadingVenues] = useState(true);
+
+  useEffect(() => {
+    api.getVenues()
+      .then(res => setVenues(res.venues || []))
+      .catch(console.error)
+      .finally(() => setLoadingVenues(false));
+  }, []);
   return (
     <div className="min-h-screen">
       <TopBar title="Settings" subtitle="Platform configuration & preferences" />
@@ -71,23 +82,29 @@ export default function Settings() {
             <h3 className="text-sm font-semibold text-white/90">Active Venue Selection</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {VENUES.slice(0, 6).map((venue, i) => (
+            {loadingVenues ? (
+              <div className="col-span-3 text-center py-6">
+                <div className="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-xs text-white/30">Loading venues…</p>
+              </div>
+            ) : venues.slice(0, 6).map((venue, i) => (
               <motion.div
                 key={venue.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
+                onClick={() => setActiveVenueIdx(i)}
                 className={`p-3 rounded-xl cursor-pointer transition-all duration-200
-                  ${i === 0
+                  ${i === activeVenueIdx
                     ? 'bg-brand-500/15 border border-brand-500/30 shadow-lg shadow-brand-500/5'
                     : 'bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.10]'
                   }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={`text-sm font-semibold ${i === 0 ? 'text-brand-400' : 'text-white/70'}`}>
+                  <span className={`text-sm font-semibold ${i === activeVenueIdx ? 'text-brand-400' : 'text-white/70'}`}>
                     {venue.name}
                   </span>
-                  {i === 0 && <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />}
+                  {i === activeVenueIdx && <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />}
                 </div>
                 <p className="text-[10px] text-white/30">{venue.city}, {venue.country} • {venue.capacity.toLocaleString()} capacity</p>
               </motion.div>

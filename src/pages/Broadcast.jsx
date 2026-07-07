@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Radio, Tv, Camera, Clapperboard, Layers3, Gamepad2,
   Eye, Play, Pause, Volume2, Maximize2, Share2,
-  Sparkles, Trophy, Timer, Activity, Signal
+  Sparkles, Trophy, Timer, Activity, Signal,
+  Megaphone, Plus, Trash2, Check, AlertCircle, X
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
+import api from '../lib/api';
 
 const feeds = [
   { id: 1, name: 'Main Camera — Center', angle: 'Wide', status: 'live', fps: 60, resolution: '4K HDR', viewers: '2.4M' },
@@ -36,6 +38,70 @@ const highlights = [
 
 export default function Broadcast() {
   const [selectedFeed, setSelectedFeed] = useState(feeds[0]);
+  const [broadcasts, setBroadcasts] = useState([]);
+  const [loadingBroadcasts, setLoadingBroadcasts] = useState(true);
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [newMsg, setNewMsg] = useState({ title: '', message: '', channel: 'all', priority: 'normal' });
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchBroadcasts = useCallback(async () => {
+    try {
+      const res = await api.getBroadcasts('metlife');
+      setBroadcasts(res.messages || []);
+    } catch (err) {
+      console.error('Broadcast fetch error:', err);
+    } finally {
+      setLoadingBroadcasts(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBroadcasts();
+  }, [fetchBroadcasts]);
+
+  const handleCreateBroadcast = async () => {
+    if (!newMsg.title || !newMsg.message) return;
+    setSubmitting(true);
+    try {
+      await api.createBroadcast({ ...newMsg, venue_id: 'metlife' });
+      setNewMsg({ title: '', message: '', channel: 'all', priority: 'normal' });
+      setShowNewForm(false);
+      await fetchBroadcasts();
+    } catch (err) {
+      console.error('Create broadcast error:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteBroadcast = async (id) => {
+    try {
+      await api.deleteBroadcast(id);
+      setBroadcasts(prev => prev.filter(b => b.id !== id));
+    } catch (err) {
+      console.error('Delete broadcast error:', err);
+    }
+  };
+
+  const handleToggleBroadcast = async (b) => {
+    try {
+      const newStatus = b.status === 'active' ? 'paused' : 'active';
+      await api.updateBroadcast(b.id, { status: newStatus });
+      await fetchBroadcasts();
+    } catch (err) {
+      console.error('Toggle broadcast error:', err);
+    }
+  };
+
+  const priorityColors = {
+    urgent: 'bg-rose-500/15 text-rose-400 border-rose-500/20',
+    high: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
+    normal: 'bg-brand-500/15 text-brand-400 border-brand-500/20',
+  };
+
+  const channelIcons = {
+    all: '📡', screens: '🖥️', pa: '📢', app: '📱',
+  };
 
   return (
     <div className="min-h-screen">
@@ -230,6 +296,150 @@ export default function Broadcast() {
             </motion.div>
           </div>
         </div>
+
+        {/* Broadcast Messages Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass-card rounded-2xl p-5"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Megaphone className="w-4 h-4 text-brand-400" />
+              <h3 className="text-sm font-semibold text-white/90">Stadium Broadcasts</h3>
+              <span className="text-xs text-white/30">{broadcasts.filter(b => b.status === 'active').length} active</span>
+            </div>
+            <button
+              onClick={() => setShowNewForm(!showNewForm)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/15 border border-brand-500/30
+                text-xs text-brand-400 hover:bg-brand-500/25 transition-all"
+            >
+              <Plus className="w-3 h-3" />
+              New Broadcast
+            </button>
+          </div>
+
+          {/* New Broadcast Form */}
+          <AnimatePresence>
+            {showNewForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-3"
+              >
+                <input
+                  type="text"
+                  placeholder="Broadcast title..."
+                  value={newMsg.title}
+                  onChange={e => setNewMsg(p => ({ ...p, title: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white/80
+                    placeholder:text-white/20 focus:outline-none focus:border-brand-500/40 transition-all"
+                />
+                <textarea
+                  placeholder="Message content..."
+                  value={newMsg.message}
+                  onChange={e => setNewMsg(p => ({ ...p, message: e.target.value }))}
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white/80
+                    placeholder:text-white/20 focus:outline-none focus:border-brand-500/40 transition-all resize-none"
+                />
+                <div className="flex items-center gap-3">
+                  <select
+                    value={newMsg.channel}
+                    onChange={e => setNewMsg(p => ({ ...p, channel: e.target.value }))}
+                    className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-white/60
+                      focus:outline-none focus:border-brand-500/40 transition-all"
+                  >
+                    <option value="all">📡 All Channels</option>
+                    <option value="screens">🖥️ Screens</option>
+                    <option value="pa">📢 PA System</option>
+                    <option value="app">📱 Fan App</option>
+                  </select>
+                  <select
+                    value={newMsg.priority}
+                    onChange={e => setNewMsg(p => ({ ...p, priority: e.target.value }))}
+                    className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-white/60
+                      focus:outline-none focus:border-brand-500/40 transition-all"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                  <div className="flex-1 flex items-center gap-2 justify-end">
+                    <button
+                      onClick={() => setShowNewForm(false)}
+                      className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/40 hover:text-white/60 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreateBroadcast}
+                      disabled={!newMsg.title || !newMsg.message || submitting}
+                      className="px-4 py-1.5 rounded-lg bg-brand-500 text-xs text-white font-medium
+                        hover:bg-brand-600 disabled:opacity-40 transition-all"
+                    >
+                      {submitting ? 'Sending...' : 'Send Broadcast'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Broadcast List */}
+          <div className="space-y-2">
+            {loadingBroadcasts ? (
+              <div className="text-center py-6">
+                <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-xs text-white/30">Loading broadcasts…</p>
+              </div>
+            ) : broadcasts.length === 0 ? (
+              <p className="text-xs text-white/30 text-center py-6">No broadcasts yet</p>
+            ) : broadcasts.map((b) => (
+              <motion.div
+                key={b.id}
+                layout
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] transition-all group"
+              >
+                <span className="text-lg leading-none mt-0.5">{channelIcons[b.channel] || '📡'}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs font-semibold text-white/80 truncate">{b.title}</span>
+                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded border ${priorityColors[b.priority] || priorityColors.normal}`}>
+                      {b.priority?.toUpperCase()}
+                    </span>
+                    <span className={`ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded ${
+                      b.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' :
+                      b.status === 'scheduled' ? 'bg-amber-500/10 text-amber-400' :
+                      'bg-white/[0.04] text-white/30'
+                    }`}>{b.status}</span>
+                  </div>
+                  <p className="text-[11px] text-white/40 line-clamp-2">{b.message}</p>
+                  <p className="text-[9px] text-white/20 mt-1">{b.channel} • {new Date(b.created_at).toLocaleTimeString()}</p>
+                </div>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleToggleBroadcast(b)}
+                    title={b.status === 'active' ? 'Pause' : 'Activate'}
+                    className="p-1.5 rounded-lg hover:bg-white/[0.08] transition-all"
+                  >
+                    {b.status === 'active' ? <Pause className="w-3 h-3 text-amber-400" /> : <Play className="w-3 h-3 text-emerald-400" />}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBroadcast(b.id)}
+                    className="p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                  >
+                    <Trash2 className="w-3 h-3 text-rose-400/60 hover:text-rose-400" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </div>
   );
