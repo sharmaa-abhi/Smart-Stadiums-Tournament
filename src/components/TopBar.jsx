@@ -1,8 +1,14 @@
 import { Bell, Search, Globe, Wifi, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function TopBar({ title, subtitle }) {
   const [time, setTime] = useState(new Date());
+  const { user } = useAuth();
+
+  const initials = user?.name
+    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'SG';
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -63,7 +69,7 @@ export default function TopBar({ title, subtitle }) {
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500
           flex items-center justify-center text-xs font-bold text-white cursor-pointer
           hover:shadow-lg hover:shadow-brand-500/20 transition-all duration-200">
-          OP
+          {initials}
         </div>
       </div>
     </header>

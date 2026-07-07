@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import ScrollToTop from './components/ScrollToTop';
 import Dashboard from './pages/Dashboard';
@@ -10,27 +12,40 @@ import AIAssistant from './pages/AIAssistant';
 import Broadcast from './pages/Broadcast';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+function AppLayout({ children }) {
+  return (
+    <div className="flex min-h-screen bg-surface-950 stadium-grid">
+      <Sidebar />
+      <main className="flex-1 ml-[260px] min-w-0">
+        {children}
+      </main>
+    </div>
+  );
+}
 
 export default function App() {
   return (
-    <div className="flex min-h-screen bg-surface-950 stadium-grid">
+    <AuthProvider>
       <ScrollToTop />
-      <Sidebar />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      {/* Main content area — offset by fixed sidebar width */}
-      <main className="flex-1 ml-[260px] min-w-0">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/digital-twin" element={<DigitalTwin />} />
-          <Route path="/crowd" element={<CrowdManagement />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/concessions" element={<Concessions />} />
-          <Route path="/assistant" element={<AIAssistant />} />
-          <Route path="/broadcast" element={<Broadcast />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </main>
-    </div>
+        {/* Protected routes */}
+        <Route path="/" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+        <Route path="/digital-twin" element={<ProtectedRoute><AppLayout><DigitalTwin /></AppLayout></ProtectedRoute>} />
+        <Route path="/crowd" element={<ProtectedRoute><AppLayout><CrowdManagement /></AppLayout></ProtectedRoute>} />
+        <Route path="/security" element={<ProtectedRoute><AppLayout><Security /></AppLayout></ProtectedRoute>} />
+        <Route path="/concessions" element={<ProtectedRoute><AppLayout><Concessions /></AppLayout></ProtectedRoute>} />
+        <Route path="/assistant" element={<ProtectedRoute><AppLayout><AIAssistant /></AppLayout></ProtectedRoute>} />
+        <Route path="/broadcast" element={<ProtectedRoute><AppLayout><Broadcast /></AppLayout></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><AppLayout><Analytics /></AppLayout></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><AppLayout><Settings /></AppLayout></ProtectedRoute>} />
+      </Routes>
+    </AuthProvider>
   );
 }

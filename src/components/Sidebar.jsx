@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Map,
@@ -12,8 +12,11 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
+  LogOut,
+  User,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -28,6 +31,13 @@ const navItems = [
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <aside
@@ -77,6 +87,26 @@ export default function Sidebar() {
 
       {/* Bottom */}
       <div className="px-3 pb-4 space-y-1 border-t border-white/[0.06] pt-3">
+        {/* User Profile */}
+        {user && !collapsed && (
+          <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+              {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-xs font-semibold text-white/80 truncate">{user.name}</p>
+              <p className="text-[10px] text-white/30 capitalize">{user.role}</p>
+            </div>
+          </div>
+        )}
+        {user && collapsed && (
+          <div className="flex justify-center py-2">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center text-xs font-bold text-white">
+              {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+            </div>
+          </div>
+        )}
+
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -91,6 +121,21 @@ export default function Sidebar() {
           <Settings className="w-[18px] h-[18px]" />
           {!collapsed && <span>Settings</span>}
         </NavLink>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
+            text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/[0.06] transition-all duration-200"
+        >
+          {collapsed ? (
+            <LogOut className="w-[18px] h-[18px] mx-auto" />
+          ) : (
+            <>
+              <LogOut className="w-[18px] h-[18px]" />
+              <span>Logout</span>
+            </>
+          )}
+        </button>
 
         <button
           onClick={() => setCollapsed(!collapsed)}
