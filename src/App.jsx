@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleGuard from './components/RoleGuard';
+import PWAInstallBanner from './components/PWAInstallBanner';
 import Sidebar from './components/Sidebar';
 import ScrollToTop from './components/ScrollToTop';
 import Dashboard from './pages/Dashboard';
@@ -14,6 +15,7 @@ import Broadcast from './pages/Broadcast';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import AdminPanel from './pages/AdminPanel';
+import FanPortal from './pages/FanPortal';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -43,10 +45,12 @@ export default function App() {
   return (
     <AuthProvider>
       <ScrollToTop />
+      <PWAInstallBanner />
       <Routes>
-        {/* Public routes */}
+        {/* ── Public routes ── */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/fan" element={<FanPortal />} />
 
         {/* ── All roles ── */}
         <Route path="/" element={<Page><Dashboard /></Page>} />

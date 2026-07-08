@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Map, ShieldAlert, MessageSquareText, Users,
   UtensilsCrossed, Radio, BarChart3, Settings, Zap, ChevronLeft,
   ChevronRight, LogOut, UserCog, ClipboardList, TrendingUp,
-  Building2, Eye, Siren, DollarSign, Shield, Activity,
+  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -17,6 +17,7 @@ const NAV_BY_ROLE = {
     { to: '/broadcast', icon: Radio, label: 'Broadcast Control', desc: 'All channels' },
     { to: '/settings', icon: Building2, label: 'Venue Settings', desc: 'Config & policies' },
     { to: '/assistant', icon: MessageSquareText, label: 'AI Command', desc: 'AI insights' },
+    { to: '/fan', icon: Ticket, label: 'Fan Portal', desc: 'Fan-facing app' },
   ],
   manager: [
     { to: '/', icon: LayoutDashboard, label: 'Ops Dashboard', desc: 'Live operations' },
@@ -25,6 +26,7 @@ const NAV_BY_ROLE = {
     { to: '/crowd', icon: Users, label: 'Crowd Flow', desc: 'Capacity planning' },
     { to: '/broadcast', icon: Radio, label: 'Announcements', desc: 'Staff broadcasts' },
     { to: '/assistant', icon: MessageSquareText, label: 'AI Advisor', desc: 'Operational AI' },
+    { to: '/fan', icon: Ticket, label: 'Fan Portal', desc: 'Fan-facing app' },
     { to: '/settings', icon: Settings, label: 'My Settings', desc: 'Profile & prefs' },
   ],
   security: [
@@ -43,9 +45,11 @@ const NAV_BY_ROLE = {
     { to: '/concessions', icon: UtensilsCrossed, label: 'Concessions', desc: 'Queue tracking' },
     { to: '/broadcast', icon: Radio, label: 'Broadcast', desc: 'Announcements' },
     { to: '/assistant', icon: MessageSquareText, label: 'AI Assistant', desc: 'Operations AI' },
+    { to: '/fan', icon: Ticket, label: 'Fan Portal', desc: 'Fan-facing app' },
     { to: '/settings', icon: Settings, label: 'Settings', desc: 'Profile & prefs' },
   ],
 };
+
 
 // ── Role branding ──────────────────────────────────────────────────────────
 const ROLE_BRAND = {
