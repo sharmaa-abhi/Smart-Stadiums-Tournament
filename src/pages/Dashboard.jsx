@@ -14,9 +14,10 @@ import AlertCard from '../components/AlertCard';
 import StadiumHeatmap from '../components/StadiumHeatmap';
 import api from '../lib/api';
 
-const VENUE_ID = 'metlife';
+const getVenueId = () => localStorage.getItem('sg_active_venue_id') || 'metlife';
 
 export default function Dashboard() {
+  const VENUE_ID = getVenueId();
   const [kpis, setKpis] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [timeData, setTimeData] = useState([]);

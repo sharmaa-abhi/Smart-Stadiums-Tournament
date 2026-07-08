@@ -24,7 +24,7 @@ const securityZones = [
   { id: 6, name: 'Field Perimeter', status: 'secure', cameras: 12, alerts: 0, level: 'green', patrols: 4, lastSweep: '1 min ago' },
 ];
 
-const VENUE_ID = 'metlife';
+const getVenueId = () => localStorage.getItem('sg_active_venue_id') || 'metlife';
 
 const accessLog = [
   { time: '15:10:23', event: 'VIP credential scan — authorized', zone: 'VIP-3', type: 'success' },
@@ -73,6 +73,7 @@ function generateThreatTimeline() {
 }
 
 export default function Security() {
+  const VENUE_ID = getVenueId();
   const [selectedZone, setSelectedZone] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [showIncidentModal, setShowIncidentModal] = useState(false);

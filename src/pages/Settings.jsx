@@ -81,7 +81,15 @@ export default function Settings() {
 
   useEffect(() => {
     api.getVenues()
-      .then(res => setVenues(res.venues || []))
+      .then(res => {
+        const list = res.venues || [];
+        setVenues(list);
+        const savedId = localStorage.getItem('sg_active_venue_id');
+        if (savedId) {
+          const idx = list.findIndex(v => v.id === savedId);
+          if (idx !== -1) setActiveVenueIdx(idx);
+        }
+      })
       .catch(console.error)
       .finally(() => setLoadingVenues(false));
   }, []);
@@ -135,7 +143,10 @@ export default function Settings() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
-                onClick={() => setActiveVenueIdx(i)}
+                onClick={() => {
+                  setActiveVenueIdx(i);
+                  localStorage.setItem('sg_active_venue_id', venue.id);
+                }}
                 className={`p-3 rounded-xl cursor-pointer transition-all duration-200
                   ${i === activeVenueIdx
                     ? 'bg-brand-500/15 border border-brand-500/30 shadow-lg shadow-brand-500/5'

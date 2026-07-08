@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
 // ── POST /api/incidents ──
 router.post('/', (req, res) => {
   try {
-    const { type, zone, priority, description, venue_id } = req.body;
+    const { type, zone, priority, description, venue_id } = req.body || {};
 
     if (!type || !zone) {
       return res.status(400).json({ error: 'Type and zone are required.' });
@@ -73,7 +73,7 @@ router.patch('/:id', (req, res) => {
       return res.status(404).json({ error: 'Incident not found.' });
     }
 
-    const { status, assignee, response } = req.body;
+    const { status, assignee, response } = req.body || {};
     const updates = [];
     const params = [];
 

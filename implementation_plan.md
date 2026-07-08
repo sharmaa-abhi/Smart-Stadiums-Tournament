@@ -1,45 +1,47 @@
-# Smart Stadiums — Remaining Backend Services + Full Browser Testing
+# Implementation Plan — Backend SSE, Auth, and Settings Integration
 
-## Overview
+This plan implements the remaining backend routes, auth updates, settings functionality, and real-time SSE telemetry, followed by automated browser verification.
 
-The backend contains routes for Auth, Venues, Incidents, Analytics, Broadcast, AI, and Users. The frontend pages (Dashboard, Security, Concessions, Crowd Management, etc.) are partially wired, but some pages need more comprehensive integration with the backend APIs. We will:
-1. Update authentication middleware to support URL query token parsing for EventSource (SSE).
-2. Implement Server-Sent Events (SSE) route `/api/venues/:id/live-kpis` on the backend to stream live KPI updates.
-3. Modify `Dashboard.jsx` to establish an EventSource connection for real-time KPI updates.
-4. Modify `Settings.jsx` to include user profile update (name) and password change functionality wired to the backend API.
-5. Launch both servers and run automated browser verification using the browser subagent.
+## User Review Required
 
----
+> [!IMPORTANT]
+> The implementation of persistent venue state will store the selected venue ID in `localStorage` as `sg_active_venue_id`. If not present, it will fallback to `'metlife'`. This ensures that all components load data matching the selected venue.
 
 ## Proposed Changes
 
-### Server
+### Component: Backend (Express Server)
 
 #### [MODIFY] [auth.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/server/middleware/auth.js)
-- Allow authenticating requests via a `token` query parameter in addition to the standard `Authorization` Bearer header to support SSE connections.
+* Ensure requests are authenticated using either the `Authorization` Bearer header or the `token` query parameter to support browser native `EventSource` (which does not allow custom headers by default). *(Note: Already implemented, but we will verify it is operational.)*
 
 #### [MODIFY] [venues.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/server/routes/venues.js)
-- Implement a `GET /api/venues/:id/live-kpis` route that sets the response headers for SSE (`text/event-stream`) and pushes live-generated venue KPI stats down the connection every 2 seconds.
+* Verify the `/api/venues/:id/live-kpis` route correctly sets headers for Server-Sent Events (`text/event-stream`), sends the initial KPI dataset, and pushes updates every 2 seconds. *(Note: Already implemented, but we will verify it works during execution.)*
 
-### Frontend
+---
+
+### Component: Frontend (React App)
 
 #### [MODIFY] [Dashboard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/src/pages/Dashboard.jsx)
-- Use `EventSource` connected to the `/api/venues/:id/live-kpis` endpoint to receive live updates.
-- Keep standard polling/fetching for secondary telemetry, alerts, occupancy, and heatmaps.
+* Use `localStorage.getItem('sg_active_venue_id') || 'metlife'` as the `VENUE_ID` to support dynamic loading of the user's active venue from settings.
+* Establish `EventSource` connection to dynamic SSE URL `/api/venues/${VENUE_ID}/live-kpis?token=${token}`.
 
 #### [MODIFY] [Settings.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/src/pages/Settings.jsx)
-- Wire active venue selection to state.
-- Add user profile edit card (update name) using `api.updateUserProfile()`.
-- Add change password card (current password + new password) using `api.changePassword()`.
+* Update active venue selection on mount to check if `sg_active_venue_id` exists in `localStorage` and set it accordingly.
+* Save the active venue ID to `localStorage` under key `sg_active_venue_id` when the user selects a venue card.
+* Update `handleUpdateProfile` to call `api.updateUserProfile({ name: profileName })` and verify it updates the profile name.
+* Update `handlePasswordChange` to call `api.changePassword(currentPassword, newPassword)`.
 
 ---
 
 ## Verification Plan
 
-### Automated
-- Launch frontend (Vite) and backend (Express) concurrently.
-- Run browser subagent task to navigate through all dashboard pages, trigger incident resolution, test AI chat, edit profile, and verify that real API data is loaded correctly.
+### Automated Verification
+* Run Express server (`npm run dev` in `server/`) and Vite dev server (`npm run dev` in frontend workspace) concurrently.
+* Launch browser subagent to:
+  1. Navigate to the login/registration page and authenticate.
+  2. Load the operations dashboard, verify that KPI telemetry updates automatically over SSE, and verify pages navigate correctly.
+  3. Navigate to Settings page, change the active venue, update the user profile name, change the password, and verify the changes persist.
 
 ### Manual Verification
-- Verify that live KPI tickers tick automatically without manual refresh or periodic REST requests in the network panel.
-- Update profile details and verify changes persist on page refresh.
+* Inspect the network panel to confirm SSE connection is active and receiving telemetry messages every 2 seconds.
+* Check that profile name changes are persisted after updating and refreshing.
