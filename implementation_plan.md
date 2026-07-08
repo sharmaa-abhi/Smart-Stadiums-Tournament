@@ -2,56 +2,12 @@
 
 ## Overview
 
-The project has a solid Express/SQLite backend with Auth, Venues, and Incidents routes fully working. The frontend pages (Dashboard, Security, Concessions, Crowd Management, etc.) are still using **local mock data** instead of real API calls. We need to:
-
-1. Add **remaining backend routes** (analytics, broadcast, AI assistant, user profile/settings)
-2. **Wire every frontend page** to the real API instead of mock data
-3. Fix the **Security page** to use real incidents from DB
-4. Add **WebSocket / SSE** for live-updating KPI tickers
-5. Launch both servers and do **extreme-level browser testing** through every page and feature
-
----
-
-## Remaining Backend Routes to Add
-
-### New: `/api/analytics` — `server/routes/analytics.js`
-- `GET /api/analytics/overview` — match stats, revenue, total attendance per venue
-- `GET /api/analytics/trends` — 7-day trend data for charts
-- `GET /api/analytics/performance` — per-zone performance scores
-
-### New: `/api/broadcast` — `server/routes/broadcast.js`
-- `GET /api/broadcast/messages` — list of active broadcast messages
-- `POST /api/broadcast/messages` — create new broadcast
-- `PATCH /api/broadcast/messages/:id` — update (activate/deactivate)
-- `DELETE /api/broadcast/messages/:id` — delete
-
-### New: `/api/ai` — `server/routes/ai.js`
-- `POST /api/ai/chat` — AI assistant conversation handler (smart pre-programmed responses for stadium operations Q&A)
-- `GET /api/ai/history` — chat history per session
-
-### New: `/api/users` — `server/routes/users.js`
-- `GET /api/users/profile` — get full user profile
-- `PATCH /api/users/profile` — update name, avatar
-- `PATCH /api/users/password` — change password
-
-### Database additions to `server/db/database.js`
-- `broadcast_messages` table
-- `ai_conversations` table
-
----
-
-## Frontend Wiring
-
-### Pages to wire to real API:
-- **Dashboard** — use `api.getVenueKPIs()`, `api.getVenueAlerts()`, `api.getVenueTimeseries()`, `api.getVenueOccupancy()`, `api.getVenueHeatmap()`
-- **Security** — use `api.getIncidents()`, `api.createIncident()`, `api.updateIncident()`
-- **Concessions** — use `api.getVenueConcessions()`, `api.getVenueGates()`
-- **CrowdManagement** — use `api.getVenueOccupancy()`, `api.getVenueTimeseries()`, `api.getVenueHeatmap()`
-- **Analytics** — use new `api.getAnalytics*()`
-- **Broadcast** — use new `api.getBroadcasts()`, `api.createBroadcast()`
-- **AIAssistant** — use new `api.aiChat()`
-- **Settings** — use `api.getVenues()`, `api.updateProfile()`
-- **TopBar** — show real logged-in user name/role
+The backend contains routes for Auth, Venues, Incidents, Analytics, Broadcast, AI, and Users. The frontend pages (Dashboard, Security, Concessions, Crowd Management, etc.) are partially wired, but some pages need more comprehensive integration with the backend APIs. We will:
+1. Update authentication middleware to support URL query token parsing for EventSource (SSE).
+2. Implement Server-Sent Events (SSE) route `/api/venues/:id/live-kpis` on the backend to stream live KPI updates.
+3. Modify `Dashboard.jsx` to establish an EventSource connection for real-time KPI updates.
+4. Modify `Settings.jsx` to include user profile update (name) and password change functionality wired to the backend API.
+5. Launch both servers and run automated browser verification using the browser subagent.
 
 ---
 
@@ -59,46 +15,31 @@ The project has a solid Express/SQLite backend with Auth, Venues, and Incidents 
 
 ### Server
 
-#### [NEW] server/routes/analytics.js
-#### [NEW] server/routes/broadcast.js
-#### [NEW] server/routes/ai.js
-#### [NEW] server/routes/users.js
-#### [MODIFY] server/db/database.js — add broadcast_messages + ai_conversations tables + seed data
-#### [MODIFY] server/index.js — register 4 new route files
+#### [MODIFY] [auth.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/server/middleware/auth.js)
+- Allow authenticating requests via a `token` query parameter in addition to the standard `Authorization` Bearer header to support SSE connections.
 
-### Frontend API Client
+#### [MODIFY] [venues.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/server/routes/venues.js)
+- Implement a `GET /api/venues/:id/live-kpis` route that sets the response headers for SSE (`text/event-stream`) and pushes live-generated venue KPI stats down the connection every 2 seconds.
 
-#### [MODIFY] src/lib/api.js — add analytics, broadcast, AI, user profile methods
+### Frontend
 
-### Frontend Pages
+#### [MODIFY] [Dashboard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/src/pages/Dashboard.jsx)
+- Use `EventSource` connected to the `/api/venues/:id/live-kpis` endpoint to receive live updates.
+- Keep standard polling/fetching for secondary telemetry, alerts, occupancy, and heatmaps.
 
-#### [MODIFY] src/pages/Dashboard.jsx — wire to real API
-#### [MODIFY] src/pages/Security.jsx — wire incidents to real API
-#### [MODIFY] src/pages/Concessions.jsx — wire to real API
-#### [MODIFY] src/pages/CrowdManagement.jsx — wire to real API
-#### [MODIFY] src/pages/Analytics.jsx — wire to new analytics API
-#### [MODIFY] src/pages/Broadcast.jsx — wire to new broadcast API
-#### [MODIFY] src/pages/AIAssistant.jsx — wire to new AI chat API
-#### [MODIFY] src/pages/Settings.jsx — wire venues + user profile to real API
-#### [MODIFY] src/components/TopBar.jsx — show real user from AuthContext
+#### [MODIFY] [Settings.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/src/pages/Settings.jsx)
+- Wire active venue selection to state.
+- Add user profile edit card (update name) using `api.updateUserProfile()`.
+- Add change password card (current password + new password) using `api.changePassword()`.
 
 ---
 
 ## Verification Plan
 
 ### Automated
-- Start both servers simultaneously
-- Browser testing through every page and interaction
+- Launch frontend (Vite) and backend (Express) concurrently.
+- Run browser subagent task to navigate through all dashboard pages, trigger incident resolution, test AI chat, edit profile, and verify that real API data is loaded correctly.
 
-### Manual Browser Testing (Extreme Level)
-1. Register new user → verify in DB
-2. Login → verify token in localStorage
-3. Dashboard → live KPI updates, charts, heatmap
-4. Security → view/create/resolve incidents
-5. Concessions → live queue data, gate flows
-6. Crowd Management → occupancy, heatmap
-7. Analytics → charts and trends
-8. Broadcast → create/delete messages
-9. AI Assistant → chat with bot
-10. Settings → venue selection, user profile
-11. Logout → redirect to login, verify token cleared
+### Manual Verification
+- Verify that live KPI tickers tick automatically without manual refresh or periodic REST requests in the network panel.
+- Update profile details and verify changes persist on page refresh.

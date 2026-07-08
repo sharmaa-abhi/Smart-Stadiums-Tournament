@@ -24,32 +24,47 @@ export default function Dashboard() {
   const [heatmap, setHeatmap] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAll = async () => {
-    try {
-      const [kpisRes, alertsRes, timeRes, occRes, heatRes] = await Promise.all([
-        api.getVenueKPIs(VENUE_ID),
-        api.getVenueAlerts(VENUE_ID),
-        api.getVenueTimeseries(VENUE_ID, 24),
-        api.getVenueOccupancy(VENUE_ID),
-        api.getVenueHeatmap(VENUE_ID),
-      ]);
-      setKpis(kpisRes.kpis);
-      setAlerts(alertsRes.alerts);
-      setTimeData(timeRes.timeseries);
-      setOccupancy(occRes.occupancy);
-      setHeatmap(heatRes.heatmap);
-    } catch (err) {
-      console.error('Dashboard fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchAll();
-    // Live update every 5 seconds
-    const interval = setInterval(fetchAll, 5000);
-    return () => clearInterval(interval);
+    const fetchOthers = async () => {
+      try {
+        const [alertsRes, timeRes, occRes, heatRes] = await Promise.all([
+          api.getVenueAlerts(VENUE_ID),
+          api.getVenueTimeseries(VENUE_ID, 24),
+          api.getVenueOccupancy(VENUE_ID),
+          api.getVenueHeatmap(VENUE_ID),
+        ]);
+        setAlerts(alertsRes.alerts);
+        setTimeData(timeRes.timeseries);
+        setOccupancy(occRes.occupancy);
+        setHeatmap(heatRes.heatmap);
+      } catch (err) {
+        console.error('Dashboard fetch others error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOthers();
+    const interval = setInterval(fetchOthers, 10000);
+
+    // SSE connection for KPIs
+    const token = localStorage.getItem('sg_token');
+    const sseUrl = `${api.baseUrl}/venues/${VENUE_ID}/live-kpis?token=${token}`;
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setKpis(data);
+      } catch (err) {
+        console.error('Error parsing live KPIs:', err);
+      }
+    };
+
+    return () => {
+      clearInterval(interval);
+      eventSource.close();
+    };
   }, []);
 
   const CustomTooltip = ({ active, payload, label }) => {
