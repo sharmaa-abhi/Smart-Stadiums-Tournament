@@ -1,10 +1,37 @@
 import { Bell, Search, Globe, Wifi, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationPanel from './NotificationPanel';
+import { AnimatePresence } from 'framer-motion';
+
+const ROLE_BRAND = {
+  admin: {
+    gradient: 'from-rose-500 to-orange-500',
+    glow: 'hover:shadow-rose-500/20',
+  },
+  manager: {
+    gradient: 'from-violet-500 to-purple-600',
+    glow: 'hover:shadow-violet-500/20',
+  },
+  security: {
+    gradient: 'from-amber-500 to-yellow-500',
+    glow: 'hover:shadow-amber-500/20',
+  },
+  operator: {
+    gradient: 'from-brand-500 to-accent-500',
+    glow: 'hover:shadow-brand-500/20',
+  },
+};
 
 export default function TopBar({ title, subtitle }) {
   const [time, setTime] = useState(new Date());
   const { user } = useAuth();
+  const { unreadCount } = useNotifications();
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  const role = user?.role || 'operator';
+  const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
 
   const initials = user?.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
@@ -58,12 +85,30 @@ export default function TopBar({ title, subtitle }) {
         </div>
 
         {/* Notifications */}
-        <button className="relative p-2 rounded-xl bg-white/[0.04] border border-white/[0.08]
-          hover:bg-white/[0.07] transition-all duration-200 group">
-          <Bell className="w-4 h-4 text-white/50 group-hover:text-white/80 transition-colors" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full text-[9px] font-bold
-            flex items-center justify-center text-white pulse-dot">3</span>
-        </button>
+        <div className="relative">
+          <button
+            id="notification-bell-btn"
+            onClick={() => setIsPanelOpen(!isPanelOpen)}
+            className={`relative p-2 rounded-xl border transition-all duration-200 group
+              ${isPanelOpen 
+                ? 'bg-brand-500/10 border-brand-500/30 text-brand-400 shadow-[0_0_15px_rgba(51,120,255,0.25)]' 
+                : 'bg-white/[0.04] border-white/[0.08] text-white/50 hover:bg-white/[0.07] hover:text-white/80'}`}
+          >
+            <Bell className="w-4 h-4 transition-colors" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 rounded-full text-[9px] font-bold
+                flex items-center justify-center text-white pulse-dot">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+
+          <AnimatePresence>
+            {isPanelOpen && (
+              <NotificationPanel isOpen={isPanelOpen} onClose={() => setIsPanelOpen(false)} />
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Avatar & User Details */}
         <div className="flex items-center gap-2">
@@ -71,9 +116,9 @@ export default function TopBar({ title, subtitle }) {
             <p className="text-xs font-semibold text-white/85">{user?.name || 'Operations Operator'}</p>
             <p className="text-[9px] text-white/45 capitalize">{user?.role || 'operator'}</p>
           </div>
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500
+          <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient}
             flex items-center justify-center text-xs font-bold text-white cursor-pointer
-            hover:shadow-lg hover:shadow-brand-500/20 transition-all duration-200">
+            hover:shadow-lg ${brand.glow} transition-all duration-200`}>
             {initials}
           </div>
         </div>

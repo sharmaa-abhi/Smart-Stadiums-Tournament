@@ -92,8 +92,7 @@ const ACTIVE_STYLE = {
 };
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, sidebarCollapsed: collapsed, toggleSidebar } = useAuth();
   const navigate = useNavigate();
 
   const role = user?.role || 'operator';
@@ -189,7 +188,7 @@ export default function Sidebar() {
         </button>
 
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleSidebar}
           className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
             text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all duration-200
             ${collapsed ? 'justify-center' : ''}`}

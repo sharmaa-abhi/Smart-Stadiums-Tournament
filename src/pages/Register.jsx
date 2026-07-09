@@ -38,7 +38,10 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4 overflow-hidden relative">
+      {/* Animated scanline */}
+      <div className="fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-500/35 via-accent-400/50 via-brand-500/35 to-transparent shadow-[0_0_15px_rgba(34,211,238,0.4)] animate-scanline pointer-events-none z-0" />
+
       {/* Ambient glow */}
       <div className="fixed top-0 right-1/4 w-96 h-96 bg-accent-500/8 rounded-full blur-[120px] pointer-events-none" />
       <div className="fixed bottom-0 left-1/4 w-96 h-96 bg-brand-500/6 rounded-full blur-[120px] pointer-events-none" />
