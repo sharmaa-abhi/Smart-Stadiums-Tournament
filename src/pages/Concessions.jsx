@@ -64,8 +64,28 @@ export default function Concessions() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen">
+        <TopBar title="Concessions & Retail Control" subtitle="Real-time sales tracking & queue intelligence" />
+        <div className="p-6 space-y-6">
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-24 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex-shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-5 w-16 bg-white/[0.04] rounded-md" />
+                  <div className="h-3.5 w-24 bg-white/[0.04] rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+            <div className="lg:col-span-2 h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
+            <div className="h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
+          </div>
+        </div>
       </div>
     );
   }

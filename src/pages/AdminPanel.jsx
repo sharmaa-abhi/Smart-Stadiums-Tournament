@@ -180,9 +180,20 @@ export default function AdminPanel() {
             </select>
           </div>
 
-          {/* Table */}
           {loading ? (
-            <div className="flex items-center justify-center h-40 text-white/30 text-sm">Loading users...</div>
+            <div className="space-y-2 max-h-[340px] pr-1 animate-pulse">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.01] border border-white/[0.03]">
+                  <div className="w-8 h-8 rounded-xl bg-white/[0.04] flex-shrink-0" />
+                  <div className="flex-1 space-y-1.5 min-w-0">
+                    <div className="h-4 w-32 bg-white/[0.04] rounded-md" />
+                    <div className="h-3 w-48 bg-white/[0.04] rounded-md" />
+                  </div>
+                  <div className="w-20 h-6 bg-white/[0.04] rounded-md flex-shrink-0" />
+                  <div className="w-8 h-8 bg-white/[0.04] rounded-md flex-shrink-0 animate-pulse" />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="overflow-auto max-h-[340px] space-y-2 pr-1">
               {filtered.map(u => (
