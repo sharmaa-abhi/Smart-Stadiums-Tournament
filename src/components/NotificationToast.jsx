@@ -17,7 +17,7 @@ const TYPE_ICONS = {
 
 const SEVERITY_STYLES = {
   critical: {
-    bg: 'bg-gradient-to-r from-rose-500/20 to-rose-500/5',
+    bg: 'bg-surface-900/98',
     border: 'border-rose-500/40',
     icon: AlertTriangle,
     iconColor: 'text-rose-400',
@@ -25,7 +25,7 @@ const SEVERITY_STYLES = {
     badge: 'bg-rose-500',
   },
   warning: {
-    bg: 'bg-gradient-to-r from-amber-500/20 to-amber-500/5',
+    bg: 'bg-surface-900/98',
     border: 'border-amber-500/30',
     icon: AlertTriangle,
     iconColor: 'text-amber-400',
@@ -33,7 +33,7 @@ const SEVERITY_STYLES = {
     badge: 'bg-amber-500',
   },
   info: {
-    bg: 'bg-gradient-to-r from-brand-500/15 to-brand-500/5',
+    bg: 'bg-surface-900/98',
     border: 'border-brand-500/25',
     icon: Info,
     iconColor: 'text-brand-400',
@@ -41,7 +41,7 @@ const SEVERITY_STYLES = {
     badge: 'bg-brand-500',
   },
   success: {
-    bg: 'bg-gradient-to-r from-emerald-500/15 to-emerald-500/5',
+    bg: 'bg-surface-900/98',
     border: 'border-emerald-500/25',
     icon: CheckCircle2,
     iconColor: 'text-emerald-400',
