@@ -57,7 +57,7 @@ const settingSections = [
 ];
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [venues, setVenues] = useState([]);
   const [activeVenueIdx, setActiveVenueIdx] = useState(0);
   const [loadingVenues, setLoadingVenues] = useState(true);
@@ -97,8 +97,9 @@ export default function Settings() {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await api.updateUserProfile({ name: profileName, avatar: profileAvatar });
-      setProfileMsg({ type: 'success', text: 'Profile updated successfully! Refresh to see changes.' });
+      const res = await api.updateUserProfile({ name: profileName, avatar: profileAvatar });
+      updateUser(res.user);
+      setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
     } catch (err) {
       setProfileMsg({ type: 'error', text: err.message || 'Failed to update profile.' });
     }

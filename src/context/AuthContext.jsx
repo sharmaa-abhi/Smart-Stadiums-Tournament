@@ -70,8 +70,12 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  const updateUser = useCallback((updatedUser) => {
+    setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, login, register, logout, sidebarCollapsed, toggleSidebar }}>
+    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, login, register, logout, sidebarCollapsed, toggleSidebar, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

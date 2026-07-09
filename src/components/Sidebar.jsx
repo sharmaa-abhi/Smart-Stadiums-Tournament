@@ -160,9 +160,17 @@ export default function Sidebar() {
       <div className="px-3 pb-4 space-y-1 border-t border-white/[0.06] pt-3">
         {user && !collapsed && (
           <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
-              {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-            </div>
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08]"
+              />
+            ) : (
+              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
+                {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+              </div>
+            )}
             <div className="overflow-hidden">
               <p className="text-xs font-semibold text-white/80 truncate">{user.name}</p>
               <p className="text-[10px] text-white/30 capitalize">{brand.label}</p>
@@ -171,9 +179,17 @@ export default function Sidebar() {
         )}
         {user && collapsed && (
           <div className="flex justify-center py-2">
-            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white`}>
-              {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-            </div>
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-8 h-8 rounded-xl object-cover border border-white/[0.08]"
+              />
+            ) : (
+              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white`}>
+                {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+              </div>
+            )}
           </div>
         )}
 
