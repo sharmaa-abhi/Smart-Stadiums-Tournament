@@ -84,4 +84,48 @@ router.get('/all', (req, res) => {
   }
 });
 
+// ── PATCH /api/users/:id/role (admin only) ──
+router.patch('/:id/role', (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required.' });
+    }
+    const { role } = req.body;
+    if (!['admin', 'manager', 'security', 'operator'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role.' });
+    }
+
+    // Prevent demoting self
+    if (Number(req.params.id) === req.user.id && role !== 'admin') {
+      return res.status(400).json({ error: 'You cannot change your own admin role.' });
+    }
+
+    db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.id);
+    res.json({ message: 'User role updated successfully.' });
+  } catch (err) {
+    console.error('Update user role error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+// ── DELETE /api/users/:id (admin only) ──
+router.delete('/:id', (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required.' });
+    }
+
+    // Prevent deleting self
+    if (Number(req.params.id) === req.user.id) {
+      return res.status(400).json({ error: 'You cannot delete your own admin account.' });
+    }
+
+    db.prepare('DELETE FROM users WHERE id = ?').run(req.params.id);
+    res.json({ message: 'User deleted successfully.' });
+  } catch (err) {
+    console.error('Delete user error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 export default router;

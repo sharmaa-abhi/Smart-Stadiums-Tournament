@@ -43,6 +43,13 @@ const LEVEL_COLORS = {
   critical: 'text-rose-400',
 };
 
+const USER_ROLE_GRADIENTS = {
+  admin: 'from-rose-500 to-orange-500',
+  manager: 'from-violet-500 to-purple-600',
+  security: 'from-amber-500 to-yellow-500',
+  operator: 'from-brand-500 to-accent-500',
+};
+
 export default function AdminPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,6 +80,30 @@ export default function AdminPanel() {
   });
 
   const roleCount = role => users.filter(u => u.role === role).length;
+
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      await api.request(`/users/${userId}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role: newRole }),
+      });
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    } catch (err) {
+      alert(err.message || 'Failed to update role.');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await api.request(`/users/${userId}`, {
+        method: 'DELETE',
+      });
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    } catch (err) {
+      alert(err.message || 'Failed to delete user.');
+    }
+  };
 
   return (
     <div className="min-h-screen p-6 space-y-6">
@@ -153,24 +184,49 @@ export default function AdminPanel() {
           {loading ? (
             <div className="flex items-center justify-center h-40 text-white/30 text-sm">Loading users...</div>
           ) : (
-            <div className="overflow-auto max-h-80 space-y-2 pr-1">
+            <div className="overflow-auto max-h-[340px] space-y-2 pr-1">
               {filtered.map(u => (
                 <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.05] transition-colors">
-                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                    {u.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                  </div>
+                  {u.avatar ? (
+                    <img
+                      src={u.avatar}
+                      alt={u.name}
+                      className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08]"
+                    />
+                  ) : (
+                    <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${USER_ROLE_GRADIENTS[u.role] || 'from-white/20 to-white/10'} 
+                      flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-sm border border-white/[0.04]`}>
+                      {(u.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">{u.name}</p>
                     <p className="text-xs text-white/30 truncate">{u.email}</p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border ${ROLE_COLORS[u.role] || 'text-white/40 bg-white/5 border-white/10'}`}>
-                    {u.role}
-                  </span>
+                  
+                  <select
+                    value={u.role}
+                    disabled={u.id === user?.id}
+                    onChange={e => handleRoleChange(u.id, e.target.value)}
+                    className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase border cursor-pointer focus:outline-none bg-surface-900 
+                      disabled:cursor-not-allowed disabled:opacity-60 transition-all ${ROLE_COLORS[u.role] || 'text-white/40 border-white/10'}`}
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                    <option value="security">Security</option>
+                    <option value="operator">Operator</option>
+                  </select>
+
                   <div className="flex gap-1">
                     <button className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors">
                       <Lock className="w-3.5 h-3.5" />
                     </button>
-                    <button className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/30 hover:text-rose-400 transition-colors">
+                    <button
+                      onClick={() => handleDeleteUser(u.id)}
+                      disabled={u.id === user?.id}
+                      className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/30 hover:text-rose-400 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                      title={u.id === user?.id ? "You cannot delete yourself" : "Delete User"}
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
