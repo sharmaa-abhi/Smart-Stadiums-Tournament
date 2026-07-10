@@ -18,7 +18,7 @@ async function run() {
   const timestamp = Date.now();
   const results = [];
 
-  const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/a52b80d8-64ea-4fe0-8365-63414713a8c8';
+  const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/97de6741-682c-4e97-b6e4-01ca6225f4cd';
 
   for (const role of roles) {
     console.log(`\n=== Testing Role Profile: ${role.toUpperCase()} ===`);
