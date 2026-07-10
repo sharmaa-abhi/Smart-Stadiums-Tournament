@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
-import { generateConcessions } from '../data/mockData';
+import api from '../lib/api';
 
 const COLORS = ['#3378ff', '#22d3ee', '#34d399', '#f59e0b', '#f43f5e', '#a78bfa'];
 
@@ -42,17 +42,58 @@ const topItems = [
 ];
 
 export default function Concessions() {
-  const [concessions, setConcessions] = useState(generateConcessions());
+  const [concessions, setConcessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchConcessions = async () => {
+    try {
+      const res = await api.getVenueConcessions('metlife');
+      setConcessions(res.concessions || []);
+    } catch (err) {
+      console.error('Failed to fetch concessions:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setConcessions(generateConcessions());
-    }, 8000);
+    fetchConcessions();
+    const interval = setInterval(fetchConcessions, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <TopBar title="Concessions & Retail Control" subtitle="Real-time sales tracking & queue intelligence" />
+        <div className="p-6 space-y-6">
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-24 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex-shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-5 w-16 bg-white/[0.04] rounded-md" />
+                  <div className="h-3.5 w-24 bg-white/[0.04] rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+            <div className="lg:col-span-2 h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
+            <div className="h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const totalRevenue = concessions.reduce((sum, c) => sum + c.revenue, 0);
-  const avgWaitAll = (concessions.reduce((sum, c) => sum + parseFloat(c.avgWait), 0) / concessions.length).toFixed(1);
+  const avgWaitAll = concessions.length > 0
+    ? (concessions.reduce((sum, c) => sum + parseFloat(c.avgWait), 0) / concessions.length).toFixed(1)
+    : '0.0';
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;

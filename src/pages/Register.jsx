@@ -11,6 +11,40 @@ const roles = [
   { value: 'admin', label: 'Admin', desc: 'System administration' },
 ];
 
+const ROLE_BRAND = {
+  admin: {
+    gradient: 'from-rose-500 to-orange-500',
+    glow: 'shadow-[0_0_25px_rgba(239,68,68,0.45)]',
+    logoGlow: 'shadow-[0_0_30px_rgba(239,68,68,0.25)]',
+    buttonGradient: 'from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600',
+  },
+  manager: {
+    gradient: 'from-violet-500 to-purple-600',
+    glow: 'shadow-[0_0_25px_rgba(139,92,246,0.45)]',
+    logoGlow: 'shadow-[0_0_30px_rgba(139,92,246,0.25)]',
+    buttonGradient: 'from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700',
+  },
+  security: {
+    gradient: 'from-amber-500 to-yellow-500',
+    glow: 'shadow-[0_0_25px_rgba(245,158,11,0.45)]',
+    logoGlow: 'shadow-[0_0_30px_rgba(245,158,11,0.25)]',
+    buttonGradient: 'from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600',
+  },
+  operator: {
+    gradient: 'from-brand-500 to-accent-500',
+    glow: 'shadow-[0_0_25px_rgba(51,120,255,0.45)]',
+    logoGlow: 'shadow-[0_0_30px_rgba(51,120,255,0.25)]',
+    buttonGradient: 'from-brand-500 to-accent-500 hover:from-brand-600 hover:to-accent-600',
+  },
+};
+
+const ROLE_HIGHLIGHTS = {
+  admin: 'bg-rose-500/15 border-rose-500/35 text-rose-400',
+  manager: 'bg-violet-500/15 border-violet-500/35 text-violet-400',
+  security: 'bg-amber-500/15 border-amber-500/35 text-amber-400',
+  operator: 'bg-brand-500/15 border-brand-500/35 text-brand-400',
+};
+
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,6 +55,8 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,10 +74,15 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4">
-      {/* Ambient glow */}
-      <div className="fixed top-0 right-1/4 w-96 h-96 bg-accent-500/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-0 left-1/4 w-96 h-96 bg-brand-500/6 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4 overflow-hidden relative">
+      {/* Animated scanline */}
+      <div className="fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-500/35 via-accent-400/50 via-brand-500/35 to-transparent shadow-[0_0_15px_rgba(34,211,238,0.4)] animate-scanline pointer-events-none z-0" />
+
+      {/* Ambient glows */}
+      <div className={`fixed top-0 right-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none transition-all duration-500
+        ${role === 'admin' ? 'bg-rose-500/8' : role === 'manager' ? 'bg-violet-500/8' : role === 'security' ? 'bg-amber-500/8' : 'bg-accent-500/8'}`} />
+      <div className={`fixed bottom-0 left-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none transition-all duration-500
+        ${role === 'admin' ? 'bg-orange-500/6' : role === 'manager' ? 'bg-purple-500/6' : role === 'security' ? 'bg-yellow-500/6' : 'bg-brand-500/6'}`} />
 
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -55,7 +96,7 @@ export default function Register() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-brand-500 flex items-center justify-center mx-auto mb-4 glow-accent"
+            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center mx-auto mb-4 ${brand.glow}`}
           >
             <Zap className="w-8 h-8 text-white" />
           </motion.div>
@@ -69,7 +110,7 @@ export default function Register() {
         <div className="glass-card rounded-2xl p-8 border border-white/[0.08]">
           <div className="mb-6">
             <h2 className="text-lg font-bold font-display text-white/90">Create account</h2>
-            <p className="text-sm text-white/40 mt-1">Set up your operator credentials</p>
+            <p className="text-sm text-white/40 mt-1">Set up your credentials</p>
           </div>
 
           {error && (
@@ -149,8 +190,8 @@ export default function Register() {
             {/* Role Selector */}
             <div>
               <label className="text-xs text-white/50 font-medium block mb-1.5">
-                <Shield className="w-3 h-3 inline mr-1" />
-                Role
+                <Shield className="w-3 h-3 inline mr-1 text-white/40" />
+                Role Profile
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {roles.map((r) => (
@@ -160,7 +201,7 @@ export default function Register() {
                     onClick={() => setRole(r.value)}
                     className={`p-2.5 rounded-xl text-left transition-all duration-200 border
                       ${role === r.value
-                        ? 'bg-brand-500/15 border-brand-500/30 text-brand-400'
+                        ? ROLE_HIGHLIGHTS[r.value]
                         : 'bg-white/[0.02] border-white/[0.06] text-white/50 hover:bg-white/[0.05] hover:text-white/70'
                       }`}
                   >
@@ -175,9 +216,8 @@ export default function Register() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-accent-500 to-brand-500
-                text-sm font-semibold text-white hover:from-accent-600 hover:to-brand-600
-                disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 glow-accent mt-2"
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient}
+                text-sm font-semibold text-white transition-all duration-200 ${brand.logoGlow} mt-2 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -194,7 +234,7 @@ export default function Register() {
           <div className="mt-6 text-center">
             <p className="text-sm text-white/30">
               Already have an account?{' '}
-              <Link to="/login" className="text-accent-400 hover:text-accent-300 font-medium transition-colors">
+              <Link to="/login" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
                 Sign in
               </Link>
             </p>

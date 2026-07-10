@@ -10,23 +10,65 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
-import { generateOccupancy, generateTimeSeriesData, ZONES } from '../data/mockData';
+import api from '../lib/api';
 
 export default function CrowdManagement() {
-  const [occupancy, setOccupancy] = useState(generateOccupancy());
-  const [timeData, setTimeData] = useState(generateTimeSeriesData(30));
+  const [occupancy, setOccupancy] = useState([]);
+  const [timeData, setTimeData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const [occRes, timeRes] = await Promise.all([
+        api.getVenueOccupancy('metlife'),
+        api.getVenueTimeseries('metlife', 30),
+      ]);
+      setOccupancy(occRes.occupancy || []);
+      setTimeData(timeRes.timeseries || []);
+    } catch (err) {
+      console.error('Failed to fetch crowd management data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setOccupancy(generateOccupancy());
-      setTimeData(generateTimeSeriesData(30));
-    }, 6000);
+    fetchData();
+    const interval = setInterval(fetchData, 6000);
     return () => clearInterval(interval);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <TopBar title="Crowd & Resource Management" subtitle="Predictive analytics & real-time flow optimization" />
+        <div className="p-6 space-y-6">
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-24 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex-shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-5 w-16 bg-white/[0.04] rounded-md" />
+                  <div className="h-3.5 w-24 bg-white/[0.04] rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+            <div className="lg:col-span-2 h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
+            <div className="h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const totalFans = occupancy.reduce((sum, z) => sum + z.current, 0);
   const totalCapacity = occupancy.reduce((sum, z) => sum + z.capacity, 0);
-  const overallOccupancy = ((totalFans / totalCapacity) * 100).toFixed(1);
+  const overallOccupancy = totalCapacity > 0 ? ((totalFans / totalCapacity) * 100).toFixed(1) : '0.0';
 
   const radialData = occupancy.slice(0, 6).map((z, i) => ({
     name: `Zone ${z.zone}`,

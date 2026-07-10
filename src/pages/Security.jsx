@@ -24,7 +24,7 @@ const securityZones = [
   { id: 6, name: 'Field Perimeter', status: 'secure', cameras: 12, alerts: 0, level: 'green', patrols: 4, lastSweep: '1 min ago' },
 ];
 
-const VENUE_ID = 'metlife';
+const getVenueId = () => localStorage.getItem('sg_active_venue_id') || 'metlife';
 
 const accessLog = [
   { time: '15:10:23', event: 'VIP credential scan — authorized', zone: 'VIP-3', type: 'success' },
@@ -73,6 +73,7 @@ function generateThreatTimeline() {
 }
 
 export default function Security() {
+  const VENUE_ID = getVenueId();
   const [selectedZone, setSelectedZone] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [showIncidentModal, setShowIncidentModal] = useState(false);
@@ -80,7 +81,7 @@ export default function Security() {
   const [liveAccessLog, setLiveAccessLog] = useState(accessLog);
   const [incidents, setIncidents] = useState([]);
   const [loadingIncidents, setLoadingIncidents] = useState(true);
-  const [newIncidentForm, setNewIncidentForm] = useState({ type: '', zone: '', priority: 'medium', description: '' });
+  const [newIncidentForm, setNewIncidentForm] = useState({ type: 'Unauthorized Access', zone: '', priority: 'medium', description: '' });
 
   const fetchIncidents = useCallback(async () => {
     try {
@@ -92,6 +93,31 @@ export default function Security() {
       setLoadingIncidents(false);
     }
   }, []);
+
+  const handleResolveIncident = async (id) => {
+    try {
+      const responseTime = `${Math.floor(Math.random() * 50 + 10)}s`;
+      await api.updateIncident(id, { status: 'resolved', response: responseTime });
+      fetchIncidents();
+    } catch (err) {
+      console.error('Failed to resolve incident:', err);
+    }
+  };
+
+  const handleSubmitIncident = async () => {
+    if (!newIncidentForm.type || !newIncidentForm.zone) return;
+    try {
+      await api.createIncident({
+        ...newIncidentForm,
+        venue_id: VENUE_ID
+      });
+      setNewIncidentForm({ type: 'Unauthorized Access', zone: '', priority: 'medium', description: '' });
+      setShowIncidentModal(false);
+      fetchIncidents();
+    } catch (err) {
+      console.error('Failed to create incident:', err);
+    }
+  };
 
   useEffect(() => {
     fetchIncidents();
@@ -448,7 +474,7 @@ export default function Security() {
                         transition={{ delay: i * 0.06 }}
                         className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
                       >
-                        <td className="py-3 px-3 text-xs font-mono text-accent-400">{inc.id}</td>
+                        <td className="py-3 px-3 text-xs font-mono text-accent-400">{inc.incident_id}</td>
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2">
                             {inc.type === 'Lost Child' ? <Baby className="w-3.5 h-3.5 text-rose-400" /> :
@@ -471,7 +497,19 @@ export default function Security() {
                         <td className="py-3 px-3 text-xs text-emerald-400 font-mono">{inc.response}</td>
                         <td className="py-3 px-3 text-xs text-white/40">{inc.assignee}</td>
                         <td className="py-3 px-3">
-                          <ChevronRight className="w-3.5 h-3.5 text-white/20" />
+                          {inc.status !== 'resolved' ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleResolveIncident(inc.id);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-[10px] font-semibold transition-all duration-200"
+                            >
+                              Resolve
+                            </button>
+                          ) : (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          )}
                         </td>
                       </motion.tr>
                     ))}
@@ -770,7 +808,11 @@ export default function Security() {
                 <div className="space-y-4">
                   <div>
                     <label className="text-xs text-white/50 font-medium block mb-1.5">Incident Type</label>
-                    <select className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 focus:outline-none focus:border-brand-500/40">
+                    <select
+                      value={newIncidentForm.type}
+                      onChange={e => setNewIncidentForm(prev => ({ ...prev, type: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 focus:outline-none focus:border-brand-500/40"
+                    >
                       <option>Unauthorized Access</option>
                       <option>Lost Child</option>
                       <option>Crowd Surge</option>
@@ -783,15 +825,32 @@ export default function Security() {
                   </div>
                   <div>
                     <label className="text-xs text-white/50 font-medium block mb-1.5">Location / Zone</label>
-                    <input type="text" placeholder="e.g., Section 108, Gate B, VIP Level 3..." className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 placeholder:text-white/25 focus:outline-none focus:border-brand-500/40" />
+                    <input
+                      type="text"
+                      placeholder="e.g., Section 108, Gate B, VIP Level 3..."
+                      value={newIncidentForm.zone}
+                      onChange={e => setNewIncidentForm(prev => ({ ...prev, zone: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 placeholder:text-white/25 focus:outline-none focus:border-brand-500/40"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/50 font-medium block mb-1.5">Priority</label>
                     <div className="flex gap-2">
-                      {['Critical', 'High', 'Medium', 'Low'].map(p => (
-                        <button key={p} className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all
-                          ${p === 'Critical' ? 'bg-rose-500/15 border-rose-500/30 text-rose-400' :
-                            'bg-white/[0.03] border-white/[0.06] text-white/50 hover:bg-white/[0.06]'}`}>
+                      {['critical', 'high', 'medium', 'low'].map(p => (
+                        <button
+                          key={p}
+                          onClick={() => setNewIncidentForm(prev => ({ ...prev, priority: p }))}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium border capitalize transition-all
+                            ${newIncidentForm.priority === p
+                              ? p === 'critical'
+                                ? 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                                : p === 'high'
+                                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                                  : p === 'medium'
+                                    ? 'bg-brand-500/15 border-brand-500/30 text-brand-400'
+                                    : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                              : 'bg-white/[0.03] border-white/[0.06] text-white/50 hover:bg-white/[0.06]'}`}
+                        >
                           {p}
                         </button>
                       ))}
@@ -799,13 +858,25 @@ export default function Security() {
                   </div>
                   <div>
                     <label className="text-xs text-white/50 font-medium block mb-1.5">Description</label>
-                    <textarea rows={3} placeholder="Describe the incident..." className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 placeholder:text-white/25 focus:outline-none focus:border-brand-500/40 resize-none" />
+                    <textarea
+                      rows={3}
+                      placeholder="Describe the incident..."
+                      value={newIncidentForm.description}
+                      onChange={e => setNewIncidentForm(prev => ({ ...prev, description: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white/70 placeholder:text-white/25 focus:outline-none focus:border-brand-500/40 resize-none"
+                    />
                   </div>
                   <div className="flex gap-3 pt-2">
-                    <button onClick={() => setShowIncidentModal(false)} className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-white/50 hover:bg-white/[0.07] transition-all">
+                    <button
+                      onClick={() => setShowIncidentModal(false)}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-white/50 hover:bg-white/[0.07] transition-all"
+                    >
                       Cancel
                     </button>
-                    <button onClick={() => setShowIncidentModal(false)} className="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-sm font-semibold text-white hover:bg-rose-600 transition-all glow-rose">
+                    <button
+                      onClick={handleSubmitIncident}
+                      className="flex-1 px-4 py-2.5 rounded-xl bg-rose-500 text-sm font-semibold text-white hover:bg-rose-600 transition-all glow-rose"
+                    >
                       Submit Incident
                     </button>
                   </div>

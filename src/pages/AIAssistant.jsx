@@ -7,8 +7,17 @@ import {
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
+
+const USER_ROLE_BG = {
+  admin: 'bg-rose-500/20 text-rose-400',
+  manager: 'bg-violet-500/20 text-violet-400',
+  security: 'bg-amber-500/20 text-amber-400',
+  operator: 'bg-brand-500/20 text-brand-400',
+};
 
 export default function AIAssistant() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([
     { role: 'assistant', content: "Hello! I'm StadiumAI, your intelligent stadium operations assistant. I'm monitoring MetLife Stadium in real-time. Ask me about crowd density, security incidents, concession queues, or anything match day related!" },
   ]);
@@ -103,21 +112,29 @@ export default function AIAssistant() {
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center
-                    ${msg.role === 'user'
-                      ? 'bg-brand-500/20'
-                      : msg.role === 'system'
-                        ? 'bg-accent-500/20'
-                        : 'bg-gradient-to-br from-brand-500/30 to-accent-500/30'
-                    }`}>
-                    {msg.role === 'user' ? (
-                      <User className="w-3.5 h-3.5 text-brand-400" />
-                    ) : msg.role === 'system' ? (
-                      <Radio className="w-3.5 h-3.5 text-accent-400" />
-                    ) : (
-                      <Sparkles className="w-3.5 h-3.5 text-accent-400" />
-                    )}
-                  </div>
+                  {msg.role === 'user' && user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-white/[0.08]"
+                    />
+                  ) : (
+                    <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center
+                      ${msg.role === 'user'
+                        ? (USER_ROLE_BG[user?.role || 'operator'])
+                        : msg.role === 'system'
+                          ? 'bg-accent-500/20'
+                          : 'bg-gradient-to-br from-brand-500/30 to-accent-500/30'
+                      }`}>
+                      {msg.role === 'user' ? (
+                        <User className="w-3.5 h-3.5" />
+                      ) : msg.role === 'system' ? (
+                        <Radio className="w-3.5 h-3.5 text-accent-400" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5 text-accent-400" />
+                      )}
+                    </div>
+                  )}
                   <div>
                     <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed
                       ${msg.role === 'user'

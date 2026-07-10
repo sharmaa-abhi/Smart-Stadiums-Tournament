@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 const settingSections = [
   {
@@ -56,16 +57,66 @@ const settingSections = [
 ];
 
 export default function Settings() {
+  const { user, updateUser } = useAuth();
   const [venues, setVenues] = useState([]);
   const [activeVenueIdx, setActiveVenueIdx] = useState(0);
   const [loadingVenues, setLoadingVenues] = useState(true);
 
+  // Profile fields
+  const [profileName, setProfileName] = useState(user?.name || '');
+  const [profileAvatar, setProfileAvatar] = useState(user?.avatar || '');
+  const [profileMsg, setProfileMsg] = useState(null);
+
+  // Password fields
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordMsg, setPasswordMsg] = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      setProfileName(user.name);
+      setProfileAvatar(user.avatar || '');
+    }
+  }, [user]);
+
   useEffect(() => {
     api.getVenues()
-      .then(res => setVenues(res.venues || []))
+      .then(res => {
+        const list = res.venues || [];
+        setVenues(list);
+        const savedId = localStorage.getItem('sg_active_venue_id');
+        if (savedId) {
+          const idx = list.findIndex(v => v.id === savedId);
+          if (idx !== -1) setActiveVenueIdx(idx);
+        }
+      })
       .catch(console.error)
       .finally(() => setLoadingVenues(false));
   }, []);
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.updateUserProfile({ name: profileName, avatar: profileAvatar });
+      updateUser(res.user);
+      setProfileMsg({ type: 'success', text: 'Profile updated successfully!' });
+    } catch (err) {
+      setProfileMsg({ type: 'error', text: err.message || 'Failed to update profile.' });
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    try {
+      await api.changePassword(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setPasswordMsg({ type: 'success', text: 'Password changed successfully!' });
+    } catch (err) {
+      setPasswordMsg({ type: 'error', text: err.message || 'Failed to change password.' });
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <TopBar title="Settings" subtitle="Platform configuration & preferences" />
@@ -83,17 +134,22 @@ export default function Settings() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {loadingVenues ? (
-              <div className="col-span-3 text-center py-6">
-                <div className="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                <p className="text-xs text-white/30">Loading venues…</p>
-              </div>
+              [1, 2, 3].map(i => (
+                <div key={i} className="h-16 bg-white/[0.02] border border-white/[0.06] rounded-xl p-3 animate-pulse">
+                  <div className="h-4 w-24 bg-white/[0.04] rounded-md mb-1.5" />
+                  <div className="h-3 w-32 bg-white/[0.04] rounded-md" />
+                </div>
+              ))
             ) : venues.slice(0, 6).map((venue, i) => (
               <motion.div
                 key={venue.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
-                onClick={() => setActiveVenueIdx(i)}
+                onClick={() => {
+                  setActiveVenueIdx(i);
+                  localStorage.setItem('sg_active_venue_id', venue.id);
+                }}
                 className={`p-3 rounded-xl cursor-pointer transition-all duration-200
                   ${i === activeVenueIdx
                     ? 'bg-brand-500/15 border border-brand-500/30 shadow-lg shadow-brand-500/5'
@@ -111,6 +167,101 @@ export default function Settings() {
             ))}
           </div>
         </motion.div>
+
+        {/* User Profile & Security Settings */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* User Profile Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass-card rounded-2xl p-5"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-brand-400" />
+              <h3 className="text-sm font-semibold text-white/90">Edit User Profile</h3>
+            </div>
+            <form onSubmit={handleUpdateProfile} className="space-y-4">
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-white/80 focus:outline-none focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Avatar Image URL</label>
+                <input
+                  type="text"
+                  value={profileAvatar}
+                  onChange={(e) => setProfileAvatar(e.target.value)}
+                  placeholder="https://example.com/avatar.png"
+                  className="w-full px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-white/80 focus:outline-none focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
+                />
+              </div>
+              {profileMsg && (
+                <p className={`text-xs font-medium ${profileMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {profileMsg.text}
+                </p>
+              )}
+              <button
+                type="submit"
+                className="w-full py-2 rounded-xl bg-brand-500/10 border border-brand-500/20 text-xs font-semibold text-brand-400 hover:bg-brand-500/20 transition-all cursor-pointer"
+              >
+                Save Profile Changes
+              </button>
+            </form>
+          </motion.div>
+
+          {/* Change Password Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="glass-card rounded-2xl p-5"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Key className="w-4 h-4 text-brand-400" />
+              <h3 className="text-sm font-semibold text-white/90">Change Password</h3>
+            </div>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Current Password</label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-white/80 focus:outline-none focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-white/40 mb-1">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.08] text-sm text-white/80 focus:outline-none focus:border-brand-500/40 focus:bg-white/[0.05] transition-all"
+                  required
+                />
+              </div>
+              {passwordMsg && (
+                <p className={`text-xs font-medium ${passwordMsg.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {passwordMsg.text}
+                </p>
+              )}
+              <button
+                type="submit"
+                className="w-full py-2 rounded-xl bg-brand-500/10 border border-brand-500/20 text-xs font-semibold text-brand-400 hover:bg-brand-500/20 transition-all cursor-pointer"
+              >
+                Change Password
+              </button>
+            </form>
+          </motion.div>
+        </div>
 
         {/* Settings Sections */}
         {settingSections.map((section, sIdx) => {

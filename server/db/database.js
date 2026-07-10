@@ -1,11 +1,34 @@
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.join(__dirname, 'stadiumgenius.db');
 
-const db = new Database(dbPath);
+const db = new DatabaseSync(dbPath);
+
+// Compatibility wrappers for better-sqlite3 API
+db.pragma = (pragmaStr) => {
+  try {
+    return db.prepare(`PRAGMA ${pragmaStr}`).get();
+  } catch (err) {
+    db.exec(`PRAGMA ${pragmaStr}`);
+  }
+};
+
+db.transaction = (fn) => {
+  return (...args) => {
+    db.exec('BEGIN TRANSACTION');
+    try {
+      const res = fn(...args);
+      db.exec('COMMIT');
+      return res;
+    } catch (err) {
+      db.exec('ROLLBACK');
+      throw err;
+    }
+  };
+};
 
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');

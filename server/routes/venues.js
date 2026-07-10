@@ -116,6 +116,29 @@ router.get('/:id/kpis', (req, res) => {
   res.json({ kpis: generateKPIs(venue) });
 });
 
+// ── GET /api/venues/:id/live-kpis (SSE) ──
+router.get('/:id/live-kpis', (req, res) => {
+  const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(req.params.id);
+  if (!venue) return res.status(404).json({ error: 'Venue not found.' });
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  // Send initial data
+  res.write(`data: ${JSON.stringify(generateKPIs(venue))}\n\n`);
+
+  // Send updates periodically
+  const intervalId = setInterval(() => {
+    res.write(`data: ${JSON.stringify(generateKPIs(venue))}\n\n`);
+  }, 2000);
+
+  req.on('close', () => {
+    clearInterval(intervalId);
+  });
+});
+
 // ── GET /api/venues/:id/alerts ──
 router.get('/:id/alerts', (req, res) => {
   const alerts = db.prepare('SELECT * FROM alerts WHERE venue_id = ? ORDER BY id DESC').all(req.params.id);

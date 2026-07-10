@@ -391,10 +391,15 @@ export default function Broadcast() {
           {/* Broadcast List */}
           <div className="space-y-2">
             {loadingBroadcasts ? (
-              <div className="text-center py-6">
-                <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                <p className="text-xs text-white/30">Loading broadcasts…</p>
-              </div>
+              [1, 2, 3].map(i => (
+                <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.01] border border-white/[0.03] animate-pulse">
+                  <div className="w-6 h-6 rounded-lg bg-white/[0.04] flex-shrink-0" />
+                  <div className="flex-1 space-y-1.5 min-w-0">
+                    <div className="h-4 w-32 bg-white/[0.04] rounded-md mb-1" />
+                    <div className="h-3 w-48 bg-white/[0.04] rounded-md" />
+                  </div>
+                </div>
+              ))
             ) : broadcasts.length === 0 ? (
               <p className="text-xs text-white/30 text-center py-6">No broadcasts yet</p>
             ) : broadcasts.map((b) => (

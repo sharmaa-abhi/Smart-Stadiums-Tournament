@@ -58,8 +58,24 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    return localStorage.getItem('sg_sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed(prev => {
+      const newVal = !prev;
+      localStorage.setItem('sg_sidebar_collapsed', String(newVal));
+      return newVal;
+    });
+  }, []);
+
+  const updateUser = useCallback((updatedUser) => {
+    setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, login, register, logout, sidebarCollapsed, toggleSidebar, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

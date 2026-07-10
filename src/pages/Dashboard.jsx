@@ -2,21 +2,85 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users, Timer, ShieldCheck, AlertTriangle, Star, Server, Shield, Bus,
-  TrendingUp, Activity, ArrowUpRight
+  TrendingUp, Activity, ArrowUpRight, UserCog, BarChart3, Eye, Siren,
+  UtensilsCrossed, Map, Radio, DollarSign
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell
 } from 'recharts';
+import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import AlertCard from '../components/AlertCard';
 import StadiumHeatmap from '../components/StadiumHeatmap';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
-const VENUE_ID = 'metlife';
+// ── Role-specific dashboard config ─────────────────────────────────────────
+const ROLE_CONFIG = {
+  admin: {
+    title: 'Command Center',
+    subtitle: 'Full system access — MetLife Stadium • FIFA WC 2026',
+    gradient: 'from-rose-500 to-orange-500',
+    glow: 'shadow-[0_0_30px_rgba(239,68,68,0.2)]',
+    border: 'border-rose-500/20',
+    quick: [
+      { label: 'User Management', icon: UserCog, to: '/admin-panel', color: 'text-rose-400' },
+      { label: 'System Analytics', icon: BarChart3, to: '/analytics', color: 'text-violet-400' },
+      { label: 'Broadcast Control', icon: Radio, to: '/broadcast', color: 'text-sky-400' },
+      { label: 'Security Overview', icon: Shield, to: '/security', color: 'text-amber-400' },
+    ],
+  },
+  manager: {
+    title: 'Operations Dashboard',
+    subtitle: 'Revenue & KPI monitoring — MetLife Stadium • FIFA WC 2026',
+    gradient: 'from-violet-500 to-purple-600',
+    glow: 'shadow-[0_0_30px_rgba(139,92,246,0.2)]',
+    border: 'border-violet-500/20',
+    quick: [
+      { label: 'Revenue & KPIs', icon: TrendingUp, to: '/analytics', color: 'text-violet-400' },
+      { label: 'Concessions Sales', icon: DollarSign, to: '/concessions', color: 'text-emerald-400' },
+      { label: 'Crowd Flow', icon: Users, to: '/crowd', color: 'text-brand-400' },
+      { label: 'Announcements', icon: Radio, to: '/broadcast', color: 'text-sky-400' },
+    ],
+  },
+  security: {
+    title: 'Threat Dashboard',
+    subtitle: 'Real-time security monitoring — MetLife Stadium • FIFA WC 2026',
+    gradient: 'from-amber-500 to-yellow-500',
+    glow: 'shadow-[0_0_30px_rgba(245,158,11,0.2)]',
+    border: 'border-amber-500/20',
+    quick: [
+      { label: 'Incident Control', icon: ShieldCheck, to: '/security', color: 'text-amber-400' },
+      { label: 'Zone Surveillance', icon: Eye, to: '/crowd', color: 'text-rose-400' },
+      { label: 'Venue Map', icon: Map, to: '/digital-twin', color: 'text-brand-400' },
+      { label: 'Emergency Alerts', icon: Siren, to: '/broadcast', color: 'text-rose-500' },
+    ],
+  },
+  operator: {
+    title: 'Live Dashboard',
+    subtitle: 'Real-time operations — MetLife Stadium • FIFA WC 2026',
+    gradient: 'from-brand-500 to-accent-500',
+    glow: 'shadow-[0_0_30px_rgba(51,120,255,0.2)]',
+    border: 'border-brand-500/20',
+    quick: [
+      { label: 'Digital Twin', icon: Map, to: '/digital-twin', color: 'text-brand-400' },
+      { label: 'Crowd Management', icon: Users, to: '/crowd', color: 'text-accent-400' },
+      { label: 'Concessions', icon: UtensilsCrossed, to: '/concessions', color: 'text-emerald-400' },
+      { label: 'Broadcast', icon: Radio, to: '/broadcast', color: 'text-sky-400' },
+    ],
+  },
+};
+
+const getVenueId = () => localStorage.getItem('sg_active_venue_id') || 'metlife';
 
 export default function Dashboard() {
+  const VENUE_ID = getVenueId();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const role = user?.role || 'operator';
+  const config = ROLE_CONFIG[role] || ROLE_CONFIG.operator;
   const [kpis, setKpis] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [timeData, setTimeData] = useState([]);
@@ -24,32 +88,47 @@ export default function Dashboard() {
   const [heatmap, setHeatmap] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAll = async () => {
-    try {
-      const [kpisRes, alertsRes, timeRes, occRes, heatRes] = await Promise.all([
-        api.getVenueKPIs(VENUE_ID),
-        api.getVenueAlerts(VENUE_ID),
-        api.getVenueTimeseries(VENUE_ID, 24),
-        api.getVenueOccupancy(VENUE_ID),
-        api.getVenueHeatmap(VENUE_ID),
-      ]);
-      setKpis(kpisRes.kpis);
-      setAlerts(alertsRes.alerts);
-      setTimeData(timeRes.timeseries);
-      setOccupancy(occRes.occupancy);
-      setHeatmap(heatRes.heatmap);
-    } catch (err) {
-      console.error('Dashboard fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchAll();
-    // Live update every 5 seconds
-    const interval = setInterval(fetchAll, 5000);
-    return () => clearInterval(interval);
+    const fetchOthers = async () => {
+      try {
+        const [alertsRes, timeRes, occRes, heatRes] = await Promise.all([
+          api.getVenueAlerts(VENUE_ID),
+          api.getVenueTimeseries(VENUE_ID, 24),
+          api.getVenueOccupancy(VENUE_ID),
+          api.getVenueHeatmap(VENUE_ID),
+        ]);
+        setAlerts(alertsRes.alerts);
+        setTimeData(timeRes.timeseries);
+        setOccupancy(occRes.occupancy);
+        setHeatmap(heatRes.heatmap);
+      } catch (err) {
+        console.error('Dashboard fetch others error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOthers();
+    const interval = setInterval(fetchOthers, 10000);
+
+    // SSE connection for KPIs
+    const token = localStorage.getItem('sg_token');
+    const sseUrl = `${api.baseUrl}/venues/${VENUE_ID}/live-kpis?token=${token}`;
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setKpis(data);
+      } catch (err) {
+        console.error('Error parsing live KPIs:', err);
+      }
+    };
+
+    return () => {
+      clearInterval(interval);
+      eventSource.close();
+    };
   }, []);
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -68,10 +147,37 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-white/40 text-sm">Loading dashboard…</p>
+      <div className="min-h-screen">
+        <TopBar title={config.title} subtitle={config.subtitle} />
+        <div className="p-6 space-y-6">
+          {/* Welcome Banner Skeleton */}
+          <div className="h-28 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse flex items-center justify-between">
+            <div className="space-y-2.5 flex-1">
+              <div className="h-3 w-36 bg-white/[0.04] rounded-md" />
+              <div className="h-5 w-64 bg-white/[0.04] rounded-md" />
+              <div className="h-3.5 w-80 bg-white/[0.04] rounded-md" />
+            </div>
+            <div className="w-48 h-10 bg-white/[0.04] rounded-xl flex-shrink-0 hidden md:block" />
+          </div>
+
+          {/* Stats Row Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-20 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4 animate-pulse">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex-shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-5 w-16 bg-white/[0.04] rounded-md" />
+                  <div className="h-3 w-24 bg-white/[0.04] rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="col-span-2 h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse" />
+            <div className="h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse" />
+          </div>
         </div>
       </div>
     );
@@ -79,9 +185,39 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen">
-      <TopBar title="Operations Dashboard" subtitle="MetLife Stadium — FIFA World Cup 2026 • Match Day Live" />
+      <TopBar title={config.title} subtitle={config.subtitle} />
 
       <div className="p-6 space-y-6">
+        {/* Role Welcome Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className={`relative overflow-hidden rounded-2xl border ${config.border} ${config.glow} p-5`}
+          style={{ background: 'rgba(255,255,255,0.02)' }}
+        >
+          <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient} opacity-5`} />
+          <div className="relative flex items-center justify-between">
+            <div>
+              <p className="text-xs text-white/40 uppercase tracking-widest font-medium mb-1">Welcome back, {user?.name?.split(' ')[0]}</p>
+              <h2 className="text-lg font-bold text-white">{config.title}</h2>
+              <p className="text-sm text-white/50 mt-0.5">{config.subtitle}</p>
+            </div>
+            <div className="hidden md:flex items-center gap-3">
+              {config.quick.map(({ label, icon: Icon, to, color }) => (
+                <button
+                  key={to}
+                  onClick={() => navigate(to)}
+                  className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-all duration-200 group"
+                >
+                  <Icon className={`w-4 h-4 ${color} group-hover:scale-110 transition-transform`} />
+                  <span className="text-[10px] text-white/50 whitespace-nowrap">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard icon={Users} label="Total Fans In-Venue" value={kpis?.totalFans?.toLocaleString() ?? '—'} color="brand" delay={0} trend="up" trendValue="+1,240 last 15m" />
