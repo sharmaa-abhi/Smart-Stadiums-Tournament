@@ -8,7 +8,7 @@ import PWAInstallBanner from './components/PWAInstallBanner';
 import Sidebar from './components/Sidebar';
 import ScrollToTop from './components/ScrollToTop';
 import NotificationToast from './components/NotificationToast';
-import { RouteFallbackSkeleton, AuthPageSkeleton } from './components/skeleton';
+import { RouteFallbackSkeleton, AuthPageSkeleton, FanPortalSkeleton } from './components/skeleton';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
