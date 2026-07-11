@@ -1,7 +1,14 @@
 # 🗄️ StadiumGenius — Database Schema
 
+> [!IMPORTANT]
+> **MVP vs. Target Database Note:**
+> This document describes the **Target Polyglot Persistence Database Design** (PostgreSQL 16, TimescaleDB, Neo4j 5, Redis 7).
+> The current working code in this repository uses a **single local SQLite database (`node:sqlite`)** storing all operational records, user profiles, logs, and chats.
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
 > **Version:** 1.0.0 · **Last Updated:** July 2026  
-> **Databases:** PostgreSQL 16 · TimescaleDB · Neo4j 5
+> **Databases:** PostgreSQL 16 · TimescaleDB · Neo4j 5 (Target Design) \| SQLite (Actual MVP)
+
 
 ---
 

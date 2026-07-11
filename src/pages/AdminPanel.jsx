@@ -185,74 +185,57 @@ export default function AdminPanel() {
             </select>
           </div>
 
-          {loading ? (
-            <div className="space-y-2 max-h-[340px] pr-1 animate-pulse">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.01] border border-white/[0.03]">
-                  <div className="w-8 h-8 rounded-xl bg-white/[0.04] flex-shrink-0" />
-                  <div className="flex-1 space-y-1.5 min-w-0">
-                    <div className="h-4 w-32 bg-white/[0.04] rounded-md" />
-                    <div className="h-3 w-48 bg-white/[0.04] rounded-md" />
+          <div className="overflow-auto max-h-[340px] space-y-2 pr-1">
+            {filtered.map(u => (
+              <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.05] transition-colors">
+                {u.avatar ? (
+                  <img
+                    src={u.avatar}
+                    alt={u.name}
+                    className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08]"
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${USER_ROLE_GRADIENTS[u.role] || 'from-white/20 to-white/10'} 
+                    flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-sm border border-white/[0.04]`}>
+                    {(u.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                   </div>
-                  <div className="w-20 h-6 bg-white/[0.04] rounded-md flex-shrink-0" />
-                  <div className="w-8 h-8 bg-white/[0.04] rounded-md flex-shrink-0 animate-pulse" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate">{u.name}</p>
+                  <p className="text-xs text-white/30 truncate">{u.email}</p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-auto max-h-[340px] space-y-2 pr-1">
-              {filtered.map(u => (
-                <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.05] transition-colors">
-                  {u.avatar ? (
-                    <img
-                      src={u.avatar}
-                      alt={u.name}
-                      className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08]"
-                    />
-                  ) : (
-                    <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${USER_ROLE_GRADIENTS[u.role] || 'from-white/20 to-white/10'} 
-                      flex items-center justify-center text-xs font-bold text-white flex-shrink-0 shadow-sm border border-white/[0.04]`}>
-                      {(u.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{u.name}</p>
-                    <p className="text-xs text-white/30 truncate">{u.email}</p>
-                  </div>
-                  
-                  <select
-                    value={u.role}
-                    disabled={u.id === user?.id}
-                    onChange={e => handleRoleChange(u.id, e.target.value)}
-                    className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase border cursor-pointer focus:outline-none bg-surface-900 
-                      disabled:cursor-not-allowed disabled:opacity-60 transition-all ${ROLE_COLORS[u.role] || 'text-white/40 border-white/10'}`}
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="manager">Manager</option>
-                    <option value="security">Security</option>
-                    <option value="operator">Operator</option>
-                  </select>
-
-                  <div className="flex gap-1">
-                    <button className="p-1.5 rounded-lg hover:bg-white/[0.06] text-white/30 hover:text-white/60 transition-colors">
-                      <Lock className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteUser(u.id)}
+                
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <select
+                      value={u.role}
+                      onChange={(e) => handleRoleChange(u.id, e.target.value)}
                       disabled={u.id === user?.id}
-                      className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/30 hover:text-rose-400 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                      title={u.id === user?.id ? "You cannot delete yourself" : "Delete User"}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-lg border appearance-none pr-7 cursor-pointer transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed
+                        ${ROLE_COLORS[u.role] || ROLE_COLORS.operator}`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                      <option value="operator">Operator</option>
+                      <option value="security">Security</option>
+                      <option value="manager">Manager</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-white/40" />
                   </div>
+                  <button
+                    onClick={() => handleDeleteUser(u.id)}
+                    disabled={u.id === user?.id}
+                    className="p-1.5 rounded-lg hover:bg-rose-500/10 text-white/30 hover:text-rose-400 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    title={u.id === user?.id ? "You cannot delete yourself" : "Delete User"}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              ))}
-              {filtered.length === 0 && (
-                <div className="text-center py-8 text-white/30 text-sm">No users match your search.</div>
-              )}
-            </div>
-          )}
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="text-center py-8 text-white/30 text-sm">No users match your search.</div>
+            )}
+          </div>
         </div>
 
         {/* System Health */}

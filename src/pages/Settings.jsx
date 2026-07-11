@@ -7,7 +7,7 @@ import {
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import { CardGridSkeleton } from '../components/skeleton';
+import { SettingsSkeleton } from '../components/skeleton';
 
 const settingSections = [
   {
@@ -118,6 +118,10 @@ export default function Settings() {
     }
   };
 
+  if (loadingVenues) {
+    return <SettingsSkeleton />;
+  }
+
   return (
     <div className="min-h-screen">
       <TopBar title="Settings" subtitle="Platform configuration & preferences" />
@@ -134,9 +138,7 @@ export default function Settings() {
             <h3 className="text-sm font-semibold text-white/90">Active Venue Selection</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {loadingVenues ? (
-              <CardGridSkeleton count={3} />
-            ) : venues.slice(0, 6).map((venue, i) => (
+            {venues.slice(0, 6).map((venue, i) => (
               <motion.div
                 key={venue.id}
                 initial={{ opacity: 0, scale: 0.95 }}

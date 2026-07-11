@@ -1,4 +1,8 @@
 export { default as Skeleton } from './Skeleton';
+export { default as TextSkeleton } from './TextSkeleton';
+export { default as AvatarSkeleton } from './AvatarSkeleton';
+export { default as SidebarSkeleton } from './SidebarSkeleton';
+export { default as TopBarSkeleton } from './TopBarSkeleton';
 export { default as StatCardSkeleton } from './StatCardSkeleton';
 export { default as ChartSkeleton } from './ChartSkeleton';
 export { default as TableSkeleton } from './TableSkeleton';

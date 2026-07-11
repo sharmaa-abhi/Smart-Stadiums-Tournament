@@ -1,7 +1,14 @@
 # 🤖 StadiumGenius — AI Workflows & LLM Architecture
 
+> [!IMPORTANT]
+> **MVP vs. Target AI Workflows Note:**
+> This document describes the **Target Hybrid Cloud/Edge LLM Architecture** (incorporating OpenAI GPT-4o, edge Llama-3 running on Jetson clusters, pgvector RAG, and edge YOLOv8 person detection).
+> The current working code in this repository uses a **local keyword-matching response builder** within `server/routes/ai.js`. Integration of the **live Google Gemini 2.0 Flash API** is planned as a future work item.
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
 > **Version:** 1.0.0 · **Last Updated:** July 2026  
-> **Models:** GPT-4o (cloud) · Llama 3 (edge) · YOLOv8 (vision)
+> **Models:** GPT-4o / Llama 3 / YOLOv8 (Target Design) \| Gemini 2.0 (Planned Upgrade) \| Keyword Matches (Actual MVP)
+
 
 ---
 

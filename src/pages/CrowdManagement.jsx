@@ -11,7 +11,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
-import { StatsPageSkeleton } from '../components/skeleton';
+import { CrowdManagementSkeleton } from '../components/skeleton';
 
 export default function CrowdManagement() {
   const [occupancy, setOccupancy] = useState([]);
@@ -40,12 +40,7 @@ export default function CrowdManagement() {
   }, []);
 
   if (loading) {
-    return (
-      <StatsPageSkeleton
-        title="Crowd & Resource Management"
-        subtitle="Predictive analytics & real-time flow optimization"
-      />
-    );
+    return <CrowdManagementSkeleton />;
   }
 
   const totalFans = occupancy.reduce((sum, z) => sum + z.current, 0);

@@ -1,8 +1,15 @@
 # 🔒 StadiumGenius — Security Architecture
 
+> [!IMPORTANT]
+> **MVP vs. Target Security Note:**
+> This document describes the **Target Production/Enterprise Security Architecture** (including zero-trust microservice communication via mTLS, OAuth2 integration, automated CCTV Face Blurring, and granular user permission matrices).
+> The current working code in this repository implements **standard JWT validation and frontend Role Routing Guards**.
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
 > **Version:** 1.0.0 · **Last Updated:** July 2026  
-> **Classification:** Security Design Document  
+> **Classification:** Security Design Document (Target Spec) \| JWT & RoleGuard (Actual MVP)  
 > **Compliance Targets:** GDPR, FIFA Safety Regulations, OWASP Top 10
+
 
 ---
 

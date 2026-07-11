@@ -9,7 +9,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
-import { ListItemsSkeleton } from '../components/skeleton';
+import { BroadcastSkeleton } from '../components/skeleton';
 
 const feeds = [
   { id: 1, name: 'Main Camera — Center', angle: 'Wide', status: 'live', fps: 60, resolution: '4K HDR', viewers: '2.4M' },
@@ -103,6 +103,10 @@ export default function Broadcast() {
   const channelIcons = {
     all: '📡', screens: '🖥️', pa: '📢', app: '📱',
   };
+
+  if (loadingBroadcasts) {
+    return <BroadcastSkeleton />;
+  }
 
   return (
     <div className="min-h-screen">
@@ -391,9 +395,7 @@ export default function Broadcast() {
 
           {/* Broadcast List */}
           <div className="space-y-2">
-            {loadingBroadcasts ? (
-              <ListItemsSkeleton rows={3} />
-            ) : broadcasts.length === 0 ? (
+            {broadcasts.length === 0 ? (
               <p className="text-xs text-white/30 text-center py-6">No broadcasts yet</p>
             ) : broadcasts.map((b) => (
               <motion.div

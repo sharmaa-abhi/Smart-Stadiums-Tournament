@@ -53,9 +53,7 @@ const categoryPerformance = [
 
 export default function Analytics() {
   const [trends, setTrends] = useState([]);
-  const [overview, setOverview] = useState(null);
   const [performance, setPerformance] = useState([]);
-  const [revenue, setRevenue] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,9 +64,7 @@ export default function Analytics() {
       api.getAnalyticsRevenue(),
     ]).then(([trendsRes, overviewRes, perfRes, revRes]) => {
       setTrends(trendsRes.trends || []);
-      setOverview(overviewRes.overview || null);
       setPerformance(perfRes.performance || []);
-      setRevenue(revRes || null);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 

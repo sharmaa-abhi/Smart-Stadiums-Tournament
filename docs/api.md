@@ -1,7 +1,14 @@
 # 🔌 StadiumGenius — API Reference
 
-> **Version:** 1.0.0 · **Base URL:** `https://api.stadiumgenius.io/v1`  
-> **Auth:** Bearer JWT · **Format:** JSON · **Protocol:** REST + WebSocket
+> [!IMPORTANT]
+> **MVP vs. Target API Note:**
+> This document describes the **Target Production API Endpoints and Protocols** (including WebSockets, Kafka events, multi-stadium parameters, etc.).
+> The current working code in this repository runs a **local Node.js Express server on port 5000** (`/api` endpoints) with REST APIs and simulated Server-Sent Events (SSE) for dynamic updates.
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
+> **Version:** 1.0.0 · **Base URL:** `http://localhost:5000/api` (Local MVP) \| `https://api.stadiumgenius.io/v1` (Target)  
+> **Auth:** Bearer JWT · **Format:** JSON · **Protocol:** REST + SSE (MVP) \| REST + WebSocket (Target)
+
 
 ---
 

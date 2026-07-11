@@ -1,7 +1,8 @@
-import React from 'react';
-
-export default function Skeleton({ className = '' }) {
+export default function Skeleton({ className = '', rounded = 'rounded-xl' }) {
   return (
-    <div className={`bg-white/[0.04] rounded-md animate-pulse ${className}`} />
+    <div
+      className={`animate-shimmer ${rounded} ${className}`}
+      aria-hidden="true"
+    />
   );
 }

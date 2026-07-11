@@ -11,7 +11,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
-import { StatsPageSkeleton } from '../components/skeleton';
+import { ConcessionsSkeleton } from '../components/skeleton';
 
 const COLORS = ['#3378ff', '#22d3ee', '#34d399', '#f59e0b', '#f43f5e', '#a78bfa'];
 
@@ -64,12 +64,7 @@ export default function Concessions() {
   }, []);
 
   if (loading) {
-    return (
-      <StatsPageSkeleton
-        title="Concessions & Retail Control"
-        subtitle="Real-time sales tracking & queue intelligence"
-      />
-    );
+    return <ConcessionsSkeleton />;
   }
 
   const totalRevenue = concessions.reduce((sum, c) => sum + c.revenue, 0);
