@@ -16,6 +16,7 @@ import AlertCard from '../components/AlertCard';
 import StadiumHeatmap from '../components/StadiumHeatmap';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { DashboardSkeleton } from '../components/skeleton';
 
 // ── Role-specific dashboard config ─────────────────────────────────────────
 const ROLE_CONFIG = {
@@ -146,41 +147,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen">
-        <TopBar title={config.title} subtitle={config.subtitle} />
-        <div className="p-6 space-y-6">
-          {/* Welcome Banner Skeleton */}
-          <div className="h-28 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse flex items-center justify-between">
-            <div className="space-y-2.5 flex-1">
-              <div className="h-3 w-36 bg-white/[0.04] rounded-md" />
-              <div className="h-5 w-64 bg-white/[0.04] rounded-md" />
-              <div className="h-3.5 w-80 bg-white/[0.04] rounded-md" />
-            </div>
-            <div className="w-48 h-10 bg-white/[0.04] rounded-xl flex-shrink-0 hidden md:block" />
-          </div>
-
-          {/* Stats Row Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-20 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4 animate-pulse">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex-shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-5 w-16 bg-white/[0.04] rounded-md" />
-                  <div className="h-3 w-24 bg-white/[0.04] rounded-md" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Charts Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="col-span-2 h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse" />
-            <div className="h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton title={config.title} subtitle={config.subtitle} />;
   }
 
   return (

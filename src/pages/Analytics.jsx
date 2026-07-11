@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
+import { AnalyticsSkeleton } from '../components/skeleton';
 
 const matchHistory = [
   { match: 'Match 1', crowd: 78200, incidents: 4, avgQueue: 4.2, satisfaction: 4.1, response: 45 },
@@ -115,6 +116,10 @@ export default function Analytics() {
       </div>
     );
   };
+
+  if (loading) {
+    return <AnalyticsSkeleton />;
+  }
 
   return (
     <div className="min-h-screen">

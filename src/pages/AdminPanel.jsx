@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
+import { AdminPanelSkeleton } from '../components/skeleton';
 
 // ── Mock audit log data ─────────────────────────────────────────────────────
 const AUDIT_LOG = [
@@ -104,6 +105,10 @@ export default function AdminPanel() {
       alert(err.message || 'Failed to delete user.');
     }
   };
+
+  if (loading) {
+    return <AdminPanelSkeleton />;
+  }
 
   return (
     <div className="min-h-screen p-6 space-y-6">

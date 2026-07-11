@@ -13,6 +13,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
+import { SecuritySkeleton } from '../components/skeleton';
 
 // ── Security zone data with expanded detail ──
 const securityZones = [
@@ -187,6 +188,10 @@ export default function Security() {
     { id: 'evacuation', label: 'Evacuation', icon: Route },
     { id: 'patrols', label: 'Patrol Tracking', icon: Footprints },
   ];
+
+  if (loadingIncidents) {
+    return <SecuritySkeleton />;
+  }
 
   return (
     <div className="min-h-screen">
