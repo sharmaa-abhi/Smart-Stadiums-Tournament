@@ -56,8 +56,9 @@ export default function TopBar({ title, subtitle }) {
         setIsProfileOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // Use mousedown with capture phase or verify targets
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   useEffect(() => {
