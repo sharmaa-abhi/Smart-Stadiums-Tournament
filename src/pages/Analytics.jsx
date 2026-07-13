@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
+import { AnalyticsSkeleton } from '../components/skeleton';
 
 const matchHistory = [
   { match: 'Match 1', crowd: 78200, incidents: 4, avgQueue: 4.2, satisfaction: 4.1, response: 45 },
@@ -52,9 +53,7 @@ const categoryPerformance = [
 
 export default function Analytics() {
   const [trends, setTrends] = useState([]);
-  const [overview, setOverview] = useState(null);
   const [performance, setPerformance] = useState([]);
-  const [revenue, setRevenue] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,9 +64,7 @@ export default function Analytics() {
       api.getAnalyticsRevenue(),
     ]).then(([trendsRes, overviewRes, perfRes, revRes]) => {
       setTrends(trendsRes.trends || []);
-      setOverview(overviewRes.overview || null);
       setPerformance(perfRes.performance || []);
-      setRevenue(revRes || null);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -115,6 +112,10 @@ export default function Analytics() {
       </div>
     );
   };
+
+  if (loading) {
+    return <AnalyticsSkeleton />;
+  }
 
   return (
     <div className="min-h-screen">

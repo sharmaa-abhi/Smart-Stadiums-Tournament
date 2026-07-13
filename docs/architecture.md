@@ -1,8 +1,15 @@
 # 🏟️ StadiumGenius — System Architecture
 
+> [!IMPORTANT]
+> **MVP vs. Target Architecture Note:**
+> This document describes the **Target Production/Enterprise Architecture** (FastAPI, PostgreSQL, TimescaleDB, Neo4j, Apache Kafka, NVIDIA Jetson edge nodes, etc.).
+> The current working code in this repository is implemented as a **fully functional MVP** using **React (Vite) + Node.js (Express) + SQLite (`node:sqlite`) + Server-Sent Events (SSE)**.
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
 > **Version:** 1.0.0 · **Last Updated:** July 2026  
-> **Status:** MVP — FIFA World Cup 2026  
+> **Status:** Target Enterprise Specification (MVP implemented in Express + SQLite)  
 > **Classification:** Technical Architecture Document
+
 
 ---
 

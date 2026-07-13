@@ -8,6 +8,7 @@ import {
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { AIAssistantSkeleton } from '../components/skeleton';
 
 const USER_ROLE_BG = {
   admin: 'bg-rose-500/20 text-rose-400',
@@ -25,11 +26,15 @@ export default function AIAssistant() {
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
   useEffect(() => {
-    api.aiSuggestions().then(d => setSuggestions(d.suggestions || [])).catch(() => {});
+    api.aiSuggestions()
+      .then(d => setSuggestions(d.suggestions || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const scrollToBottom = () => {
@@ -69,6 +74,10 @@ export default function AIAssistant() {
       );
     });
   };
+
+  if (loading) {
+    return <AIAssistantSkeleton />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

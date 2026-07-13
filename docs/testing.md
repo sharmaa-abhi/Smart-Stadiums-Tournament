@@ -1,8 +1,14 @@
 # 🧪 StadiumGenius — Testing Strategy
 
+> [!IMPORTANT]
+> **MVP vs. Target Testing Note:**
+> This document describes the **Target Comprehensive Quality Assurance Strategy** (including multi-threaded Pytest scripts, vitest suites, Playwright E2E suites, and k6 scale tests).
+> The current working code in this repository includes unit and role verification tests (run via `test_all_roles.mjs` and `verify_roles.js` using node-native assertions and Puppeteer).
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
 > **Version:** 1.0.0 · **Last Updated:** July 2026  
-> **Scope:** Unit, integration, load, E2E, and AI-specific testing  
-> **Tools:** Pytest, Vitest, Playwright, k6, Locust
+> **Scope:** Target QA Strategy (Pytest/Playwright/k6) \| Actual MVP Testing (Native Node + Puppeteer Verification)
+
 
 ---
 

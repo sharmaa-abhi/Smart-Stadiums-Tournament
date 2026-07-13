@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   QrCode, MapPin, ShoppingCart, Star, Ticket, Clock, ChevronRight,
   CheckCircle, Plus, Minus, Trash2, Wifi, Battery, Signal,
   Trophy, Zap, Users, X, ArrowLeft, Bell, Search
 } from 'lucide-react';
+import { FanPortalSkeleton } from '../components/skeleton';
 
 // ── Mock Data ─────────────────────────────────────────────────────────────
 const MATCH = {
@@ -473,6 +474,16 @@ const TABS = [
 
 export default function FanPortal() {
   const [activeTab, setActiveTab] = useState('ticket');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <FanPortalSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-surface-950"

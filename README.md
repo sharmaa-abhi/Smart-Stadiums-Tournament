@@ -1,334 +1,239 @@
-# 🏟️ StadiumGenius – AI-Powered Smart Stadium Platform
+# 🏟️ StadiumGenius
 
-> **Building smarter, safer, and more connected stadiums with AI, IoT, and real-time analytics.**
+<div align="center">
 
----
+### AI-Powered Smart Stadium Operations Platform
 
-## 🌟 Overview
+**FIFA World Cup 2026 · Digital Twins · IoT · Generative AI**
 
-**StadiumGenius** is an AI-powered smart stadium platform designed to help stadium operators monitor crowds, improve fan experiences, and respond quickly to emergencies.
-
-The platform collects live information from cameras, IoT sensors, ticket gates, and other stadium systems. It analyzes this data in real time and provides intelligent recommendations to operators while helping fans navigate the stadium efficiently.
-
-Whether it's reducing queues, preventing congestion, or improving safety, StadiumGenius makes large-scale event management smarter.
-
----
-
-## ❓ Why StadiumGenius?
-
-Managing thousands of spectators during major sporting events is challenging.
-
-Common problems include:
-
-🚶 Long entry queues
-
-👥 Crowd congestion
-
-🚨 Slow emergency response
-
-🪑 Difficulty finding seats
-
-🍔 Long food stall waiting times
-
-🚻 Trouble locating restrooms
-
-🧭 Poor navigation inside large venues
-
-🛡️ Security monitoring challenges
-
-StadiumGenius uses Artificial Intelligence and real-time analytics to solve these problems before they impact fans.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev)
+[![Express](https://img.shields.io/badge/Express-5.1-000000?logo=express)](https://expressjs.com)
+[![SQLite](https://img.shields.io/badge/SQLite-3.x-003B57?logo=sqlite)](https://sqlite.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)](https://vite.dev)
 
 ---
 
-# 🚀 Features
+*Transform stadium operations with real-time AI-driven crowd management, predictive analytics, and intelligent decision support — designed for 80,000+ seat FIFA World Cup 2026 venues.*
 
-## 🏟️ Digital Twin
-
-A live digital representation of the stadium showing:
-
-- 👥 Crowd density
-- 🪑 Seat occupancy
-- 🚪 Entry gate status
-- 📍 Stadium zones
-- 🍔 Food court activity
-- 🚻 Facility usage
-- 🚨 Emergency locations
+</div>
 
 ---
 
-## 🤖 AI Assistant
+## 📋 Table of Contents
 
-An intelligent assistant for stadium operators.
-
-It can:
-
-- 💬 Explain ongoing situations
-- 📈 Analyze live stadium conditions
-- 📝 Generate incident reports
-- 💡 Suggest recommended actions
-- ❓ Answer operational questions
-
-### Example Questions
-
-> Why is Gate B crowded?
-
-> Suggest an alternate entry route.
-
-> Generate a security incident report.
+- [Project Overview](#project-overview)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+- [Current Achievements](#current-achievements)
+- [Future Work](#future-work)
+- [React + Vite Template Info](#react--vite-template-info)
+- [License](#license)
 
 ---
 
-## 🧭 Smart Navigation
+## 🎯 Project Overview
 
-Fans can quickly find:
+**StadiumGenius** is an enterprise-grade, AI-powered smart stadium operations platform built for FIFA World Cup 2026 venues. It combines cutting-edge frontend design with real-time capabilities to deliver crowd management, security orchestration, concession optimization, and operational intelligence.
 
-- 🪑 Their seat
-- 🚻 Nearest restroom
-- 🍔 Food stalls
-- 🚑 Medical centers
-- 🚪 Emergency exits
-- 🚶 Less crowded walking routes
+### The Problem
 
----
+Managing 80,000+ fans in a World Cup stadium involves:
 
-## 📊 Crowd Prediction
+- **Safety risks** from crowd density buildup at gates, corridors, and concessions
+- **Slow incident response** — average 45+ seconds to detect and dispatch
+- **Blind spots** — operators lack unified real-time visibility across camera grids, gates, and concession points
+- **Reactive operations** — decisions made after problems occur, not before
 
-AI predicts crowd movement before congestion occurs.
+### Our Solution
 
-This allows operators to:
+StadiumGenius provides a **unified command center** with:
 
-- 🚪 Open additional gates
-- 👮 Deploy security staff
-- 🚶 Redirect spectators
-- ⏱️ Reduce waiting times
-
----
-
-## 🚨 Security Monitoring
-
-Monitor important safety events including:
-
-- ⚠️ Suspicious crowd behavior
-- 🚷 Unauthorized access
-- ❤️ Medical emergencies
-- 👶 Lost children
-- 🚒 Emergency incidents
+| Capability | Impact |
+|-----------|--------|
+| **AI-Powered Digital Twin** | Live interactive visualization of stadium zones and occupancy state |
+| **Crowd Management** | Real-time density tracking and redirection triggers |
+| **Generative AI Assistant** | Natural-language operational queries backed by database context |
+| **Security & Patrols** | Interactive incident log, priority tracking, and broadcasts |
 
 ---
 
-## 📡 Real-Time Analytics
+## ✨ Key Features
 
-Monitor live stadium operations:
+### 🖥️ Operator Dashboard
 
-- 📈 Crowd trends
-- 🎟️ Ticket scans
-- 🚪 Gate utilization
-- 🌡️ Sensor readings
-- 📹 Camera events
-- ⚡ System alerts
+Real-time command center with live KPIs, crowd density overview, gate throughput, weather monitoring, and an automated alert feed. Powered by SSE (Server-Sent Events) live updates.
+
+### 🏗️ Digital Twin Engine
+
+Multi-layer visualization of the stadium including crowd density, security zones, and gate/infrastructure status.
+
+### 👥 Crowd Management
+
+Zone-by-zone occupancy tracking with capacity meters, crowd status logs, and dynamic corridor redirection controls.
+
+### 🍔 Concession Analytics
+
+Queue monitoring, wait time tracking, and express lane activation flows for concession zones.
+
+### 🤖 AI Operations Assistant
+
+Conversational assistant supporting operational queries regarding crowd density, incidents, weather, concessions, and announcements.
+
+### 🛡️ Security & Broadcasts
+
+Patrol unit allocations, active incident workflows (Active -> Investigating -> Resolved), and venue-wide public announcement (PA)/app broadcast creation panel.
 
 ---
 
-# ⚙️ How It Works
+## 🛠️ Technology Stack
 
-```text
-📱 Fans + 📷 Cameras + 📡 IoT Sensors + 🎟️ Ticket Gates
-                          │
-                          ▼
-                 📥 Collect Live Data
-                          │
-                          ▼
-                 🤖 AI Processes Data
-                          │
-                          ▼
-              🏟️ Digital Twin Updates
-                          │
-                          ▼
-            📊 Dashboard Shows Insights
-                          │
-                          ▼
-            👨‍💼 Operators Take Action
-                          │
-                          ▼
-          📲 Fans Receive Live Updates
+### Frontend
+
+- **React 19**: Component-based user interface.
+- **Vite 8**: Frontend tooling and fast HMR.
+- **Tailwind CSS v4**: Modern utility-first styling.
+- **Framer Motion 12**: Smooth UI transitions and micro-interactions.
+- **Recharts 3.x**: Data visualization and metric charts.
+- **Lucide React**: Clean vector icon pack.
+
+### Backend
+
+- **Node.js & Express**: Lightweight, robust API server.
+- **SQLite (`node:sqlite`)**: Local storage with seeded schemas for venues, alerts, incidents, and messages.
+- **JSON Web Tokens (JWT)**: Secure role-based user sessions and authentication middleware.
+
+---
+
+## 📂 Project Structure
+
 ```
-
----
-
-# 🛠️ Technology Stack
-
-| Technology | Purpose |
-|------------|---------|
-| ⚛️ React | Dashboard UI |
-| 📱 React Native | Mobile Application |
-| 🚀 FastAPI | Backend APIs |
-| 🐘 PostgreSQL | Primary Database |
-| ⏱️ TimescaleDB | Time-Series Sensor Data |
-| 🕸️ Neo4j | Stadium Map & Relationships |
-| 📨 Kafka | Real-Time Event Streaming |
-| ⚡ Redis | Caching |
-| 🐳 Docker | Containerization |
-| ☸️ Kubernetes | Deployment |
-| 🧠 OpenAI / Llama | AI Assistant |
-
----
-
-# 📂 Project Structure
-
-```text
-stadium-genius/
+Smart-Stadiums-Tournament/
 │
-├── 📁 backend/
-├── 📁 frontend/
-├── 📁 docs/
-├── 📁 infrastructure/
-└── 📄 README.md
+├── README.md                    # Main project overview (merged)
+├── FUTURE_ROADMAP.md            # Detailed implementation plan & priority matrix
+├── package.json                 # Frontend dependencies (React, Tailwind, Recharts)
+├── vite.config.js               # Vite & PWA configuration
+├── index.html                   # Entry HTML page
+│
+├── src/                         # 🖥️ React Frontend
+│   ├── App.jsx                  # Main routing & Role Guard setup
+│   ├── main.jsx                 # Frontend entry point
+│   ├── components/              # Skeletons, Sidebars, TopBar, and common widgets
+│   ├── context/                 # Context Providers (AuthContext)
+│   ├── data/                    # Local data & constant definitions
+│   ├── lib/                     # Client libraries (axios wrapper for APIs)
+│   └── pages/                   # Feature Pages (DigitalTwin, Security, Analytics, etc.)
+│
+├── server/                      # ⚙️ Node.js Express Backend
+│   ├── index.js                 # API server entry point
+│   ├── package.json             # Backend dependencies (express, jwt, sqlite)
+│   ├── db/                      # Database initialization (`stadiumgenius.db`)
+│   ├── middleware/              # Authentication and Role verification
+│   └── routes/                  # API routes (ai, analytics, incidents, etc.)
+│
+└── stadium-genius/              # Documentation & reference assets
 ```
 
 ---
 
-# 🚀 Getting Started
+## 🚀 Quick Start
 
-## 1️⃣ Clone the Repository
+### Prerequisites
 
-```bash
-git clone https://github.com/sharmaa-abhi/Smart-Stadiums-Tournament.git
-```
+- **Node.js** (v22+ recommended)
+- **npm** (v10+ recommended)
 
----
+### Step 1: Install Dependencies
 
-## 2️⃣ Install Backend Dependencies
-
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
----
-
-## 3️⃣ Install Frontend Dependencies
+From the project root:
 
 ```bash
-cd ../frontend
+# Install frontend dependencies
 npm install
+
+# Install backend dependencies
+cd server
+npm install
+cd ..
 ```
 
----
+### Step 2: Configure Environment
 
-## 4️⃣ Run the Project
+Create a `.env` file in the `server` directory (or modify the existing one):
+
+```env
+PORT=5000
+JWT_SECRET=super-secret-stadium-genius-key-fifa-2026-xyz
+JWT_EXPIRES_IN=7d
+NODE_ENV=development
+```
+
+### Step 3: Run the Platform
+
+You will need two terminal windows open:
+
+**Terminal 1 (Backend Server)**
 
 ```bash
-docker compose up
+cd server
+npm run dev
 ```
 
----
+**Terminal 2 (Frontend Dashboard)**
 
-# 📚 Documentation
+```bash
+# From the root directory
+npm run dev
+```
 
-Detailed technical documentation is available inside the **docs/** folder.
-
-📄 architecture.md
-
-📄 data-flow.md
-
-📄 api.md
-
-📄 database-schema.md
-
-📄 deployment.md
-
-📄 ai-workflows.md
-
-📄 security.md
-
-📄 testing.md
+Open `http://localhost:5173` in your browser.
 
 ---
 
-# 🎯 Future Improvements
+## 🏅 Current Achievements
 
-We plan to add:
-
-🏟️ Multi-stadium management
-
-🎥 Computer Vision analytics
-
-🚗 Smart parking management
-
-🚌 Public transport integration
-
-🎙️ AI broadcast assistant
-
-🥽 AR stadium navigation
-
-📈 Predictive staffing
-
-🌦️ Weather-aware event management
-
-💳 Cashless smart payments
-
-🤖 Autonomous security monitoring
+| Feature | Status | Description |
+|---------|:------:|-------------|
+| **JWT Authentication** | ✅ Done | Sign up, Log in, and safe token handling |
+| **RBAC Security** | ✅ Done | Admin, Manager, Operator, Security guards protect routes |
+| **Digital Twin View** | ✅ Done | Stadium layout heatmap and interactive zone stats |
+| **Live Updates** | ✅ Done | Telemetry streams updates via SSE connection |
+| **Incidents Logs** | ✅ Done | Create, update, and resolve incident tickets |
+| **AI Assistant UI** | ✅ Done | Fully reactive chat layout with suggestions |
 
 ---
 
-# 🤝 Contributing
+## 🔮 Future Work
 
-We welcome contributions from the community!
+Check [FUTURE_ROADMAP.md](FUTURE_ROADMAP.md) for detailed tasks, timelines, and priority matrices.
 
-### 📌 Steps
-
-1. 🍴 Fork the repository
-2. 🌿 Create a feature branch
-3. 💻 Commit your changes
-4. 📤 Push to your branch
-5. 🔀 Open a Pull Request
+- **Real Google Gemini API Integration**: Move AI Chatbot from local keyword mock responses to live `gemini-2.0-flash` calls.
+- **Two-Factor Authentication (MFA)**: Setup OTP codes via Speakeasy and Nodemailer.
+- **Real-Time IoT Integration**: Connect actual sensors over MQTT and Websockets.
+- **PDF Report Exporter**: Allow managers to print match reports.
 
 ---
 
-# 💡 Vision
+## 🛠️ React + Vite Template Info
 
-Our goal is to create stadiums that are:
+This project was initialized using a Vite + React template.
 
-✅ Safer
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-✅ Smarter
+### React Compiler
 
-✅ More efficient
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-✅ Fan-friendly
+### Expanding the Oxlint configuration
 
-By combining Artificial Intelligence, IoT, and real-time analytics, StadiumGenius helps transform traditional stadium operations into intelligent digital ecosystems.
-
----
-
-# 📄 License
-
-This project is licensed under the **MIT License**.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
 
 ---
 
-# 👨‍💻 Author
+## 📄 License
 
-**Abhishek Sharma**
-
-💼 AI • Cloud • IoT • Full Stack Development
-
-> *"Building smarter stadiums using AI, IoT, and real-time analytics."*
-
----
-
-# ⭐ Support
-
-If you found this project useful:
-
-⭐ Star the repository
-
-🍴 Fork it
-
-🤝 Contribute
-
-📢 Share it with others
-
----
-
-## 🚀 Let's Build the Future of Smart Stadiums Together!
+This project is licensed under the MIT License.

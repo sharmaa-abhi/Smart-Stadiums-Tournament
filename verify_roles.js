@@ -8,6 +8,7 @@ async function run() {
   console.log('🚀 Starting Automated Role and Profile verification...');
   const browser = await puppeteer.launch({
     headless: true,
+    userDataDir: path.join('C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/72dc4d11-456b-409e-b81a-f6dab2600102', 'puppeteer_profile'),
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
@@ -22,7 +23,7 @@ async function run() {
 
   for (const role of roles) {
     console.log(`\n=== Testing Role Profile: ${role.toUpperCase()} ===`);
-    
+
     // Go to register
     await page.goto('http://localhost:5173/register', { waitUntil: 'domcontentloaded' });
     await delay(500);
@@ -34,8 +35,11 @@ async function run() {
     console.log(`Registering ${name} (${email})...`);
 
     // Fill registration form
+    await page.waitForSelector('input[placeholder="John Doe"]');
     await page.type('input[placeholder="John Doe"]', name);
+    await page.waitForSelector('input[placeholder="operator@stadiumgenius.io"]');
     await page.type('input[placeholder="operator@stadiumgenius.io"]', email);
+    await page.waitForSelector('input[placeholder="Min 6 characters"]');
     await page.type('input[placeholder="Min 6 characters"]', password);
 
     // Click the role button matching the role
@@ -65,12 +69,13 @@ async function run() {
     await delay(2000); // Allow dashboard fetches and live counters to populate
 
     // Extract TopBar elements
-    const topBarName = await page.$eval('.hidden.sm\\:block.text-right p:first-of-type', el => el.textContent);
-    const topBarRole = await page.$eval('.hidden.sm\\:block.text-right p:last-of-type', el => el.textContent);
-    
+    const topBarName = await page.$eval('.topbar-profile-name', el => el.textContent);
+    const topBarRole = await page.$eval('.topbar-profile-role', el => el.textContent);
+
     // Get the avatar classes
     const avatarClasses = await page.evaluate(() => {
-      const parent = document.querySelector('.hidden.sm\\:block.text-right');
+      const nameEl = document.querySelector('.topbar-profile-name');
+      const parent = nameEl.parentElement;
       const avatar = parent.nextElementSibling;
       return avatar ? avatar.className : '';
     });
@@ -114,7 +119,7 @@ async function run() {
       console.warn('⚠️ Logout button not found, clearing localStorage.');
       await page.evaluate(() => localStorage.removeItem('sg_token'));
     }
-    
+
     await delay(500);
   }
 

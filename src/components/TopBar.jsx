@@ -1,9 +1,10 @@
-import { Bell, Search, Globe, Wifi, Clock, Shield, TrendingUp, ShieldAlert, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Bell, Search, Globe, Wifi, Clock, Shield, TrendingUp, ShieldAlert, Zap, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationPanel from './NotificationPanel';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const ROLE_BRAND = {
   admin: {
@@ -34,9 +35,12 @@ const ROLE_BRAND = {
 
 export default function TopBar({ title, subtitle }) {
   const [time, setTime] = useState(new Date());
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+  const navigate = useNavigate();
 
   const role = user?.role || 'operator';
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
@@ -45,6 +49,17 @@ export default function TopBar({ title, subtitle }) {
   const initials = user?.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : 'SG';
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    }
+    // Use mousedown with capture phase or verify targets
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
@@ -120,27 +135,113 @@ export default function TopBar({ title, subtitle }) {
         </div>
 
         {/* Avatar & User Details */}
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:block text-right">
-            <p className="text-xs font-semibold text-white/85">{user?.name || 'Operations Operator'}</p>
-            <div className="flex items-center gap-1.5 justify-end mt-0.5">
-              <RoleIcon className={`w-3 h-3 ${brand.iconColor}`} />
-              <p className="text-[10px] text-white/45 capitalize leading-none">{user?.role || 'operator'}</p>
+        <div className="relative" ref={profileRef}>
+          <div 
+            onClick={() => setIsProfileOpen(prev => !prev)}
+            className="flex items-center gap-2 cursor-pointer group select-none"
+          >
+            <div className="hidden sm:block text-right">
+              <p className="topbar-profile-name text-xs font-semibold text-white/85 group-hover:text-white transition-colors">{user?.name || 'Operations Operator'}</p>
+              <div className="flex items-center gap-1.5 justify-end mt-0.5">
+                <RoleIcon className={`w-3 h-3 ${brand.iconColor}`} />
+                <p className="topbar-profile-role text-[10px] text-white/45 capitalize leading-none">{user?.role || 'operator'}</p>
+              </div>
             </div>
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-8 h-8 rounded-xl object-cover border border-white/[0.08] hover:shadow-lg transition-all duration-200"
+              />
+            ) : (
+              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient}
+                flex items-center justify-center text-xs font-bold text-white
+                hover:shadow-lg ${brand.glow} transition-all duration-200`}>
+                {initials}
+              </div>
+            )}
           </div>
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-8 h-8 rounded-xl object-cover cursor-pointer border border-white/[0.08] hover:shadow-lg transition-all duration-200"
-            />
-          ) : (
-            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient}
-              flex items-center justify-center text-xs font-bold text-white cursor-pointer
-              hover:shadow-lg ${brand.glow} transition-all duration-200`}>
-              {initials}
-            </div>
-          )}
+
+          <AnimatePresence>
+            {isProfileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute right-0 mt-2 w-72 bg-surface-900/98 backdrop-blur-2xl rounded-2xl border border-white/[0.08] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[60] space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Profile Overview</span>
+                  <button onClick={() => setIsProfileOpen(false)} className="p-1 rounded-lg hover:bg-white/[0.04] text-white/40 hover:text-white/60">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-xl object-cover border border-white/[0.08]" />
+                  ) : (
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-sm font-bold text-white`}>
+                      {initials}
+                    </div>
+                  )}
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
+                    <p className="text-[10px] text-white/30 truncate capitalize font-semibold">{user?.role || 'operator'}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 border-t border-white/[0.06] pt-3 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-white/40">Email:</span>
+                    <span className="text-white/70 truncate max-w-[160px]">{user?.email || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/40">Status:</span>
+                    <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Active On Duty
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/40">Last Login:</span>
+                    <span className="text-white/50 font-mono text-[10px]">Today, 18:10</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  <button 
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      navigate('/settings');
+                    }}
+                    className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-semibold text-white/70 hover:bg-white/[0.06] hover:text-white transition-all"
+                  >
+                    Edit Profile
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      navigate('/settings');
+                    }}
+                    className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-semibold text-white/70 hover:bg-white/[0.06] hover:text-white transition-all"
+                  >
+                    Settings
+                  </button>
+                </div>
+
+                <button 
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    logout();
+                    navigate('/login', { replace: true });
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-xs font-bold text-rose-400 transition-all"
+                >
+                  Logout
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>

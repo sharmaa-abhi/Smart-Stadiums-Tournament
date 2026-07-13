@@ -1,7 +1,14 @@
 # 📡 StadiumGenius — Data Flow Architecture
 
+> [!IMPORTANT]
+> **MVP vs. Target Data Flow Note:**
+> This document describes the **Target Real-Time Stream Ingestion and Event Processing Architecture** (telemetry ingestion from 400+ IoT sensors, Kafka brokers, Flink stream analysis, and database writes).
+> The current working code in this repository simulates streaming data through **Server-Sent Events (SSE)**.
+> For details on the actual implemented codebase, database schema, and files, please refer to the root [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) and [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md).
+
 > **Version:** 1.0.0 · **Last Updated:** July 2026  
-> **Scope:** End-to-end telemetry ingestion, processing, and AI decision pipeline
+> **Scope:** Target Stream Pipelines (Kafka/Flink) \| Actual MVP Pipeline (Server-Sent Events)
+
 
 ---
 

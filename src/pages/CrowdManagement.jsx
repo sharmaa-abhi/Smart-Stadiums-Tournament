@@ -11,6 +11,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
+import { CrowdManagementSkeleton } from '../components/skeleton';
 
 export default function CrowdManagement() {
   const [occupancy, setOccupancy] = useState([]);
@@ -39,31 +40,7 @@ export default function CrowdManagement() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen">
-        <TopBar title="Crowd & Resource Management" subtitle="Predictive analytics & real-time flow optimization" />
-        <div className="p-6 space-y-6">
-          {/* Stats Skeleton */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-24 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/[0.04] flex-shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-5 w-16 bg-white/[0.04] rounded-md" />
-                  <div className="h-3.5 w-24 bg-white/[0.04] rounded-md" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
-            <div className="lg:col-span-2 h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
-            <div className="h-96 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5" />
-          </div>
-        </div>
-      </div>
-    );
+    return <CrowdManagementSkeleton />;
   }
 
   const totalFans = occupancy.reduce((sum, z) => sum + z.current, 0);

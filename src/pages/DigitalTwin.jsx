@@ -7,19 +7,25 @@ import {
 import TopBar from '../components/TopBar';
 import StadiumHeatmap from '../components/StadiumHeatmap';
 import { generateStadiumHeatmap, generateGateData, ZONES } from '../data/mockData';
+import { DigitalTwinSkeleton } from '../components/skeleton';
 
 export default function DigitalTwin() {
   const [heatmap, setHeatmap] = useState(generateStadiumHeatmap());
   const [gates, setGates] = useState(generateGateData());
   const [activeLayer, setActiveLayer] = useState('density');
   const [selectedZone, setSelectedZone] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
     const interval = setInterval(() => {
       setHeatmap(generateStadiumHeatmap());
       setGates(generateGateData());
     }, 4000);
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   const layers = [
@@ -35,6 +41,10 @@ export default function DigitalTwin() {
     windSpeed: (Math.random() * 10 + 5).toFixed(1),
     airQuality: Math.floor(Math.random() * 30 + 60),
   }), []);
+
+  if (loading) {
+    return <DigitalTwinSkeleton />;
+  }
 
   return (
     <div className="min-h-screen">
