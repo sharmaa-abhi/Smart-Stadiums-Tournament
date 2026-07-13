@@ -408,17 +408,18 @@ export default function Security() {
                 <h3 className="text-sm font-semibold text-white/90 mb-4">Emergency Quick Actions</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { icon: Siren, label: 'Trigger Lockdown', color: 'rose', desc: 'Seal all gates & exits' },
-                    { icon: Megaphone, label: 'PA Announcement', color: 'amber', desc: 'Broadcast to all zones' },
-                    { icon: Route, label: 'Evacuation Mode', color: 'rose', desc: 'Activate evac routes' },
-                    { icon: Phone, label: 'Call Emergency', color: 'brand', desc: 'Contact 911 / Police' },
-                    { icon: Users, label: 'Deploy Backup', color: 'accent', desc: 'Request additional teams' },
-                    { icon: FileText, label: 'Generate Report', color: 'emerald', desc: 'AI incident summary' },
+                    { icon: Siren, label: 'Trigger Lockdown', color: 'rose', desc: 'Seal all gates & exits', action: () => alert('⚠️ [LOCKDOWN] Initiating full stadium lockdown protocol. All automatic doors locked. Dispatching units to main gates.') },
+                    { icon: Megaphone, label: 'PA Announcement', color: 'amber', desc: 'Broadcast to all zones', action: () => alert('📢 [PA BROADCAST] Live audio channel opened to stadium speakers. Ready for announcement.') },
+                    { icon: Route, label: 'Evacuation Mode', color: 'rose', desc: 'Activate evac routes', action: () => alert('🚨 [EVACUATION] Active egress routes highlighted. Dynamic digital signage updated to show exit paths.') },
+                    { icon: Phone, label: 'Call Emergency', color: 'brand', desc: 'Contact 911 / Police', action: () => alert('📞 [CALLING EMERGENCY SERVICES] Automatic priority dispatcher dialed. High incident payload transmitted.') },
+                    { icon: Users, label: 'Deploy Backup', color: 'accent', desc: 'Request additional teams', action: () => alert('🛡️ [BACKUP DEPLOYED] Reinforcements dispatched. Security squads Alpha-4 and Bravo-1 en-route.') },
+                    { icon: FileText, label: 'Generate Report', color: 'emerald', desc: 'AI incident summary', action: () => alert('📝 [REPORT GENERATION] AI incident summary report generated and downloaded as PDF.') },
                   ].map((action, i) => {
                     const ActionIcon = action.icon;
                     return (
                       <motion.button
                         key={i}
+                        onClick={action.action}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.06 + 0.4 }}
