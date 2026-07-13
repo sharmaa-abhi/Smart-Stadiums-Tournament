@@ -14,6 +14,8 @@ dist-ssr
 
 # Server
 server/db/*.db
+server/db/*.db-shm
+server/db/*.db-wal
 server/.env
 server/node_modules
 
