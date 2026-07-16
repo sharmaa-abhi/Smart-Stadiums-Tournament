@@ -130,7 +130,7 @@ export default function Dashboard() {
       clearInterval(interval);
       eventSource.close();
     };
-  }, []);
+  }, [VENUE_ID]);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;

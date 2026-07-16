@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../db/database.js';
 import authMiddleware from '../middleware/auth.js';
+import { sanitizeUser } from '../utils/sanitize.js';
 
 const router = Router();
 
@@ -14,10 +15,9 @@ function generateToken(user) {
   );
 }
 
-function sanitizeUser(user) {
-  const { password, ...safe } = user;
-  return safe;
-}
+// Allowed roles for self-registration (admin must be assigned by existing admin)
+const SELF_REGISTER_ROLES = ['operator', 'security', 'manager'];
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // ── POST /api/auth/register ──
 router.post('/register', async (req, res) => {
@@ -28,9 +28,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
 
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }
+
+    // Prevent self-registration as admin
+    const safeRole = (role && SELF_REGISTER_ROLES.includes(role)) ? role : 'operator';
 
     // Check if user already exists
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -46,7 +53,7 @@ router.post('/register', async (req, res) => {
     const stmt = db.prepare(`
       INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
     `);
-    const result = stmt.run(name, email, hashedPassword, role || 'operator');
+    const result = stmt.run(name, email, hashedPassword, safeRole);
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
     const token = generateToken(user);

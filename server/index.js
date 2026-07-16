@@ -2,6 +2,14 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import crypto from 'crypto';
+
+// ── Auto-generate JWT_SECRET if not provided ──
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = crypto.randomBytes(64).toString('hex');
+  console.warn('⚠️  WARNING: JWT_SECRET is not set in .env — using auto-generated random secret.');
+  console.warn('   Sessions will be invalidated on every server restart. Set a persistent secret in server/.env');
+}
 
 // Import database (runs table creation + seeding)
 import './db/database.js';
@@ -19,16 +27,49 @@ import notificationRoutes from './routes/notifications.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ── Security Headers ──
+// Basic security headers (Content-Security-Policy, X-Frame-Options, etc.)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
+// ── Rate Limiting (auth endpoints) ──
+const authRateLimitMap = new Map();
+const AUTH_RATE_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const AUTH_RATE_MAX = 20; // max attempts per window
+
+function authRateLimiter(req, res, next) {
+  const key = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const entry = authRateLimitMap.get(key);
+
+  if (!entry || now - entry.start > AUTH_RATE_WINDOW_MS) {
+    authRateLimitMap.set(key, { start: now, count: 1 });
+    return next();
+  }
+
+  entry.count++;
+  if (entry.count > AUTH_RATE_MAX) {
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+  }
+  return next();
+}
+
 // ── Middleware ──
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:5178', 'http://localhost:3000'],
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
 
 // ── API Routes ──
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRateLimiter, authRoutes);
 app.use('/api/venues', venueRoutes);
 app.use('/api/incidents', incidentRoutes);
 app.use('/api/analytics', analyticsRoutes);

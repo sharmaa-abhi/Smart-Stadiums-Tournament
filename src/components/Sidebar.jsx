@@ -2,10 +2,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Map, ShieldAlert, MessageSquareText, Users,
   UtensilsCrossed, Radio, BarChart3, Settings, Zap, ChevronLeft,
-  ChevronRight, LogOut, UserCog, ClipboardList, TrendingUp,
+  ChevronRight, LogOut, UserCog, TrendingUp,
   Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket,
 } from 'lucide-react';
-import { useState } from 'react';
+
 import { useAuth } from '../context/AuthContext';
 
 // ── Unique nav items per role ──────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   QrCode, MapPin, ShoppingCart, Star, Ticket, Clock, ChevronRight,
   CheckCircle, Plus, Minus, Trash2, Wifi, Battery, Signal,
-  Trophy, Zap, Users, X, ArrowLeft, Bell, Search
+  Trophy, Zap, Bell
 } from 'lucide-react';
 import { FanPortalSkeleton } from '../components/skeleton';
 

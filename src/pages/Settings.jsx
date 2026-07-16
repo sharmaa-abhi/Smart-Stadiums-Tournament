@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Settings as SettingsIcon, Globe, Bell, Shield, Monitor, Palette,
-  Database, Wifi, Server, Key, Users, ToggleLeft, ToggleRight, ChevronRight
+  Globe, Bell, Shield, Monitor,
+  Server, Key, Users, ToggleLeft, ToggleRight, ChevronRight
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';

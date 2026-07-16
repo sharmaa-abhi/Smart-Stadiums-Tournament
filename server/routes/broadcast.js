@@ -29,6 +29,12 @@ router.post('/messages', (req, res) => {
     if (!title || !message) {
       return res.status(400).json({ error: 'Title and message are required.' });
     }
+    if (title.length > 200) {
+      return res.status(400).json({ error: 'Title must be 200 characters or fewer.' });
+    }
+    if (message.length > 2000) {
+      return res.status(400).json({ error: 'Message must be 2000 characters or fewer.' });
+    }
 
     const stmt = db.prepare(`
       INSERT INTO broadcast_messages (title, message, channel, priority, status, venue_id, created_by, expires_at)

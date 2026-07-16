@@ -2,14 +2,10 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../db/database.js';
 import authMiddleware from '../middleware/auth.js';
+import { sanitizeUser } from '../utils/sanitize.js';
 
 const router = Router();
 router.use(authMiddleware);
-
-function sanitizeUser(user) {
-  const { password, ...safe } = user;
-  return safe;
-}
 
 // ── GET /api/users/profile ──
 router.get('/profile', (req, res) => {
