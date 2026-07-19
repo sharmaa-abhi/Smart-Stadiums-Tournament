@@ -8,7 +8,7 @@ async function run() {
   console.log('🚀 Starting Automated Role and Profile verification...');
   const browser = await puppeteer.launch({
     headless: true,
-    userDataDir: path.join('C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/40c04d7e-c714-4eba-8456-c81532d4860e', 'puppeteer_profile'),
+    userDataDir: path.join('C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/cf5ca472-3650-4b35-b786-4b45f5c262da', 'puppeteer_profile'),
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
@@ -123,7 +123,7 @@ run().catch(async err => {
   console.error('❌ Verification script encountered an error:', err);
   if (global.pageRef) {
     try {
-      const failPath = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/40c04d7e-c714-4eba-8456-c81532d4860e/failure.png';
+      const failPath = path.join(screenshotDir, 'failure.png');
       await global.pageRef.screenshot({ path: failPath });
       console.log(`📸 Saved failure state screenshot to: ${failPath}`);
     } catch (e) {
