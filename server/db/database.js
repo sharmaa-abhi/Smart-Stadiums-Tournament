@@ -110,7 +110,15 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
+
+  CREATE INDEX IF NOT EXISTS idx_incidents_venue_id ON incidents(venue_id);
+  CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);
+  CREATE INDEX IF NOT EXISTS idx_alerts_venue_id ON alerts(venue_id);
+  CREATE INDEX IF NOT EXISTS idx_broadcast_messages_venue_id ON broadcast_messages(venue_id);
+  CREATE INDEX IF NOT EXISTS idx_broadcast_messages_status ON broadcast_messages(status);
+  CREATE INDEX IF NOT EXISTS idx_ai_conversations_session_user ON ai_conversations(session_id, user_id);
 `);
+
 
 // ── Seed Venues ──
 const venueCount = db.prepare('SELECT COUNT(*) as count FROM venues').get();

@@ -8,21 +8,25 @@ async function run() {
   console.log('🚀 Starting Automated Role and Profile verification...');
   const browser = await puppeteer.launch({
     headless: true,
-    userDataDir: path.join('C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/72dc4d11-456b-409e-b81a-f6dab2600102', 'puppeteer_profile'),
+    userDataDir: path.join('C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/40c04d7e-c714-4eba-8456-c81532d4860e', 'puppeteer_profile'),
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 800 });
 
   const roles = ['operator', 'security', 'manager', 'admin'];
   const timestamp = Date.now();
   const results = [];
 
-  const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/72dc4d11-456b-409e-b81a-f6dab2600102';
+  const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/40c04d7e-c714-4eba-8456-c81532d4860e';
 
   for (const role of roles) {
     console.log(`\n=== Testing Role Profile: ${role.toUpperCase()} ===`);
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 800 });
+
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    page.on('pageerror', err => console.log('PAGE ERROR:', err.toString()));
+
+    global.pageRef = page;
     
     // Go to register
     await page.goto('http://localhost:5173/register', { waitUntil: 'domcontentloaded' });
@@ -64,8 +68,8 @@ async function run() {
     const submitBtn = await page.$('button[type="submit"]');
     await submitBtn.click();
 
-    // Wait for navigation/dashboard load
-    await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+    // Wait for dashboard load
+    await page.waitForSelector('.topbar-profile-name', { timeout: 20000 });
     await delay(2000); // Allow dashboard fetches and live counters to populate
 
     // Extract TopBar elements
@@ -105,22 +109,8 @@ async function run() {
       screenshotName: `${role}_dashboard.png`
     });
 
-    // Click Logout
-    const logoutBtn = await page.evaluateHandle(() => {
-      const btns = Array.from(document.querySelectorAll('button'));
-      return btns.find(b => b.textContent.includes('Logout'));
-    });
-
-    if (logoutBtn && logoutBtn.asElement()) {
-      await logoutBtn.asElement().click();
-      await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
-      console.log('🚪 Logged out successfully.');
-    } else {
-      console.warn('⚠️ Logout button not found, clearing localStorage.');
-      await page.evaluate(() => localStorage.removeItem('sg_token'));
-    }
-    
-    await delay(500);
+    await page.close();
+    await delay(3000);
   }
 
   await browser.close();
@@ -130,7 +120,16 @@ async function run() {
   console.log('\n🎉 All verification tests completed successfully. Summary results written.');
 }
 
-run().catch(err => {
+run().catch(async err => {
   console.error('❌ Verification script encountered an error:', err);
+  if (global.pageRef) {
+    try {
+      const failPath = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/40c04d7e-c714-4eba-8456-c81532d4860e/failure.png';
+      await global.pageRef.screenshot({ path: failPath });
+      console.log(`📸 Saved failure state screenshot to: ${failPath}`);
+    } catch (e) {
+      console.error('Failed to take failure screenshot:', e);
+    }
+  }
   process.exit(1);
 });

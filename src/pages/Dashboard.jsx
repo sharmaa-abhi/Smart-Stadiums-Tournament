@@ -74,11 +74,8 @@ const ROLE_CONFIG = {
   },
 };
 
-const getVenueId = () => localStorage.getItem('sg_active_venue_id') || 'metlife';
-
 export default function Dashboard() {
-  const VENUE_ID = getVenueId();
-  const { user } = useAuth();
+  const { user, activeVenueId } = useAuth();
   const navigate = useNavigate();
   const role = user?.role || 'operator';
   const config = ROLE_CONFIG[role] || ROLE_CONFIG.operator;
@@ -93,10 +90,10 @@ export default function Dashboard() {
     const fetchOthers = async () => {
       try {
         const [alertsRes, timeRes, occRes, heatRes] = await Promise.all([
-          api.getVenueAlerts(VENUE_ID),
-          api.getVenueTimeseries(VENUE_ID, 24),
-          api.getVenueOccupancy(VENUE_ID),
-          api.getVenueHeatmap(VENUE_ID),
+          api.getVenueAlerts(activeVenueId),
+          api.getVenueTimeseries(activeVenueId, 24),
+          api.getVenueOccupancy(activeVenueId),
+          api.getVenueHeatmap(activeVenueId),
         ]);
         setAlerts(alertsRes.alerts);
         setTimeData(timeRes.timeseries);
@@ -114,7 +111,7 @@ export default function Dashboard() {
 
     // SSE connection for KPIs
     const token = localStorage.getItem('sg_token');
-    const sseUrl = `${api.baseUrl}/venues/${VENUE_ID}/live-kpis?token=${token}`;
+    const sseUrl = `${api.baseUrl}/venues/${activeVenueId}/live-kpis?token=${token}`;
     const eventSource = new EventSource(sseUrl);
 
     eventSource.onmessage = (event) => {
@@ -130,7 +127,7 @@ export default function Dashboard() {
       clearInterval(interval);
       eventSource.close();
     };
-  }, []);
+  }, [activeVenueId]);
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;

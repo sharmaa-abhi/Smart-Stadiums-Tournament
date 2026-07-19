@@ -11,33 +11,35 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { CrowdManagementSkeleton } from '../components/skeleton';
 
 export default function CrowdManagement() {
+  const { activeVenueId } = useAuth();
   const [occupancy, setOccupancy] = useState([]);
   const [timeData, setTimeData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
-    try {
-      const [occRes, timeRes] = await Promise.all([
-        api.getVenueOccupancy('metlife'),
-        api.getVenueTimeseries('metlife', 30),
-      ]);
-      setOccupancy(occRes.occupancy || []);
-      setTimeData(timeRes.timeseries || []);
-    } catch (err) {
-      console.error('Failed to fetch crowd management data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [occRes, timeRes] = await Promise.all([
+          api.getVenueOccupancy(activeVenueId),
+          api.getVenueTimeseries(activeVenueId, 30),
+        ]);
+        setOccupancy(occRes.occupancy || []);
+        setTimeData(timeRes.timeseries || []);
+      } catch (err) {
+        console.error('Failed to fetch crowd management data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchData();
     const interval = setInterval(fetchData, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeVenueId]);
 
   if (loading) {
     return <CrowdManagementSkeleton />;

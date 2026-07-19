@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../db/database.js';
 import authMiddleware from '../middleware/auth.js';
+import { sanitizeUser } from '../utils/sanitize.js';
 
 const router = Router();
 
@@ -14,22 +15,26 @@ function generateToken(user) {
   );
 }
 
-function sanitizeUser(user) {
-  const { password, ...safe } = user;
-  return safe;
-}
-
 // ── POST /api/auth/register ──
 router.post('/register', async (req, res) => {
+  const { name, email, password, role } = req.body;
+  console.log(`[API] Register attempt: name="${name}", email="${email}", role="${role}"`);
   try {
-    const { name, email, password, role } = req.body;
-
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
 
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+
+    // Allowed roles for self-registration (admin must be assigned by existing admin, except in development/test environments)
+    const SELF_REGISTER_ROLES = process.env.NODE_ENV === 'development'
+      ? ['operator', 'security', 'manager', 'admin']
+      : ['operator', 'security', 'manager'];
+
+    if (role && !SELF_REGISTER_ROLES.includes(role)) {
+      return res.status(400).json({ error: 'Invalid role.' });
     }
 
     // Check if user already exists
@@ -50,6 +55,7 @@ router.post('/register', async (req, res) => {
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
     const token = generateToken(user);
+    console.log(`[API] Register success for ${email}`);
 
     res.status(201).json({
       message: 'Account created successfully.',
@@ -57,7 +63,7 @@ router.post('/register', async (req, res) => {
       user: sanitizeUser(user),
     });
   } catch (err) {
-    console.error('Register error:', err);
+    console.error('[API] Register error:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
 });

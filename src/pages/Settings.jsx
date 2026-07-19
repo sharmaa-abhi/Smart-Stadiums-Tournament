@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Settings as SettingsIcon, Globe, Bell, Shield, Monitor, Palette,
-  Database, Wifi, Server, Key, Users, ToggleLeft, ToggleRight, ChevronRight
+  Globe, Bell, Shield, Server, Key, Users
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
@@ -58,9 +57,8 @@ const settingSections = [
 ];
 
 export default function Settings() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, activeVenueId, setActiveVenueId } = useAuth();
   const [venues, setVenues] = useState([]);
-  const [activeVenueIdx, setActiveVenueIdx] = useState(0);
   const [loadingVenues, setLoadingVenues] = useState(true);
 
   // Profile fields
@@ -83,17 +81,14 @@ export default function Settings() {
   useEffect(() => {
     api.getVenues()
       .then(res => {
-        const list = res.venues || [];
-        setVenues(list);
-        const savedId = localStorage.getItem('sg_active_venue_id');
-        if (savedId) {
-          const idx = list.findIndex(v => v.id === savedId);
-          if (idx !== -1) setActiveVenueIdx(idx);
-        }
+        setVenues(res.venues || []);
       })
       .catch(console.error)
       .finally(() => setLoadingVenues(false));
   }, []);
+
+  const activeVenueIdx = venues.findIndex(v => v.id === activeVenueId);
+  const currentActiveIdx = activeVenueIdx !== -1 ? activeVenueIdx : 0;
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -145,20 +140,19 @@ export default function Settings() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.06 }}
                 onClick={() => {
-                  setActiveVenueIdx(i);
-                  localStorage.setItem('sg_active_venue_id', venue.id);
+                  setActiveVenueId(venue.id);
                 }}
                 className={`p-3 rounded-xl cursor-pointer transition-all duration-200
-                  ${i === activeVenueIdx
+                  ${i === currentActiveIdx
                     ? 'bg-brand-500/15 border border-brand-500/30 shadow-lg shadow-brand-500/5'
                     : 'bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] hover:border-white/[0.10]'
                   }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={`text-sm font-semibold ${i === activeVenueIdx ? 'text-brand-400' : 'text-white/70'}`}>
+                  <span className={`text-sm font-semibold ${i === currentActiveIdx ? 'text-brand-400' : 'text-white/70'}`}>
                     {venue.name}
                   </span>
-                  {i === activeVenueIdx && <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />}
+                  {i === currentActiveIdx && <span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" />}
                 </div>
                 <p className="text-[10px] text-white/30">{venue.city}, {venue.country} • {venue.capacity.toLocaleString()} capacity</p>
               </motion.div>

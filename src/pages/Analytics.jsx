@@ -1,36 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  BarChart3, TrendingUp, TrendingDown, Users, Timer, Shield,
-  Star, Bus, Target, Award, ArrowUpRight, Calendar
+  Users, Timer, Shield, Star, Bus, Target, Calendar, Award, TrendingUp, TrendingDown
 } from 'lucide-react';
 import {
-  AreaChart, Area, BarChart, Bar, LineChart, Line,
+  AreaChart, Area, BarChart, Bar, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar,
-  PieChart, Pie, Cell
+  RadarChart, PolarGrid, PolarAngleAxis, Radar, Cell
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
 import { AnalyticsSkeleton } from '../components/skeleton';
-
-const matchHistory = [
-  { match: 'Match 1', crowd: 78200, incidents: 4, avgQueue: 4.2, satisfaction: 4.1, response: 45 },
-  { match: 'Match 2', crowd: 80100, incidents: 3, avgQueue: 3.8, satisfaction: 4.3, response: 38 },
-  { match: 'Match 3', crowd: 81500, incidents: 2, avgQueue: 3.2, satisfaction: 4.5, response: 28 },
-  { match: 'Match 4', crowd: 79800, incidents: 2, avgQueue: 2.9, satisfaction: 4.6, response: 22 },
-  { match: 'Match 5', crowd: 82100, incidents: 1, avgQueue: 2.5, satisfaction: 4.7, response: 18 },
-  { match: 'Match 6', crowd: 82500, incidents: 1, avgQueue: 2.3, satisfaction: 4.8, response: 15 },
-];
-
-const radarData = [
-  { metric: 'Crowd Flow', value: 92, fullMark: 100 },
-  { metric: 'Safety', value: 95, fullMark: 100 },
-  { metric: 'Concessions', value: 88, fullMark: 100 },
-  { metric: 'Transport', value: 82, fullMark: 100 },
-  { metric: 'Fan Satisfaction', value: 91, fullMark: 100 },
-  { metric: 'AI Accuracy', value: 94, fullMark: 100 },
-];
 
 const kpiCards = [
   { icon: Timer, label: 'Queue Time Reduction', value: '-47%', baseline: '4.8 min → 2.5 min', trend: 'down', color: 'accent' },
@@ -42,14 +22,6 @@ const kpiCards = [
 ];
 
 const COLORS = ['#3378ff', '#22d3ee', '#34d399', '#f59e0b', '#f43f5e'];
-
-const categoryPerformance = [
-  { name: 'Crowd Mgmt', value: 92 },
-  { name: 'Security', value: 95 },
-  { name: 'Concessions', value: 88 },
-  { name: 'Transport', value: 82 },
-  { name: 'Broadcast', value: 96 },
-];
 
 export default function Analytics() {
   const [trends, setTrends] = useState([]);

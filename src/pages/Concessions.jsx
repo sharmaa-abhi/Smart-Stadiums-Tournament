@@ -11,6 +11,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { ConcessionsSkeleton } from '../components/skeleton';
 
 const COLORS = ['#3378ff', '#22d3ee', '#34d399', '#f59e0b', '#f43f5e', '#a78bfa'];
@@ -43,25 +44,26 @@ const topItems = [
 ];
 
 export default function Concessions() {
+  const { activeVenueId } = useAuth();
   const [concessions, setConcessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchConcessions = async () => {
-    try {
-      const res = await api.getVenueConcessions('metlife');
-      setConcessions(res.concessions || []);
-    } catch (err) {
-      console.error('Failed to fetch concessions:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchConcessions = async () => {
+      try {
+        const res = await api.getVenueConcessions(activeVenueId);
+        setConcessions(res.concessions || []);
+      } catch (err) {
+        console.error('Failed to fetch concessions:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchConcessions();
     const interval = setInterval(fetchConcessions, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeVenueId]);
 
   if (loading) {
     return <ConcessionsSkeleton />;

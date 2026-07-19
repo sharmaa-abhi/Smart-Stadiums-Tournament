@@ -124,14 +124,31 @@ router.get('/:id/live-kpis', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
   // Send initial data
-  res.write(`data: ${JSON.stringify(generateKPIs(venue))}\n\n`);
+  try {
+    if (!req.destroyed) {
+      res.write(`data: ${JSON.stringify(generateKPIs(venue))}\n\n`);
+    }
+  } catch (err) {
+    console.error('Error writing initial live-kpis:', err);
+    return;
+  }
 
   // Send updates periodically
   const intervalId = setInterval(() => {
-    res.write(`data: ${JSON.stringify(generateKPIs(venue))}\n\n`);
+    if (req.destroyed) {
+      clearInterval(intervalId);
+      return;
+    }
+    try {
+      res.write(`data: ${JSON.stringify(generateKPIs(venue))}\n\n`);
+    } catch (err) {
+      console.error('Error writing live-kpis stream:', err);
+      clearInterval(intervalId);
+    }
   }, 2000);
 
   req.on('close', () => {

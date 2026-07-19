@@ -8,6 +8,7 @@ import PWAInstallBanner from './components/PWAInstallBanner';
 import Sidebar from './components/Sidebar';
 import ScrollToTop from './components/ScrollToTop';
 import NotificationToast from './components/NotificationToast';
+import ErrorBoundary from './components/ErrorBoundary';
 import { RouteFallbackSkeleton, AuthPageSkeleton, FanPortalSkeleton } from './components/skeleton';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -23,6 +24,7 @@ const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const FanPortal = lazy(() => import('./pages/FanPortal'));
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function AppLayout({ children }) {
   const { sidebarCollapsed } = useAuth();
@@ -41,9 +43,11 @@ function Page({ roles = [], children }) {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <Suspense fallback={<RouteFallbackSkeleton />}>
-          {roles.length > 0 ? <RoleGuard roles={roles}>{children}</RoleGuard> : children}
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<RouteFallbackSkeleton />}>
+            {roles.length > 0 ? <RoleGuard roles={roles}>{children}</RoleGuard> : children}
+          </Suspense>
+        </ErrorBoundary>
       </AppLayout>
     </ProtectedRoute>
   );
@@ -55,32 +59,37 @@ export default function App() {
       <NotificationProvider>
         <ScrollToTop />
         <PWAInstallBanner />
-        <Suspense fallback={<AuthPageSkeleton />}>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/fan" element={
-              <Suspense fallback={<FanPortalSkeleton />}>
-                <FanPortal />
-              </Suspense>
-            } />
+        <ErrorBoundary>
+          <Suspense fallback={<AuthPageSkeleton />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/fan" element={
+                <Suspense fallback={<FanPortalSkeleton />}>
+                  <FanPortal />
+                </Suspense>
+              } />
 
-            <Route path="/" element={<Page><Dashboard /></Page>} />
-            <Route path="/assistant" element={<Page><AIAssistant /></Page>} />
-            <Route path="/settings" element={<Page><Settings /></Page>} />
+              <Route path="/" element={<Page><Dashboard /></Page>} />
+              <Route path="/assistant" element={<Page><AIAssistant /></Page>} />
+              <Route path="/settings" element={<Page><Settings /></Page>} />
 
-            <Route path="/digital-twin" element={<Page roles={['operator', 'manager', 'admin']}><DigitalTwin /></Page>} />
-            <Route path="/crowd" element={<Page roles={['operator', 'manager', 'security', 'admin']}><CrowdManagement /></Page>} />
-            <Route path="/concessions" element={<Page roles={['operator', 'manager', 'admin']}><Concessions /></Page>} />
+              <Route path="/digital-twin" element={<Page roles={['operator', 'manager', 'admin']}><DigitalTwin /></Page>} />
+              <Route path="/crowd" element={<Page roles={['operator', 'manager', 'security', 'admin']}><CrowdManagement /></Page>} />
+              <Route path="/concessions" element={<Page roles={['operator', 'manager', 'admin']}><Concessions /></Page>} />
 
-            <Route path="/security" element={<Page roles={['security', 'admin']}><Security /></Page>} />
+              <Route path="/security" element={<Page roles={['security', 'admin']}><Security /></Page>} />
 
-            <Route path="/analytics" element={<Page roles={['manager', 'admin']}><Analytics /></Page>} />
-            <Route path="/broadcast" element={<Page roles={['manager', 'security', 'operator', 'admin']}><Broadcast /></Page>} />
+              <Route path="/analytics" element={<Page roles={['manager', 'admin']}><Analytics /></Page>} />
+              <Route path="/broadcast" element={<Page roles={['manager', 'security', 'operator', 'admin']}><Broadcast /></Page>} />
 
-            <Route path="/admin-panel" element={<Page roles={['admin']}><AdminPanel /></Page>} />
-          </Routes>
-        </Suspense>
+              <Route path="/admin-panel" element={<Page roles={['admin']}><AdminPanel /></Page>} />
+
+              {/* 404 — catch all unmatched routes */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </NotificationProvider>
     </AuthProvider>
   );

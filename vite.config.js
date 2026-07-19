@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png', 'screenshots/*.png'],
+      includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
         name: 'StadiumGenius',
         short_name: 'StadiumGenius',
@@ -38,7 +38,7 @@ export default defineConfig({
             options: { cacheName: 'google-fonts-cache', expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 } },
           },
           {
-            urlPattern: /^http:\/\/localhost:5000\/api\/.*/i,
+            urlPattern: ({ url, request }) => url.href.startsWith('http://localhost:5000/api/') && request.method === 'GET',
             handler: 'NetworkFirst',
             options: { cacheName: 'api-cache', expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 } },
           },
@@ -47,4 +47,9 @@ export default defineConfig({
       devOptions: { enabled: true },
     }),
   ],
+  server: {
+    watch: {
+      ignored: ['**/server/**'],
+    },
+  },
 });

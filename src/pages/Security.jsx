@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShieldAlert, Eye, AlertTriangle, CheckCircle2, Radio,
-  MapPin, Lock, Unlock, Camera, Scan, UserX, Baby,
-  ArrowRight, Clock, ChevronRight, Shield, Siren,
+  Lock, Unlock, Camera, Scan, UserX, Baby,
+  ChevronRight, Shield, Siren,
   Video, Route, Users, Phone, FileText, X,
   TriangleAlert, Activity, Megaphone, BellRing, Footprints
 } from 'lucide-react';
@@ -13,6 +13,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { SecuritySkeleton } from '../components/skeleton';
 
 // ── Security zone data with expanded detail ──
@@ -24,8 +25,6 @@ const securityZones = [
   { id: 5, name: 'West Parking', status: 'secure', cameras: 16, alerts: 0, level: 'green', patrols: 2, lastSweep: '5 min ago' },
   { id: 6, name: 'Field Perimeter', status: 'secure', cameras: 12, alerts: 0, level: 'green', patrols: 4, lastSweep: '1 min ago' },
 ];
-
-const getVenueId = () => localStorage.getItem('sg_active_venue_id') || 'metlife';
 
 const accessLog = [
   { time: '15:10:23', event: 'VIP credential scan — authorized', zone: 'VIP-3', type: 'success' },
@@ -74,8 +73,7 @@ function generateThreatTimeline() {
 }
 
 export default function Security() {
-  const VENUE_ID = getVenueId();
-  const [selectedZone, setSelectedZone] = useState(null);
+  const { activeVenueId } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [showIncidentModal, setShowIncidentModal] = useState(false);
   const [threatData] = useState(generateThreatTimeline());
@@ -86,14 +84,14 @@ export default function Security() {
 
   const fetchIncidents = useCallback(async () => {
     try {
-      const res = await api.getIncidents(VENUE_ID);
+      const res = await api.getIncidents(activeVenueId);
       setIncidents(res.incidents || []);
     } catch (err) {
       console.error('Failed to fetch incidents:', err);
     } finally {
       setLoadingIncidents(false);
     }
-  }, []);
+  }, [activeVenueId]);
 
   const handleResolveIncident = async (id) => {
     try {
@@ -110,7 +108,7 @@ export default function Security() {
     try {
       await api.createIncident({
         ...newIncidentForm,
-        venue_id: VENUE_ID
+        venue_id: activeVenueId
       });
       setNewIncidentForm({ type: 'Unauthorized Access', zone: '', priority: 'medium', description: '' });
       setShowIncidentModal(false);

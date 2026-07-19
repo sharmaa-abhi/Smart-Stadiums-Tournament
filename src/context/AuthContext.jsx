@@ -62,6 +62,15 @@ export function AuthProvider({ children }) {
     return localStorage.getItem('sg_sidebar_collapsed') === 'true';
   });
 
+  const [activeVenueId, setActiveVenueIdState] = useState(() => {
+    return localStorage.getItem('sg_active_venue_id') || 'metlife';
+  });
+
+  const setActiveVenueId = useCallback((id) => {
+    localStorage.setItem('sg_active_venue_id', id);
+    setActiveVenueIdState(id);
+  }, []);
+
   const toggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => {
       const newVal = !prev;
@@ -75,7 +84,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, isAuthenticated, login, register, logout, sidebarCollapsed, toggleSidebar, updateUser }}>
+    <AuthContext.Provider value={{
+      user, token, loading, isAuthenticated, login, register, logout,
+      sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId
+    }}>
       {children}
     </AuthContext.Provider>
   );

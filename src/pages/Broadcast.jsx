@@ -9,6 +9,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { BroadcastSkeleton } from '../components/skeleton';
 
 const feeds = [
@@ -38,6 +39,7 @@ const highlights = [
 ];
 
 export default function Broadcast() {
+  const { activeVenueId } = useAuth();
   const [selectedFeed, setSelectedFeed] = useState(feeds[0]);
   const [broadcasts, setBroadcasts] = useState([]);
   const [loadingBroadcasts, setLoadingBroadcasts] = useState(true);
@@ -47,14 +49,14 @@ export default function Broadcast() {
 
   const fetchBroadcasts = useCallback(async () => {
     try {
-      const res = await api.getBroadcasts('metlife');
+      const res = await api.getBroadcasts(activeVenueId);
       setBroadcasts(res.messages || []);
     } catch (err) {
       console.error('Broadcast fetch error:', err);
     } finally {
       setLoadingBroadcasts(false);
     }
-  }, []);
+  }, [activeVenueId]);
 
   useEffect(() => {
     fetchBroadcasts();
@@ -64,7 +66,7 @@ export default function Broadcast() {
     if (!newMsg.title || !newMsg.message) return;
     setSubmitting(true);
     try {
-      await api.createBroadcast({ ...newMsg, venue_id: 'metlife' });
+      await api.createBroadcast({ ...newMsg, venue_id: activeVenueId });
       setNewMsg({ title: '', message: '', channel: 'all', priority: 'normal' });
       setShowNewForm(false);
       await fetchBroadcasts();

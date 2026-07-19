@@ -78,29 +78,43 @@ router.get('/stream', authMiddleware, (req, res) => {
   res.flushHeaders();
 
   // Send initial batch of 3 notifications
-  const initial = Array.from({ length: 3 }, () => generateNotification());
-  initial.forEach(n => {
-    res.write(`data: ${JSON.stringify(n)}\n\n`);
-  });
+  try {
+    if (!req.destroyed) {
+      const initial = Array.from({ length: 3 }, () => generateNotification());
+      initial.forEach(n => {
+        res.write(`data: ${JSON.stringify(n)}\n\n`);
+      });
+    }
+  } catch (err) {
+    console.error('Error writing initial notifications:', err);
+    return;
+  }
+
+  let timerId = null;
 
   // Stream new notifications at random intervals (8-15 seconds)
   function scheduleNext() {
     const delay = Math.floor(Math.random() * 7000) + 8000; // 8-15s
     return setTimeout(() => {
+      if (req.destroyed) {
+        if (timerId) clearTimeout(timerId);
+        return;
+      }
       try {
         const notification = generateNotification();
         res.write(`data: ${JSON.stringify(notification)}\n\n`);
         timerId = scheduleNext();
-      } catch {
-        // Client disconnected
+      } catch (err) {
+        console.error('Error writing notification stream:', err);
+        if (timerId) clearTimeout(timerId);
       }
     }, delay);
   }
 
-  let timerId = scheduleNext();
+  timerId = scheduleNext();
 
   req.on('close', () => {
-    clearTimeout(timerId);
+    if (timerId) clearTimeout(timerId);
   });
 });
 
