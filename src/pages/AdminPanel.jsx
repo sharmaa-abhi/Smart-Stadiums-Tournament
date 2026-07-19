@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  Users, Shield, Activity, UserCheck, UserX, Trash2,
+  Users, Shield, Activity, Trash2,
   RefreshCw, Search, ChevronDown, BarChart3, Clock,
-  AlertTriangle, CheckCircle, Eye, Lock, Globe
+  CheckCircle, Eye
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';

@@ -29,19 +29,19 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4 overflow-hidden relative">
+    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4 overflow-hidden relative z-0">
       {/* Animated scanline */}
-      <div className="fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-500/35 via-accent-400/50 via-brand-500/35 to-transparent shadow-[0_0_15px_rgba(34,211,238,0.4)] animate-scanline pointer-events-none z-0" />
+      <div className="fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-500/35 via-accent-400/50 via-brand-500/35 to-transparent shadow-[0_0_15px_rgba(34,211,238,0.4)] animate-scanline pointer-events-none z-1" />
 
       {/* Ambient glow effects */}
-      <div className="fixed top-0 left-1/4 w-96 h-96 bg-brand-500/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-accent-500/6 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-brand-500/8 rounded-full blur-[120px] pointer-events-none z-1" />
+      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-accent-500/6 rounded-full blur-[120px] pointer-events-none z-1" />
 
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">

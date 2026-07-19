@@ -15,6 +15,7 @@ function generateToken(user) {
   );
 }
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // ── POST /api/auth/register ──
 router.post('/register', async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -24,18 +25,20 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
 
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+
     if (password.length < 6) {
       return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }
 
     // Allowed roles for self-registration (admin must be assigned by existing admin, except in development/test environments)
-    const SELF_REGISTER_ROLES = process.env.NODE_ENV === 'development'
+    const allowedRoles = process.env.NODE_ENV === 'development'
       ? ['operator', 'security', 'manager', 'admin']
       : ['operator', 'security', 'manager'];
 
-    if (role && !SELF_REGISTER_ROLES.includes(role)) {
-      return res.status(400).json({ error: 'Invalid role.' });
-    }
+    const safeRole = (role && allowedRoles.includes(role)) ? role : 'operator';
 
     // Check if user already exists
     const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -51,7 +54,7 @@ router.post('/register', async (req, res) => {
     const stmt = db.prepare(`
       INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
     `);
-    const result = stmt.run(name, email, hashedPassword, role || 'operator');
+    const result = stmt.run(name, email, hashedPassword, safeRole);
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
     const token = generateToken(user);

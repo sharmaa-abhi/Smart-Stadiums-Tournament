@@ -17,7 +17,7 @@ export default function PWAInstallBanner() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((reg) => {
-          console.log('[PWA] Service worker registered:', reg.scope);
+          if (import.meta.env.DEV) console.log('[PWA] Service worker registered:', reg.scope);
           setSwReady(true);
         })
         .catch((err) => console.error('[PWA] SW registration failed:', err));
@@ -36,7 +36,7 @@ export default function PWAInstallBanner() {
       setInstalled(true);
       setShow(false);
       setDeferredPrompt(null);
-      console.log('[PWA] App installed successfully');
+      if (import.meta.env.DEV) console.log('[PWA] App installed successfully');
     });
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -46,7 +46,7 @@ export default function PWAInstallBanner() {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    console.log('[PWA] Install outcome:', outcome);
+    if (import.meta.env.DEV) console.log('[PWA] Install outcome:', outcome);
     setDeferredPrompt(null);
     setShow(false);
   };

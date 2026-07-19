@@ -27,6 +27,17 @@ import notificationRoutes from './routes/notifications.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ── Security Headers ──
+// Basic security headers (Content-Security-Policy, X-Frame-Options, etc.)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
 // ── Rate Limiting (auth endpoints) ──
 const authRateLimitMap = new Map();
 const AUTH_RATE_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -61,7 +72,7 @@ function authRateLimiter(req, res, next) {
 
 // ── Middleware ──
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: ['http://localhost:5173', 'http://localhost:5178', 'http://localhost:3000'],
   credentials: true,
 }));
 app.use(express.json({ limit: '100kb' }));

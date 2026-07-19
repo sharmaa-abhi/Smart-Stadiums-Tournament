@@ -16,7 +16,7 @@ async function run() {
   const timestamp = Date.now();
   const results = [];
 
-  const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/40c04d7e-c714-4eba-8456-c81532d4860e';
+  const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/cf5ca472-3650-4b35-b786-4b45f5c262da';
 
   for (const role of roles) {
     console.log(`\n=== Testing Role Profile: ${role.toUpperCase()} ===`);
@@ -27,7 +27,6 @@ async function run() {
     page.on('pageerror', err => console.log('PAGE ERROR:', err.toString()));
 
     global.pageRef = page;
-    
     // Go to register
     await page.goto('http://localhost:5173/register', { waitUntil: 'domcontentloaded' });
     await delay(500);
@@ -75,7 +74,7 @@ async function run() {
     // Extract TopBar elements
     const topBarName = await page.$eval('.topbar-profile-name', el => el.textContent);
     const topBarRole = await page.$eval('.topbar-profile-role', el => el.textContent);
-    
+
     // Get the avatar classes
     const avatarClasses = await page.evaluate(() => {
       const nameEl = document.querySelector('.topbar-profile-name');

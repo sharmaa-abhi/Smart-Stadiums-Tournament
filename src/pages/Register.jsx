@@ -45,6 +45,13 @@ const ROLE_HIGHLIGHTS = {
   operator: 'bg-brand-500/15 border-brand-500/35 text-brand-400',
 };
 
+const ROLE_SCANLINE = {
+  admin: 'via-rose-500/35 via-orange-400/50 via-rose-500/35 shadow-[0_0_15px_rgba(244,63,94,0.4)]',
+  manager: 'via-violet-500/35 via-purple-400/50 via-violet-500/35 shadow-[0_0_15px_rgba(139,92,246,0.4)]',
+  security: 'via-amber-500/35 via-yellow-400/50 via-amber-500/35 shadow-[0_0_15px_rgba(245,158,11,0.4)]',
+  operator: 'via-brand-500/35 via-accent-400/50 via-brand-500/35 shadow-[0_0_15px_rgba(34,211,238,0.4)]',
+};
+
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -74,21 +81,21 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4 overflow-hidden relative">
+    <div className="min-h-screen flex items-center justify-center bg-surface-950 stadium-grid p-4 overflow-hidden relative z-0">
       {/* Animated scanline */}
-      <div className="fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand-500/35 via-accent-400/50 via-brand-500/35 to-transparent shadow-[0_0_15px_rgba(34,211,238,0.4)] animate-scanline pointer-events-none z-0" />
+      <div className={`fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent to-transparent animate-scanline pointer-events-none z-1 transition-all duration-500 ${ROLE_SCANLINE[role] || ROLE_SCANLINE.operator}`} />
 
       {/* Ambient glows */}
-      <div className={`fixed top-0 right-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none transition-all duration-500
+      <div className={`fixed top-0 right-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none transition-all duration-500 z-1
         ${role === 'admin' ? 'bg-rose-500/8' : role === 'manager' ? 'bg-violet-500/8' : role === 'security' ? 'bg-amber-500/8' : 'bg-accent-500/8'}`} />
-      <div className={`fixed bottom-0 left-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none transition-all duration-500
+      <div className={`fixed bottom-0 left-1/4 w-96 h-96 rounded-full blur-[120px] pointer-events-none transition-all duration-500 z-1
         ${role === 'admin' ? 'bg-orange-500/6' : role === 'manager' ? 'bg-purple-500/6' : role === 'security' ? 'bg-yellow-500/6' : 'bg-brand-500/6'}`} />
 
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">

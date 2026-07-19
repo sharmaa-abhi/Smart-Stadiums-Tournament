@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Send, Bot, User, Sparkles, AlertTriangle, CheckCircle2,
+  Send, User, Sparkles, CheckCircle2,
   Mic, Paperclip, MoreHorizontal, Copy, ThumbsUp, ThumbsDown,
   Zap, Brain, Radio, History
 } from 'lucide-react';
@@ -67,10 +67,18 @@ export default function AIAssistant() {
 
   const formatContent = (content) => {
     return content.split('\n').map((line, i) => {
-      // Bold
-      let formatted = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white/90">$1</strong>');
+      if (!line) return <span key={i} className="block">&nbsp;</span>;
+      // Split on **bold** markers and render safely with React elements
+      const parts = line.split(/(\*\*.*?\*\*)/g);
       return (
-        <span key={i} className="block" dangerouslySetInnerHTML={{ __html: formatted || '&nbsp;' }} />
+        <span key={i} className="block">
+          {parts.map((part, j) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <strong key={j} className="text-white/90">{part.slice(2, -2)}</strong>;
+            }
+            return part;
+          })}
+        </span>
       );
     });
   };
