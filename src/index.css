@@ -156,7 +156,7 @@
 }
 
 .animate-scanline {
-  animation: scanline 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  animation: scanline 25s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes shimmer {
