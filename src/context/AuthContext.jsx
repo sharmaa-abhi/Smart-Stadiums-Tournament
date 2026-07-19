@@ -26,23 +26,17 @@ export function AuthProvider({ children }) {
 
       if (auth0IsAuthenticated && auth0User) {
         try {
-          const response = await fetch('http://localhost:5000/api/auth/auth0-login', {
+          const data = await api.request('/auth/auth0-login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               email: auth0User.email,
               name: auth0User.name || auth0User.nickname,
               avatar: auth0User.picture,
             }),
           });
-          const data = await response.json();
-          if (response.ok) {
-            localStorage.setItem('sg_token', data.token);
-            setToken(data.token);
-            setUser(data.user);
-          } else {
-            console.error('Failed to sync Auth0 user:', data.error);
-          }
+          localStorage.setItem('sg_token', data.token);
+          setToken(data.token);
+          setUser(data.user);
         } catch (err) {
           console.error('Error syncing Auth0 user:', err);
         } finally {
@@ -82,6 +76,21 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return data;
     } else {
+      if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
+        console.warn("Auth0 credentials missing. Falling back to mock operator login.");
+        const mockUser = {
+          id: "mock-operator",
+          name: "Mock Operator",
+          email: "operator@stadiumgenius.io",
+          role: "operator",
+          avatar: null
+        };
+        const mockToken = "mock-jwt-token";
+        localStorage.setItem('sg_token', mockToken);
+        setToken(mockToken);
+        setUser(mockUser);
+        return { user: mockUser, token: mockToken };
+      }
       await loginWithRedirect();
     }
   }, [loginWithRedirect]);
@@ -94,6 +103,21 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return data;
     } else {
+      if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
+        console.warn("Auth0 credentials missing. Falling back to mock registration.");
+        const mockUser = {
+          id: "mock-user",
+          name: name || "Mock User",
+          email: email || "user@stadiumgenius.io",
+          role: role || "operator",
+          avatar: null
+        };
+        const mockToken = "mock-jwt-token";
+        localStorage.setItem('sg_token', mockToken);
+        setToken(mockToken);
+        setUser(mockUser);
+        return { user: mockUser, token: mockToken };
+      }
       await loginWithRedirect({ authorizationParams: { screen_hint: 'signup' } });
     }
   }, [loginWithRedirect]);
