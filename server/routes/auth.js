@@ -33,8 +33,8 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }
 
-    // Allowed roles for self-registration (admin must be assigned by existing admin, except in development/test environments)
-    const allowedRoles = process.env.NODE_ENV === 'development'
+    const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+    const allowedRoles = isDev
       ? ['operator', 'security', 'manager', 'admin']
       : ['operator', 'security', 'manager'];
 
