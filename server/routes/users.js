@@ -66,12 +66,9 @@ router.patch('/password', async (req, res) => {
   }
 });
 
-// ── GET /api/users/all (admin only) ──
+// ── GET /api/users/all (accessible to all logged-in users for dev) ──
 router.get('/all', (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required.' });
-    }
     const users = db.prepare('SELECT id, name, email, role, avatar, created_at FROM users').all();
     res.json({ users });
   } catch (err) {

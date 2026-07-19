@@ -113,6 +113,22 @@ export default function Register() {
             <p className="text-sm text-white/40 mt-1">Set up your credentials</p>
           </div>
 
+          <button
+            type="button"
+            onClick={() => register()}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1]
+              text-sm font-semibold text-white border border-white/[0.08] transition-all duration-200 mb-5 cursor-pointer"
+          >
+            <Shield className="w-4 h-4 text-brand-400 animate-pulse" />
+            Continue with Auth0
+          </button>
+
+          <div className="relative flex py-2 items-center mb-4">
+            <div className="flex-grow border-t border-white/[0.06]"></div>
+            <span className="flex-shrink mx-4 text-white/20 text-[10px] font-semibold uppercase tracking-wider">or register with email</span>
+            <div className="flex-grow border-t border-white/[0.06]"></div>
+          </div>
+
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}

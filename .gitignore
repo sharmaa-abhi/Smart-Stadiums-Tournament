@@ -16,6 +16,8 @@ dist-ssr
 server/db/*.db
 server/.env
 server/node_modules
+.exe    
+
 
 # Editor directories and files
 .vscode/*

@@ -21,6 +21,7 @@ const NAV_BY_ROLE = {
   ],
   manager: [
     { to: '/', icon: LayoutDashboard, label: 'Ops Dashboard', desc: 'Live operations' },
+    { to: '/admin-panel', icon: UserCog, label: 'User Management', desc: 'Roles & accounts' },
     { to: '/analytics', icon: TrendingUp, label: 'Revenue & KPIs', desc: 'Financial metrics' },
     { to: '/concessions', icon: DollarSign, label: 'Concessions', desc: 'Sales & queues' },
     { to: '/crowd', icon: Users, label: 'Crowd Flow', desc: 'Capacity planning' },
@@ -31,6 +32,7 @@ const NAV_BY_ROLE = {
   ],
   security: [
     { to: '/', icon: Activity, label: 'Threat Dashboard', desc: 'Live security feed' },
+    { to: '/admin-panel', icon: UserCog, label: 'User Management', desc: 'Roles & accounts' },
     { to: '/security', icon: ShieldAlert, label: 'Incident Control', desc: 'Active incidents' },
     { to: '/crowd', icon: Eye, label: 'Zone Surveillance', desc: 'Crowd monitoring' },
     { to: '/digital-twin', icon: Map, label: 'Venue Map', desc: 'Zones & hotspots' },
@@ -40,6 +42,7 @@ const NAV_BY_ROLE = {
   ],
   operator: [
     { to: '/', icon: LayoutDashboard, label: 'Live Dashboard', desc: 'Real-time KPIs' },
+    { to: '/admin-panel', icon: UserCog, label: 'User Management', desc: 'Roles & accounts' },
     { to: '/digital-twin', icon: Map, label: 'Digital Twin', desc: '3D venue model' },
     { to: '/crowd', icon: Users, label: 'Crowd Management', desc: 'Flow & density' },
     { to: '/concessions', icon: UtensilsCrossed, label: 'Concessions', desc: 'Queue tracking' },
@@ -173,7 +176,7 @@ export default function Sidebar() {
             )}
             <div className="overflow-hidden">
               <p className="text-xs font-semibold text-white/80 truncate">{user.name}</p>
-              <p className="text-[10px] text-white/30 capitalize">{brand.label}</p>
+              <p className="text-[9px] text-white/40 truncate">{user.email}</p>
             </div>
           </div>
         )}

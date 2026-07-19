@@ -102,6 +102,40 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ── POST /api/auth/auth0-login ──
+router.post('/auth0-login', async (req, res) => {
+  const { email, name, avatar } = req.body;
+  try {
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    // Check if user already exists
+    let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (!user) {
+      // Create user with default role 'admin' for convenience in dev/testing
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(Math.random().toString(36), salt);
+      const stmt = db.prepare(`
+        INSERT INTO users (name, email, password, role, avatar) VALUES (?, ?, ?, ?, ?)
+      `);
+      const result = stmt.run(name || email.split('@')[0], email, hashedPassword, 'admin', avatar || null);
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
+    }
+
+    const token = generateToken(user);
+
+    res.json({
+      message: 'Login successful via Auth0.',
+      token,
+      user: sanitizeUser(user),
+    });
+  } catch (err) {
+    console.error('Auth0 login error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // ── GET /api/auth/me ──
 router.get('/me', authMiddleware, (req, res) => {
   try {

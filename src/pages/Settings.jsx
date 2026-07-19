@@ -185,6 +185,15 @@ export default function Settings() {
                 />
               </div>
               <div>
+                <label className="block text-xs text-white/40 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="w-full px-3 py-2 rounded-xl bg-white/[0.02] border border-white/[0.04] text-sm text-white/40 cursor-not-allowed"
+                />
+              </div>
+              <div>
                 <label className="block text-xs text-white/40 mb-1">Avatar Image URL</label>
                 <input
                   type="text"
