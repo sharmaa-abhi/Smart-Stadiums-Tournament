@@ -197,8 +197,8 @@ Open `http://localhost:5173` in your browser.
 
 | Feature | Status | Description |
 |---------|:------:|-------------|
-| **JWT Authentication** | ✅ Done | Sign up, Log in, and safe token handling |
-| **RBAC Security** | ✅ Done | Admin, Manager, Operator, Security guards protect routes |
+| **JWT & Auth0 Integration** | ✅ Done | Auth0 & JWT login/registration with role synchronization and fallback handlers |
+| **RBAC Security** | ✅ Done | Admin, Manager, Operator, Security guards protect routes (100% verified via E2E test suite) |
 | **Digital Twin View** | ✅ Done | Stadium layout heatmap and interactive zone stats |
 | **Live Updates** | ✅ Done | Telemetry streams updates via SSE connection |
 | **Incidents Logs** | ✅ Done | Create, update, and resolve incident tickets |
