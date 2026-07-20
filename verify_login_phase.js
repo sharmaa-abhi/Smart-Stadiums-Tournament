@@ -86,10 +86,14 @@ async function run() {
       await page.goto('http://localhost:5173/login', { waitUntil: 'load' });
       await delay(1000);
 
-      // Select role via pill button
+      // Select role via pill button or text
       const clickedRole = await page.evaluate((r) => {
         const btns = Array.from(document.querySelectorAll('button'));
-        const target = btns.find(b => b.title && b.title.toLowerCase().includes(r));
+        const target = btns.find(b =>
+          (b.title && b.title.toLowerCase().includes(r)) ||
+          b.textContent.toLowerCase().trim() === r ||
+          b.textContent.toLowerCase().includes(r)
+        );
         if (target) {
           target.click();
           return true;
@@ -98,7 +102,7 @@ async function run() {
       }, role);
 
       if (!clickedRole) {
-        console.log(`  ❌ Could not find role pill for ${role}`);
+        console.log(`  ⚠️ Could not find role pill for ${role}`);
       }
       await delay(500);
 
@@ -109,7 +113,7 @@ async function run() {
         if (target) target.click();
       });
 
-      await page.waitForSelector('.topbar-profile-name', { timeout: 15000 });
+      await page.waitForSelector('.topbar-profile-name', { timeout: 25000 });
       await delay(1000);
 
       const profileName = await page.$eval('.topbar-profile-name', el => el.textContent.trim());

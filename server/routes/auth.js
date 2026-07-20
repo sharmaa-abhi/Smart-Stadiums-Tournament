@@ -115,12 +115,12 @@ router.post('/auth0-login', async (req, res) => {
 
     // Check if user already exists
     let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
+    const allowedRoles = isDev
+      ? ['operator', 'security', 'manager', 'admin']
+      : ['operator', 'security', 'manager'];
+
     if (!user) {
-      const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
-      const allowedRoles = isDev
-        ? ['operator', 'security', 'manager', 'admin']
-        : ['operator', 'security', 'manager'];
-      
       const safeRole = (role && allowedRoles.includes(role)) ? role : 'operator';
 
       const salt = await bcrypt.genSalt(10);
@@ -130,6 +130,9 @@ router.post('/auth0-login', async (req, res) => {
       `);
       const result = stmt.run(name || email.split('@')[0], email, hashedPassword, safeRole, avatar || null);
       user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
+    } else if (role && allowedRoles.includes(role) && user.role !== role) {
+      db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, user.id);
+      user.role = role;
     }
 
     const token = generateToken(user);
