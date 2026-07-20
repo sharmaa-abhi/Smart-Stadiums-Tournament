@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:auth0:extreme": "node verify_roles_auth0.js",
+    "test:all:extreme": "node verify_all_flows.js"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.22.0",

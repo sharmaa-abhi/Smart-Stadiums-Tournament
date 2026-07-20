@@ -132,4 +132,57 @@ describe('Backend API & Security Audits', () => {
     expect(res.body.venues.length).toBeGreaterThan(0);
     expect(res.body.venues.find((v) => v.id === 'metlife')).toBeDefined();
   });
+
+  describe('Auth0 Integration Endpoints', () => {
+    const auth0Email = `auth0_${Math.random().toString(36).substring(7)}@stadiumgenius.io`;
+
+    it('successfully registers and logs in a new user via Auth0 with specified role', async () => {
+      const res = await request(app)
+        .post('/api/auth/auth0-login')
+        .send({
+          email: auth0Email,
+          name: 'Auth0 Security User',
+          avatar: 'https://avatar.url',
+          role: 'security',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.token).toBeDefined();
+      expect(res.body.user.email).toBe(auth0Email);
+      expect(res.body.user.role).toBe('security');
+
+      // Verify DB role
+      const dbUser = db.prepare('SELECT * FROM users WHERE email = ?').get(auth0Email);
+      expect(dbUser).toBeDefined();
+      expect(dbUser.role).toBe('security');
+    });
+
+    it('falls back to operator role if specified role is invalid', async () => {
+      const invalidEmail = `auth0_${Math.random().toString(36).substring(7)}@stadiumgenius.io`;
+      const res = await request(app)
+        .post('/api/auth/auth0-login')
+        .send({
+          email: invalidEmail,
+          name: 'Auth0 Invalid Role User',
+          role: 'attacker_admin', // Should be rejected/ignored
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.role).toBe('operator');
+    });
+
+    it('does not modify existing user role on subsequent logins', async () => {
+      // Login again but try to escalate to admin role
+      const res = await request(app)
+        .post('/api/auth/auth0-login')
+        .send({
+          email: auth0Email,
+          name: 'Auth0 Security User',
+          role: 'admin', // Trying to change role to admin
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.role).toBe('security'); // Must remain security
+    });
+  });
 });

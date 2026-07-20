@@ -16,9 +16,8 @@ dist-ssr
 server/db/*.db
 server/db/*.db-shm
 server/db/*.db-wal
-server/.env
 server/node_modules
-.exe    
+.env
 
 
 # Editor directories and files

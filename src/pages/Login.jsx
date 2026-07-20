@@ -153,7 +153,15 @@ export default function Login() {
 
           <button
             type="button"
-            onClick={() => login()}
+            onClick={async () => {
+              setError('');
+              try {
+                await login(undefined, undefined, role);
+                navigate('/', { replace: true });
+              } catch (err) {
+                setError(err.message || 'Auth0 login failed.');
+              }
+            }}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1]
               text-sm font-semibold text-white border border-white/[0.08] transition-all duration-200 mb-5 cursor-pointer"
           >

@@ -26,17 +26,22 @@ export function AuthProvider({ children }) {
 
       if (auth0IsAuthenticated && auth0User) {
         try {
+          const pendingRole = localStorage.getItem('sg_auth0_role');
           const data = await api.request('/auth/auth0-login', {
             method: 'POST',
             body: JSON.stringify({
               email: auth0User.email,
               name: auth0User.name || auth0User.nickname,
               avatar: auth0User.picture,
+              role: pendingRole || undefined,
             }),
           });
-          localStorage.setItem('sg_token', data.token);
-          setToken(data.token);
-          setUser(data.user);
+          localStorage.removeItem('sg_auth0_role');
+          if (data && data.token) {
+            localStorage.setItem('sg_token', data.token);
+            setToken(data.token);
+            setUser(data.user);
+          }
         } catch (err) {
           console.error('Error syncing Auth0 user:', err);
         } finally {
@@ -68,7 +73,7 @@ export function AuthProvider({ children }) {
     initAuth();
   }, [auth0Loading, auth0IsAuthenticated, auth0User]);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, password, selectedRole) => {
     if (email && password) {
       const data = await api.login(email, password);
       localStorage.setItem('sg_token', data.token);
@@ -76,15 +81,37 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return data;
     } else {
+      if (selectedRole) {
+        localStorage.setItem('sg_auth0_role', selectedRole);
+      }
       if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
         console.warn("Auth0 credentials missing. Falling back to mock operator login.");
         const mockUser = {
-          id: "mock-operator",
-          name: "Mock Operator",
-          email: "operator@stadiumgenius.io",
-          role: "operator",
+          id: `mock-${selectedRole || 'operator'}`,
+          name: `Mock ${selectedRole ? selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) : 'Operator'}`,
+          email: `${selectedRole || 'operator'}@stadiumgenius.io`,
+          role: selectedRole || "operator",
           avatar: null
         };
+        try {
+          const authUser = await api.request('/auth/auth0-login', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: mockUser.email,
+              name: mockUser.name,
+              avatar: mockUser.avatar,
+              role: mockUser.role
+            })
+          });
+          if (authUser && authUser.token) {
+            localStorage.setItem('sg_token', authUser.token);
+            setToken(authUser.token);
+            setUser(authUser.user);
+            return { user: authUser.user, token: authUser.token };
+          }
+        } catch (err) {
+          console.error("Failed to fetch real token for mock Auth0 user:", err);
+        }
         const mockToken = "mock-jwt-token";
         localStorage.setItem('sg_token', mockToken);
         setToken(mockToken);
@@ -103,15 +130,37 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return data;
     } else {
+      if (role) {
+        localStorage.setItem('sg_auth0_role', role);
+      }
       if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
         console.warn("Auth0 credentials missing. Falling back to mock registration.");
         const mockUser = {
           id: "mock-user",
-          name: name || "Mock User",
-          email: email || "user@stadiumgenius.io",
+          name: name || `Mock ${role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User'}`,
+          email: email || `${role || 'operator'}_auth0@stadiumgenius.io`,
           role: role || "operator",
           avatar: null
         };
+        try {
+          const authUser = await api.request('/auth/auth0-login', {
+            method: 'POST',
+            body: JSON.stringify({
+              email: mockUser.email,
+              name: mockUser.name,
+              avatar: mockUser.avatar,
+              role: mockUser.role
+            })
+          });
+          if (authUser && authUser.token) {
+            localStorage.setItem('sg_token', authUser.token);
+            setToken(authUser.token);
+            setUser(authUser.user);
+            return { user: authUser.user, token: authUser.token };
+          }
+        } catch (err) {
+          console.error("Failed to fetch real token for mock Auth0 user:", err);
+        }
         const mockToken = "mock-jwt-token";
         localStorage.setItem('sg_token', mockToken);
         setToken(mockToken);
