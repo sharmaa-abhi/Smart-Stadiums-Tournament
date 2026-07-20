@@ -127,14 +127,20 @@ export default function Login() {
               <p className="text-sm text-white/40 mt-1">Sign in to your operations console</p>
             </div>
             
-            {/* Quick theme selector pill/icons */}
-            <div className="flex gap-1.5 p-1.5 bg-white/[0.02] border border-white/[0.06] rounded-xl self-center shrink-0">
+            {/* Quick role profile selector */}
+            <div className="flex gap-1 p-1 bg-white/[0.02] border border-white/[0.06] rounded-xl self-center shrink-0">
               {['operator', 'security', 'manager', 'admin'].map((r) => {
                 const colors = {
-                  operator: 'bg-brand-500 shadow-[0_0_8px_rgba(51,120,255,0.4)]',
-                  security: 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]',
-                  manager: 'bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.4)]',
-                  admin: 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]'
+                  operator: 'bg-brand-500/20 text-brand-400 border-brand-500/30',
+                  security: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                  manager: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
+                  admin: 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                };
+                const activeColor = {
+                  operator: 'bg-brand-500 text-white font-bold shadow-[0_0_10px_rgba(51,120,255,0.5)]',
+                  security: 'bg-amber-500 text-white font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]',
+                  manager: 'bg-violet-500 text-white font-bold shadow-[0_0_10px_rgba(139,92,246,0.5)]',
+                  admin: 'bg-rose-500 text-white font-bold shadow-[0_0_10px_rgba(244,63,94,0.5)]'
                 };
                 return (
                   <button
@@ -142,10 +148,12 @@ export default function Login() {
                     type="button"
                     title={`Preview Console: ${r.charAt(0).toUpperCase() + r.slice(1)}`}
                     onClick={() => setRole(r)}
-                    className={`w-3.5 h-3.5 rounded-full transition-all duration-300 hover:scale-125 cursor-pointer ${colors[r]} ${
-                      role === r ? 'ring-2 ring-white scale-110' : 'opacity-35 hover:opacity-80'
+                    className={`px-2 py-1 text-[11px] rounded-lg border transition-all duration-200 cursor-pointer capitalize ${
+                      role === r ? activeColor[r] + ' scale-110' : colors[r] + ' opacity-60 hover:opacity-100'
                     }`}
-                  />
+                  >
+                    {r}
+                  </button>
                 );
               })}
             </div>

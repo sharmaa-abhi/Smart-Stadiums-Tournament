@@ -13,6 +13,10 @@ export default defineConfig({
       react: path.resolve(__dirname, 'node_modules/react'),
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
+    dedupe: ['react', 'react-dom'],
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@auth0/auth0-react', 'react-router-dom', 'framer-motion', 'lucide-react'],
   },
   plugins: [
     react(),

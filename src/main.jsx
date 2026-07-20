@@ -2,13 +2,8 @@
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
-      let needsReload = false;
       for (const registration of registrations) {
         registration.unregister();
-        needsReload = true;
-      }
-      if (needsReload) {
-        window.location.reload();
       }
     });
   }

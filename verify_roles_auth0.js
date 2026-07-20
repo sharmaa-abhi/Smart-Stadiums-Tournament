@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/7840741e-734b-49ff-8008-785c90664b44';
+const screenshotDir = 'C:/Users/ABHI SHARMA/.gemini/antigravity-ide/brain/7894ef0a-53b7-4b4d-8547-e26df3ccc7dd';
 const envPath = path.join(__dirname, '.env');
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
