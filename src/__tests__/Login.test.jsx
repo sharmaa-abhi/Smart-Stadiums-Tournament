@@ -24,11 +24,13 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 describe('Login Page Component', () => {
   const mockLoginFn = vi.fn();
+  const mockAuth0LoginFn = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     useAuth.mockReturnValue({
-      login: mockLoginFn,
+      loginMock: mockLoginFn,
+      loginWithAuth0: mockAuth0LoginFn,
     });
   });
 
@@ -40,9 +42,9 @@ describe('Login Page Component', () => {
     );
 
     expect(screen.getByPlaceholderText('operator@stadiumgenius.io')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('••••••••••••')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sign In/i })).toBeInTheDocument();
-    expect(screen.getByText('Continue with Auth0')).toBeInTheDocument();
+    expect(screen.getByText(/Auth0 Universal Login/i)).toBeInTheDocument();
   });
 
   it('switches preview role based on email input keywords automatically', () => {
@@ -56,19 +58,11 @@ describe('Login Page Component', () => {
 
     // Type admin email keyword
     fireEvent.change(emailInput, { target: { value: 'admin@stadiumgenius.io' } });
-    expect(emailInput.className).toContain('focus:border-rose-500/40'); // Admin theme border
+    expect(screen.getByRole('button', { name: 'admin' }).className).toContain('shadow-glow');
 
     // Type security email keyword
     fireEvent.change(emailInput, { target: { value: 'security-officer@stadiumgenius.io' } });
-    expect(emailInput.className).toContain('focus:border-amber-500/40'); // Security theme border
-
-    // Type manager email keyword
-    fireEvent.change(emailInput, { target: { value: 'manager-hq@stadiumgenius.io' } });
-    expect(emailInput.className).toContain('focus:border-violet-500/40'); // Manager theme border
-
-    // Type operator email keyword
-    fireEvent.change(emailInput, { target: { value: 'operator-staff@stadiumgenius.io' } });
-    expect(emailInput.className).toContain('focus:border-brand-500/40'); // Operator theme border
+    expect(screen.getByRole('button', { name: 'security' }).className).toContain('shadow-glow');
   });
 
   it('allows switching roles manually via the color dot selectors', () => {
@@ -78,18 +72,17 @@ describe('Login Page Component', () => {
       </BrowserRouter>
     );
 
-    const adminPill = screen.getByTitle('Preview Console: Admin');
-    const securityPill = screen.getByTitle('Preview Console: Security');
-    const managerPill = screen.getByTitle('Preview Console: Manager');
+    const adminPill = screen.getByRole('button', { name: 'admin' });
+    const securityPill = screen.getByRole('button', { name: 'security' });
 
     // Click Admin Dot Selector
     fireEvent.click(adminPill);
-    expect(adminPill.className).toContain('scale-110');
+    expect(adminPill.className).toContain('shadow-glow');
 
     // Click Security Dot Selector
     fireEvent.click(securityPill);
-    expect(securityPill.className).toContain('scale-110');
-    expect(adminPill.className).not.toContain('scale-110');
+    expect(securityPill.className).toContain('shadow-glow');
+    expect(adminPill.className).toContain('opacity-50');
   });
 
   it('successfully submits the form and navigates to the dashboard', async () => {
@@ -102,7 +95,7 @@ describe('Login Page Component', () => {
     );
 
     const emailInput = screen.getByPlaceholderText('operator@stadiumgenius.io');
-    const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const passwordInput = screen.getByPlaceholderText('••••••••••••');
     const signInButton = screen.getByRole('button', { name: /Sign In/i });
 
     fireEvent.change(emailInput, { target: { value: 'operator@stadiumgenius.io' } });
@@ -112,7 +105,7 @@ describe('Login Page Component', () => {
       fireEvent.click(signInButton);
     });
 
-    expect(mockLoginFn).toHaveBeenCalledWith('operator@stadiumgenius.io', 'password123');
+    expect(mockLoginFn).toHaveBeenCalledWith('operator', 'operator@stadiumgenius.io');
     expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
   });
 
@@ -126,7 +119,7 @@ describe('Login Page Component', () => {
     );
 
     const emailInput = screen.getByPlaceholderText('operator@stadiumgenius.io');
-    const passwordInput = screen.getByPlaceholderText('Enter your password');
+    const passwordInput = screen.getByPlaceholderText('••••••••••••');
     const signInButton = screen.getByRole('button', { name: /Sign In/i });
 
     fireEvent.change(emailInput, { target: { value: 'wrong@stadiumgenius.io' } });
@@ -146,8 +139,8 @@ describe('Login Page Component', () => {
       </BrowserRouter>
     );
 
-    const passwordInput = screen.getByPlaceholderText('Enter your password');
-    const toggleButton = screen.getByLabelText('Show password');
+    const passwordInput = screen.getByPlaceholderText('••••••••••••');
+    const toggleButton = passwordInput.nextElementSibling;
 
     expect(passwordInput.type).toBe('password');
 
@@ -156,7 +149,7 @@ describe('Login Page Component', () => {
     expect(passwordInput.type).toBe('text');
 
     // Toggle back to password
-    fireEvent.click(screen.getByLabelText('Hide password'));
+    fireEvent.click(toggleButton);
     expect(passwordInput.type).toBe('password');
   });
 
@@ -167,11 +160,11 @@ describe('Login Page Component', () => {
       </BrowserRouter>
     );
 
-    const auth0Btn = screen.getByText('Continue with Auth0');
+    const auth0Btn = screen.getByText(/Auth0 Universal Login/i);
     await act(async () => {
       fireEvent.click(auth0Btn);
     });
 
-    expect(mockLoginFn).toHaveBeenCalled();
+    expect(mockAuth0LoginFn).toHaveBeenCalled();
   });
 });

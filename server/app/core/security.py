@@ -98,14 +98,14 @@ async def get_current_user(
             role=role,
             account_status="active",
             email_verified=email_verified,
-            last_login=datetime.datetime.utcnow()
+            last_login=datetime.now(UTC)
         )
         db.add(user)
         db.commit()
         db.refresh(user)
     else:
         # Update login timestamp & profile attributes if changed
-        user.last_login = datetime.datetime.utcnow()
+        user.last_login = datetime.now(UTC)
         if avatar and user.avatar != avatar:
             user.avatar = avatar
         db.commit()

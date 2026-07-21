@@ -31,10 +31,14 @@ export default function AIAssistant() {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    api.aiSuggestions()
-      .then(d => setSuggestions(d.suggestions || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    // Load initial suggestions
+    setSuggestions([
+      "Analyze crowd bottleneck at Gate B",
+      "Check VIP Level security alert",
+      "Summary of concession queue wait times",
+      "Recommend gate overflow reroute protocol"
+    ]);
+    setLoading(false);
   }, []);
 
   const scrollToBottom = () => {
@@ -54,8 +58,8 @@ export default function AIAssistant() {
     setIsTyping(true);
 
     try {
-      const res = await api.aiChat(msg, sessionId);
-      setMessages(prev => [...prev, { role: 'assistant', content: res.content }]);
+      const res = await api.queryAiAssistant(msg);
+      setMessages(prev => [...prev, { role: 'assistant', content: res.ai_response || res.content }]);
     } catch (err) {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error connecting to the AI service. Please try again.' }]);
     } finally {

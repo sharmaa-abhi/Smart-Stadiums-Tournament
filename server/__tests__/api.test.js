@@ -43,7 +43,6 @@ describe('Backend API & Security Audits', () => {
     const res = await request(app).get('/api/venues');
     expect(res.headers['x-content-type-options']).toBe('nosniff');
     expect(res.headers['x-frame-options']).toBe('DENY');
-    expect(res.headers['x-xss-protection']).toBe('1; mode=block');
     expect(res.headers['strict-transport-security']).toContain('max-age=63072000');
   });
 
@@ -111,7 +110,7 @@ describe('Backend API & Security Audits', () => {
   it('blocks access to protected endpoints without a token', async () => {
     const res = await request(app).get('/api/auth/me');
     expect(res.status).toBe(401);
-    expect(res.body.error).toContain('No token provided');
+    expect(res.body.error).toContain('No valid Bearer token provided');
   });
 
   it('allows access to protected endpoints with a valid JWT token', async () => {

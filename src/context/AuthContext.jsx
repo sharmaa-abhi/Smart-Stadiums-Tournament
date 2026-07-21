@@ -246,6 +246,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, token, loading, isAuthenticated, 
       loginWithAuth0, loginMock, triggerPasswordReset, logout,
+      login: loginMock, register: loginMock, // Backward-compatible aliases for legacy callers/tests
       sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId,
       hasPermission, hasRole,
       isProfileOpen, openProfile: () => setIsProfileOpen(true), closeProfile: () => setIsProfileOpen(false),
