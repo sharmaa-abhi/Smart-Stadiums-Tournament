@@ -1,3 +1,15 @@
+/**
+ * StadiumGenius API Client
+ *
+ * Production-grade HTTP client with:
+ * - Configurable base URL via environment variable
+ * - Automatic JWT token injection
+ * - Request ID tracing for observability
+ * - 401 auto-redirect to login
+ * - Retry with exponential backoff
+ * - AbortController support for request cancellation
+ */
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
 
 class ApiClient {
@@ -17,15 +29,17 @@ class ApiClient {
     }
   }
 
-  async request(endpoint, options = {}) {
+  async request(endpoint, options = {}, { signal } = {}) {
     const token = this.getToken();
     const config = {
       headers: {
         'Content-Type': 'application/json',
+        'X-Request-ID': crypto.randomUUID?.() || `req-${Date.now()}`,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       },
       ...options,
+      ...(signal ? { signal } : {}),
     };
 
     try {
@@ -37,15 +51,53 @@ class ApiClient {
         const err = new Error(errMessage);
         err.status = response.status;
         err.detail = data.detail;
+
+        // Auto-redirect on 401 (token expired/invalid)
+        if (response.status === 401) {
+          this.setToken(null);
+          localStorage.removeItem('sg_user');
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+        }
+
         throw err;
       }
 
       return data;
     } catch (err) {
-      if (err.status === 401) {
-        console.warn('Unauthorized access - clearing stale token');
+      if (err.name === 'AbortError') {
+        // Request was cancelled — don't log
+        throw err;
       }
       throw err;
+    }
+  }
+
+  /**
+   * Retry wrapper with exponential backoff.
+   * @param {string} endpoint
+   * @param {object} options - fetch options
+   * @param {number} maxRetries - default 3
+   * @returns {Promise}
+   */
+  async requestWithRetry(endpoint, options = {}, maxRetries = 3) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await this.request(endpoint, options);
+      } catch (error) {
+        const isRetryable =
+          !error.status ||          // Network errors
+          error.status >= 500 ||    // Server errors
+          error.status === 429;     // Rate limited
+
+        if (!isRetryable || attempt === maxRetries) {
+          throw error;
+        }
+
+        const delay = 1000 * 2 ** attempt + Math.random() * 500;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
   }
 
@@ -192,10 +244,21 @@ class ApiClient {
 
   // ── Health Check ──
   async health() {
-    return this.request('/health');
+    return this.requestWithRetry('/health');
   }
+}
+
+/**
+ * Creates an AbortController for cancellable requests.
+ * Usage in React useEffect:
+ *   const { controller } = createAbortController();
+ *   api.request('/endpoint', {}, { signal: controller.signal });
+ *   return () => controller.abort();
+ */
+export function createAbortController() {
+  const controller = new AbortController();
+  return { controller, signal: controller.signal };
 }
 
 const api = new ApiClient();
 export default api;
-

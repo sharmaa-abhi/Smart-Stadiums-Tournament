@@ -7,18 +7,40 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build output
 dist
 dist-ssr
+dev-dist
 *.local
 
-# Server
+# Environment files (NEVER commit secrets)
+.env
+.env.local
+.env.production
+.env.staging
+
+# SQLite databases (both root and server)
+*.db
+*.db-shm
+*.db-wal
 server/db/*.db
 server/db/*.db-shm
 server/db/*.db-wal
-server/node_modules
-.env
 
+# Test output
+coverage
+test-results
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+
+# Python virtual environment
+.venv
+venv
 
 # Editor directories and files
 .vscode/*
@@ -30,3 +52,5 @@ server/node_modules
 *.njsproj
 *.sln
 *.sw?
+Thumbs.db
+

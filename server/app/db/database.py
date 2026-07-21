@@ -1,8 +1,12 @@
-import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from server.app.config import settings
+
+
+class Base(DeclarativeBase):
+    """Base class for all SQLAlchemy ORM models."""
+    pass
+
 
 # Determine database engine parameters
 connect_args = {"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
@@ -10,11 +14,12 @@ connect_args = {"check_same_thread": False} if "sqlite" in settings.DATABASE_URL
 engine = create_engine(
     settings.DATABASE_URL,
     connect_args=connect_args,
-    pool_pre_ping=True
+    pool_pre_ping=True,
+    echo=settings.ENVIRONMENT == "development",
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+
 
 def get_db():
     """FastAPI Dependency for database session injection."""
@@ -23,3 +28,4 @@ def get_db():
         yield db
     finally:
         db.close()
+

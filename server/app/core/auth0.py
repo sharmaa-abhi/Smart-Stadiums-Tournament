@@ -117,15 +117,9 @@ class Auth0JWTValidator:
                 headers={"WWW-Authenticate": "Bearer error='invalid_token'"},
             )
         except Exception as e:
-            # Fallback for mock tokens or local JWT during testing if JWKS fetch fails
-            if settings.ALLOW_MOCK_TOKENS:
-                try:
-                    unverified_payload = jwt.decode(token, options={"verify_signature": False})
-                    self._enrich_permissions(unverified_payload)
-                    return unverified_payload
-                except Exception:
-                    pass
-
+            # SECURITY: Never decode without signature verification.
+            # Previous code had a fallback that decoded ANY JWT without
+            # checking the signature — this allowed trivial privilege escalation.
             logger.error(f"Auth0 verification error: {str(e)}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

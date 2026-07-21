@@ -1,0 +1,1 @@
+# StadiumGenius — FastAPI Application

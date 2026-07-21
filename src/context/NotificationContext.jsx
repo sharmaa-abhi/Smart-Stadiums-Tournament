@@ -27,29 +27,57 @@ export function NotificationProvider({ children }) {
     const token = localStorage.getItem('sg_token');
     if (!token) return;
 
-    const sseUrl = `http://localhost:5000/api/notifications/stream?token=${token}`;
-    const es = new EventSource(sseUrl);
-    eventSourceRef.current = es;
+    // SECURITY: Use SSE endpoint without token in URL.
+    // The Express notification stream now accepts Bearer token via header.
+    // Since native EventSource doesn't support custom headers, we use
+    // a fetch-based SSE approach.
+    const sseUrl = `${import.meta.env.VITE_SSE_BASE_URL || 'http://localhost:5000'}/api/notifications/stream`;
+    let controller = new AbortController();
 
-    es.onmessage = (event) => {
+    async function connectSSE() {
       try {
-        const notification = JSON.parse(event.data);
-        setNotifications(prev => {
-          const next = [notification, ...prev].slice(0, MAX_NOTIFICATIONS);
-          return next;
+        const response = await fetch(sseUrl, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: controller.signal,
         });
-        setUnreadCount(prev => prev + 1);
-      } catch (err) {
-        console.error('Failed to parse notification:', err);
-      }
-    };
+        if (!response.ok) return;
+        const reader = response.body?.getReader();
+        if (!reader) return;
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-    es.onerror = () => {
-      // SSE will auto-reconnect
-    };
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const notification = JSON.parse(line.slice(6));
+                setNotifications(prev => {
+                  const next = [notification, ...prev].slice(0, MAX_NOTIFICATIONS);
+                  return next;
+                });
+                setUnreadCount(prev => prev + 1);
+              } catch { /* skip malformed data */ }
+            }
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          // Reconnect after 5 seconds on error
+          setTimeout(connectSSE, 5000);
+        }
+      }
+    }
+
+    connectSSE();
 
     return () => {
-      es.close();
+      controller.abort();
       eventSourceRef.current = null;
     };
   }, [isAuthenticated]);

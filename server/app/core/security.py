@@ -1,4 +1,5 @@
-import datetime
+import logging
+from datetime import datetime, UTC
 from typing import List, Callable, Optional, Dict, Any
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -8,6 +9,7 @@ from server.app.db.database import get_db
 from server.app.db.models import UserModel, AuditLogModel
 from server.app.core.auth0 import auth0_validator, ROLE_PERMISSIONS_MAP
 
+logger = logging.getLogger("stadiumgenius.security")
 security_scheme = HTTPBearer(auto_error=False)
 
 def log_audit_action(
@@ -27,6 +29,7 @@ def log_audit_action(
         
         client_ip = request.client.host if request.client else "127.0.0.1"
         user_agent = request.headers.get("user-agent", "unknown")
+        correlation_id = request.headers.get("X-Correlation-ID", "n/a")
 
         audit_entry = AuditLogModel(
             user_id=user_id,
@@ -38,13 +41,17 @@ def log_audit_action(
             user_agent=user_agent,
             status=status_code,
             details=details,
-            created_at=datetime.datetime.utcnow()
+            created_at=datetime.now(UTC)
         )
         db.add(audit_entry)
         db.commit()
+        logger.info(
+            "AUDIT | [%s] | user=%s role=%s | %s %s | ip=%s",
+            correlation_id, user_email, role, action, resource, client_ip
+        )
     except Exception as e:
         db.rollback()
-        print(f"Error logging audit action: {e}")
+        logger.error("Failed to write audit log: %s", e)
 
 async def get_current_user(
     request: Request,
