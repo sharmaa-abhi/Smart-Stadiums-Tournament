@@ -3,10 +3,11 @@ import {
   LayoutDashboard, Map, ShieldAlert, MessageSquareText, Users,
   UtensilsCrossed, Radio, BarChart3, Settings, Zap, ChevronLeft,
   ChevronRight, LogOut, UserCog, TrendingUp,
-  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket,
+  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket, User as UserIcon
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
+import UserProfilePopup from './UserProfilePopup';
 
 // ── Unique nav items per role ──────────────────────────────────────────────
 const NAV_BY_ROLE = {
@@ -53,8 +54,6 @@ const NAV_BY_ROLE = {
   ],
 };
 
-
-// ── Role branding ──────────────────────────────────────────────────────────
 const ROLE_BRAND = {
   admin: {
     gradient: 'from-rose-500 to-orange-500',
@@ -86,7 +85,6 @@ const ROLE_BRAND = {
   },
 };
 
-// ── Active link color per role ─────────────────────────────────────────────
 const ACTIVE_STYLE = {
   admin: 'bg-rose-500/15 text-rose-400 shadow-[inset_0_0_0_1px_rgba(239,68,68,0.25)]',
   manager: 'bg-violet-500/15 text-violet-400 shadow-[inset_0_0_0_1px_rgba(139,92,246,0.25)]',
@@ -95,7 +93,7 @@ const ACTIVE_STYLE = {
 };
 
 export default function Sidebar() {
-  const { user, logout, sidebarCollapsed: collapsed, toggleSidebar } = useAuth();
+  const { user, logout, sidebarCollapsed: collapsed, toggleSidebar, isProfileOpen, openProfile, closeProfile } = useAuth();
   const navigate = useNavigate();
 
   const role = user?.role || 'operator';
@@ -110,118 +108,128 @@ export default function Sidebar() {
   };
 
   return (
-    <aside
-      className={`fixed top-0 left-0 h-screen z-50 flex flex-col transition-all duration-300 ease-in-out
-        ${collapsed ? 'w-[72px]' : 'w-[260px]'}
-        bg-surface-950/80 backdrop-blur-xl border-r border-white/[0.06]`}
-    >
-      {/* Logo + Role Badge */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
-        <div className="relative flex-shrink-0">
-          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow}`}>
-            <RoleIcon className="w-5 h-5 text-white" />
-          </div>
-          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full pulse-dot border-2 border-surface-950" />
-        </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <h1 className="text-base font-bold font-display tracking-tight text-white whitespace-nowrap">
-              Stadium<span className="text-gradient">Genius</span>
-            </h1>
-            <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${brand.badge}`}>
-              {brand.label}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map(({ to, icon: Icon, label, desc }) => (
-          <NavLink
-            key={`${role}-${to}`}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-              ${isActive ? activeStyle : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'}
-              ${collapsed ? 'justify-center' : ''}`
-            }
-          >
-            <Icon className="w-[18px] h-[18px] flex-shrink-0 transition-colors" />
-            {!collapsed && (
-              <div className="overflow-hidden">
-                <span className="block whitespace-nowrap leading-tight">{label}</span>
-                <span className="block text-[10px] text-white/30 leading-tight whitespace-nowrap">{desc}</span>
-              </div>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* Bottom — User info + Logout */}
-      <div className="px-3 pb-4 space-y-1 border-t border-white/[0.06] pt-3">
-        {user && !collapsed && (
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-1">
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08]"
-              />
-            ) : (
-              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
-                {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-              </div>
-            )}
-            <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-white/80 truncate">{user.name}</p>
-              <p className="text-[9px] text-white/40 truncate">{user.email}</p>
+    <>
+      <aside
+        className={`fixed top-0 left-0 h-screen z-40 flex flex-col transition-all duration-300 ease-in-out
+          ${collapsed ? 'w-[72px]' : 'w-[260px]'}
+          bg-surface-950/80 backdrop-blur-xl border-r border-white/[0.06]`}
+      >
+        {/* Logo + Role Badge */}
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
+          <div className="relative flex-shrink-0">
+            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow}`}>
+              <RoleIcon className="w-5 h-5 text-white" />
             </div>
+            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full pulse-dot border-2 border-surface-950" />
           </div>
-        )}
-        {user && collapsed && (
-          <div className="flex justify-center py-2">
-            {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-8 h-8 rounded-xl object-cover border border-white/[0.08]"
-              />
-            ) : (
-              <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white`}>
-                {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-              </div>
-            )}
-          </div>
-        )}
-
-        <button
-          onClick={handleLogout}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
-            text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/[0.06] transition-all duration-200
-            ${collapsed ? 'justify-center' : ''}`}
-        >
-          <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
-          {!collapsed && <span>Logout</span>}
-        </button>
-
-        <button
-          onClick={toggleSidebar}
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
-            text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all duration-200
-            ${collapsed ? 'justify-center' : ''}`}
-        >
-          {collapsed ? (
-            <ChevronRight className="w-[18px] h-[18px] mx-auto" />
-          ) : (
-            <>
-              <ChevronLeft className="w-[18px] h-[18px]" />
-              <span>Collapse</span>
-            </>
+          {!collapsed && (
+            <div className="overflow-hidden">
+              <h1 className="text-base font-bold font-display tracking-tight text-white whitespace-nowrap">
+                Stadium<span className="text-gradient">Genius</span>
+              </h1>
+              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${brand.badge}`}>
+                {brand.label}
+              </span>
+            </div>
           )}
-        </button>
-      </div>
-    </aside>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
+          {navItems.map(({ to, icon: Icon, label, desc }) => (
+            <NavLink
+              key={`${role}-${to}`}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                ${isActive ? activeStyle : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'}
+                ${collapsed ? 'justify-center' : ''}`
+              }
+            >
+              <Icon className="w-[18px] h-[18px] flex-shrink-0 transition-colors" />
+              {!collapsed && (
+                <div className="overflow-hidden">
+                  <span className="block whitespace-nowrap leading-tight">{label}</span>
+                  <span className="block text-[10px] text-white/30 leading-tight whitespace-nowrap">{desc}</span>
+                </div>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* Bottom — User info + Logout */}
+        <div className="px-3 pb-4 space-y-1 border-t border-white/[0.06] pt-3">
+          {user && !collapsed && (
+            <button
+              onClick={openProfile}
+              className="flex items-center gap-3 px-3 py-2.5 mb-1 w-full rounded-xl hover:bg-white/[0.06] transition-colors text-left group"
+            >
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08] group-hover:border-cyan-400/50"
+                />
+              ) : (
+                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
+                  {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                </div>
+              )}
+              <div className="overflow-hidden flex-1">
+                <p className="text-xs font-semibold text-white/80 truncate group-hover:text-cyan-300">{user.name}</p>
+                <p className="text-[9px] text-white/40 truncate">{user.email}</p>
+              </div>
+            </button>
+          )}
+          {user && collapsed && (
+            <div className="flex justify-center py-2">
+              <button onClick={openProfile} title="View Profile">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="w-8 h-8 rounded-xl object-cover border border-white/[0.08] hover:border-cyan-400"
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white`}>
+                    {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                  </div>
+                )}
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={handleLogout}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
+              text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/[0.06] transition-all duration-200
+              ${collapsed ? 'justify-center' : ''}`}
+          >
+            <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
+            {!collapsed && <span>Logout</span>}
+          </button>
+
+          <button
+            onClick={toggleSidebar}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
+              text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all duration-200
+              ${collapsed ? 'justify-center' : ''}`}
+          >
+            {collapsed ? (
+              <ChevronRight className="w-[18px] h-[18px] mx-auto" />
+            ) : (
+              <>
+                <ChevronLeft className="w-[18px] h-[18px]" />
+                <span>Collapse</span>
+              </>
+            )}
+          </button>
+        </div>
+      </aside>
+
+      <UserProfilePopup isOpen={isProfileOpen} onClose={closeProfile} />
+    </>
   );
 }
+

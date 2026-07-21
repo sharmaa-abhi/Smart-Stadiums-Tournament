@@ -4,6 +4,25 @@ import api from '../lib/api';
 
 const AuthContext = createContext(null);
 
+const DEFAULT_ROLE_PERMISSIONS = {
+  admin: [
+    'manage:users', 'manage:roles', 'configure:system', 'configure:ai',
+    'read:incidents', 'delete:incidents', 'read:audit_logs', 'manage:dashboard'
+  ],
+  manager: [
+    'read:dashboard', 'assign:staff', 'read:reports', 'read:incidents',
+    'approve:ai', 'allocate:resources'
+  ],
+  operator: [
+    'login', 'read:dashboard', 'update:incidents', 'read:crowd_analytics',
+    'create:incidents', 'use:ai_assistant'
+  ],
+  security: [
+    'login', 'read:security_dashboard', 'respond:incidents', 'verify:alerts',
+    'read:cctv', 'update:emergency'
+  ]
+};
+
 export function AuthProvider({ children }) {
   const {
     isLoading: auth0Loading,
@@ -11,39 +30,70 @@ export function AuthProvider({ children }) {
     user: auth0User,
     loginWithRedirect,
     logout: auth0Logout,
+    getAccessTokenSilently,
   } = useAuth0();
 
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('sg_token'));
   const [loading, setLoading] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const isAuthenticated = !!user && !!token;
 
-  // Sync authentication state
+  // Sync authentication state with Auth0 and FastAPI Backend
   useEffect(() => {
     const initAuth = async () => {
       if (auth0Loading) return;
 
       if (auth0IsAuthenticated && auth0User) {
         try {
-          const pendingRole = localStorage.getItem('sg_auth0_role');
-          const data = await api.request('/auth/auth0-login', {
-            method: 'POST',
-            body: JSON.stringify({
-              email: auth0User.email,
-              name: auth0User.name || auth0User.nickname,
-              avatar: auth0User.picture,
-              role: pendingRole || undefined,
-            }),
-          });
-          localStorage.removeItem('sg_auth0_role');
-          if (data && data.token) {
-            localStorage.setItem('sg_token', data.token);
-            setToken(data.token);
-            setUser(data.user);
+          // Attempt to get real JWT access token from Auth0
+          let accessToken = null;
+          try {
+            accessToken = await getAccessTokenSilently();
+          } catch (tokenErr) {
+            console.warn('Could not fetch silent token from Auth0:', tokenErr);
           }
+
+          const pendingRole = localStorage.getItem('sg_auth0_role') || 'operator';
+          
+          if (accessToken) {
+            localStorage.setItem('sg_token', accessToken);
+            setToken(accessToken);
+          }
+
+          // Sync with FastAPI Backend
+          try {
+            const syncResult = await api.syncAuth0User();
+            setUser({
+              ...syncResult.user,
+              permissions: syncResult.permissions || DEFAULT_ROLE_PERMISSIONS[syncResult.user.role] || []
+            });
+          } catch (syncErr) {
+            // Fallback sync payload if backend running in offline/mock mode
+            const role = pendingRole.toLowerCase();
+            const fallbackUser = {
+              auth0_id: auth0User.sub,
+              name: auth0User.name || auth0User.nickname,
+              email: auth0User.email,
+              avatar: auth0User.picture,
+              role: role,
+              account_status: 'active',
+              email_verified: auth0User.email_verified ?? true,
+              last_login: new Date().toISOString(),
+              permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
+            };
+            setUser(fallbackUser);
+            if (!accessToken) {
+              const mockToken = `mock-${role}-jwt-token`;
+              localStorage.setItem('sg_token', mockToken);
+              setToken(mockToken);
+            }
+          }
+          localStorage.removeItem('sg_auth0_role');
         } catch (err) {
-          console.error('Error syncing Auth0 user:', err);
+          console.error('Error in Auth0 login sync:', err);
         } finally {
           setLoading(false);
         }
@@ -57,13 +107,34 @@ export function AuthProvider({ children }) {
         }
 
         try {
-          const data = await api.getMe();
-          setUser(data.user);
+          const profile = await api.getMe();
+          setUser({
+            ...profile,
+            permissions: profile.permissions || DEFAULT_ROLE_PERMISSIONS[profile.role] || []
+          });
           setToken(storedToken);
-        } catch {
-          localStorage.removeItem('sg_token');
-          setUser(null);
-          setToken(null);
+        } catch (err) {
+          console.warn('Token validation failed on startup:', err);
+          // If token valid locally (mock or stored)
+          if (storedToken.startsWith('mock-')) {
+            const role = storedToken.includes('admin') ? 'admin' :
+                         storedToken.includes('manager') ? 'manager' :
+                         storedToken.includes('security') ? 'security' : 'operator';
+            setUser({
+              auth0_id: `mock-${role}-id`,
+              name: `Stadium ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+              email: `${role}@stadiumgenius.io`,
+              role: role,
+              account_status: 'active',
+              email_verified: true,
+              last_login: new Date().toISOString(),
+              permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
+            });
+          } else {
+            localStorage.removeItem('sg_token');
+            setUser(null);
+            setToken(null);
+          }
         } finally {
           setLoading(false);
         }
@@ -71,115 +142,71 @@ export function AuthProvider({ children }) {
     };
 
     initAuth();
-  }, [auth0Loading, auth0IsAuthenticated, auth0User]);
+  }, [auth0Loading, auth0IsAuthenticated, auth0User, getAccessTokenSilently]);
 
-  const login = useCallback(async (email, password, selectedRole) => {
-    if (email && password) {
-      const data = await api.login(email, password);
-      localStorage.setItem('sg_token', data.token);
-      setToken(data.token);
-      setUser(data.user);
-      return data;
-    } else {
-      if (selectedRole) {
-        localStorage.setItem('sg_auth0_role', selectedRole);
-      }
-      if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
-        console.warn("Auth0 credentials missing. Falling back to mock operator login.");
-        const mockUser = {
-          id: `mock-${selectedRole || 'operator'}`,
-          name: `Mock ${selectedRole ? selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) : 'Operator'}`,
-          email: `${selectedRole || 'operator'}@stadiumgenius.io`,
-          role: selectedRole || "operator",
-          avatar: null
-        };
-        try {
-          const authUser = await api.request('/auth/auth0-login', {
-            method: 'POST',
-            body: JSON.stringify({
-              email: mockUser.email,
-              name: mockUser.name,
-              avatar: mockUser.avatar,
-              role: mockUser.role
-            })
-          });
-          if (authUser && authUser.token) {
-            localStorage.setItem('sg_token', authUser.token);
-            setToken(authUser.token);
-            setUser(authUser.user);
-            return { user: authUser.user, token: authUser.token };
-          }
-        } catch (err) {
-          console.error("Failed to fetch real token for mock Auth0 user:", err);
-        }
-        const mockToken = "mock-jwt-token";
-        localStorage.setItem('sg_token', mockToken);
-        setToken(mockToken);
-        setUser(mockUser);
-        return { user: mockUser, token: mockToken };
-      }
-      await loginWithRedirect();
+  // Auth0 Login Triggers
+  const loginWithAuth0 = useCallback(async (selectedRole, connection = null) => {
+    if (selectedRole) {
+      localStorage.setItem('sg_auth0_role', selectedRole);
     }
+    const params = {
+      authorizationParams: {
+        ...(connection ? { connection } : {}),
+      }
+    };
+    await loginWithRedirect(params);
   }, [loginWithRedirect]);
 
-  const register = useCallback(async (name, email, password, role) => {
-    if (email && password) {
-      const data = await api.register(name, email, password, role);
-      localStorage.setItem('sg_token', data.token);
-      setToken(data.token);
-      setUser(data.user);
-      return data;
-    } else {
-      if (role) {
-        localStorage.setItem('sg_auth0_role', role);
+  // Direct Mock Login for testing / dev demo
+  const loginMock = useCallback(async (role = 'operator', email = null) => {
+    const userRole = role.toLowerCase();
+    const mockToken = `mock-${userRole}-jwt-token`;
+    const mockUser = {
+      auth0_id: `mock-${userRole}-id-100`,
+      name: `Stadium ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}`,
+      email: email || `${userRole}@stadiumgenius.io`,
+      role: userRole,
+      account_status: 'active',
+      email_verified: true,
+      last_login: new Date().toISOString(),
+      permissions: DEFAULT_ROLE_PERMISSIONS[userRole] || []
+    };
+
+    localStorage.setItem('sg_token', mockToken);
+    setToken(mockToken);
+    setUser(mockUser);
+    return { user: mockUser, token: mockToken };
+  }, []);
+
+  // Password Reset Flow
+  const triggerPasswordReset = useCallback(async (email) => {
+    await loginWithRedirect({
+      authorizationParams: {
+        screen_hint: 'reset_password',
+        login_hint: email,
       }
-      if (!import.meta.env.VITE_AUTH0_DOMAIN || !import.meta.env.VITE_AUTH0_CLIENT_ID) {
-        console.warn("Auth0 credentials missing. Falling back to mock registration.");
-        const mockUser = {
-          id: "mock-user",
-          name: name || `Mock ${role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User'}`,
-          email: email || `${role || 'operator'}_auth0@stadiumgenius.io`,
-          role: role || "operator",
-          avatar: null
-        };
-        try {
-          const authUser = await api.request('/auth/auth0-login', {
-            method: 'POST',
-            body: JSON.stringify({
-              email: mockUser.email,
-              name: mockUser.name,
-              avatar: mockUser.avatar,
-              role: mockUser.role
-            })
-          });
-          if (authUser && authUser.token) {
-            localStorage.setItem('sg_token', authUser.token);
-            setToken(authUser.token);
-            setUser(authUser.user);
-            return { user: authUser.user, token: authUser.token };
-          }
-        } catch (err) {
-          console.error("Failed to fetch real token for mock Auth0 user:", err);
-        }
-        const mockToken = "mock-jwt-token";
-        localStorage.setItem('sg_token', mockToken);
-        setToken(mockToken);
-        setUser(mockUser);
-        return { user: mockUser, token: mockToken };
-      }
-      await loginWithRedirect({ authorizationParams: { screen_hint: 'signup' } });
-    }
+    });
   }, [loginWithRedirect]);
 
-  const logout = useCallback(() => {
+  // Logout Handler
+  const logout = useCallback(async () => {
+    try {
+      await api.logout();
+    } catch {
+      // Ignore network errors on logout
+    }
     localStorage.removeItem('sg_token');
+    localStorage.removeItem('sg_auth0_role');
     setToken(null);
     setUser(null);
+    setIsProfileOpen(false);
+
     if (auth0IsAuthenticated) {
       auth0Logout({ logoutParams: { returnTo: window.location.origin } });
     }
   }, [auth0IsAuthenticated, auth0Logout]);
 
+  // Sidebar & Venue State
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     return localStorage.getItem('sg_sidebar_collapsed') === 'true';
   });
@@ -205,10 +232,24 @@ export function AuthProvider({ children }) {
     setUser(prev => prev ? { ...prev, ...updatedUser } : null);
   }, []);
 
+  const hasPermission = useCallback((permissionCode) => {
+    if (!user || !user.permissions) return false;
+    return user.permissions.includes(permissionCode);
+  }, [user]);
+
+  const hasRole = useCallback((roleName) => {
+    if (!user || !user.role) return false;
+    return user.role.toLowerCase() === roleName.toLowerCase() || user.role.toLowerCase() === 'admin';
+  }, [user]);
+
   return (
     <AuthContext.Provider value={{
-      user, token, loading, isAuthenticated, login, register, logout,
-      sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId
+      user, token, loading, isAuthenticated, 
+      loginWithAuth0, loginMock, triggerPasswordReset, logout,
+      sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId,
+      hasPermission, hasRole,
+      isProfileOpen, openProfile: () => setIsProfileOpen(true), closeProfile: () => setIsProfileOpen(false),
+      sessionExpired, setSessionExpired
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
 
 class ApiClient {
   constructor() {
@@ -7,6 +7,14 @@ class ApiClient {
 
   getToken() {
     return localStorage.getItem('sg_token');
+  }
+
+  setToken(token) {
+    if (token) {
+      localStorage.setItem('sg_token', token);
+    } else {
+      localStorage.removeItem('sg_token');
+    }
   }
 
   async request(endpoint, options = {}) {
@@ -20,175 +28,169 @@ class ApiClient {
       ...options,
     };
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, config);
-    const data = await response.json();
+    try {
+      const response = await fetch(`${this.baseUrl}${endpoint}`, config);
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || `Request failed with status ${response.status}`);
+      if (!response.ok) {
+        const errMessage = data.detail || data.error || `Request failed with status ${response.status}`;
+        const err = new Error(errMessage);
+        err.status = response.status;
+        err.detail = data.detail;
+        throw err;
+      }
+
+      return data;
+    } catch (err) {
+      if (err.status === 401) {
+        console.warn('Unauthorized access - clearing stale token');
+      }
+      throw err;
     }
-
-    return data;
   }
 
-  // ── Auth ──
-  async register(name, email, password, role) {
-    return this.request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ name, email, password, role }),
-    });
-  }
-
-  async login(email, password) {
-    return this.request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-  }
-
+  // ── Authentication & Sync ──
   async getMe() {
     return this.request('/auth/me');
   }
 
-  // ── Venues ──
-  async getVenues() {
-    return this.request('/venues');
+  async syncAuth0User() {
+    return this.request('/auth/sync', { method: 'POST' });
   }
 
-  async getVenue(id) {
-    return this.request(`/venues/${id}`);
+  async logout() {
+    return this.request('/auth/logout', { method: 'POST' });
   }
 
-  async getVenueKPIs(id) {
-    return this.request(`/venues/${id}/kpis`);
+  async getCsrfToken() {
+    return this.request('/auth/csrf-token');
   }
 
-  async getVenueAlerts(id) {
-    return this.request(`/venues/${id}/alerts`);
+  // ── Administrator Operations ──
+  async getAdminUsers() {
+    return this.request('/admin/users');
   }
 
-  async getVenueOccupancy(id) {
-    return this.request(`/venues/${id}/occupancy`);
+  async updateAdminUserRole(userId, role) {
+    return this.request(`/admin/users/${userId}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    });
   }
 
-  async getVenueTimeseries(id, points = 24) {
-    return this.request(`/venues/${id}/timeseries?points=${points}`);
+  async getAdminRolesMatrix() {
+    return this.request('/admin/roles');
   }
 
-  async getVenueHeatmap(id) {
-    return this.request(`/venues/${id}/heatmap`);
+  async getAdminAuditLogs(limit = 50) {
+    return this.request(`/admin/audit-logs?limit=${limit}`);
   }
 
-  async getVenueGates(id) {
-    return this.request(`/venues/${id}/gates`);
+  async updateSystemConfig(key, value, description) {
+    return this.request('/admin/system-config', {
+      method: 'POST',
+      body: JSON.stringify({ key, value, description }),
+    });
   }
 
-  async getVenueConcessions(id) {
-    return this.request(`/venues/${id}/concessions`);
+  async updateAiSettings(settings) {
+    return this.request('/admin/ai-settings', {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    });
   }
 
-  // ── Incidents ──
-  async getIncidents(venueId, status) {
-    const params = new URLSearchParams();
-    if (venueId) params.set('venue_id', venueId);
-    if (status) params.set('status', status);
-    const qs = params.toString();
-    return this.request(`/incidents${qs ? `?${qs}` : ''}`);
+  // ── Manager Operations ──
+  async getManagerDashboard() {
+    return this.request('/manager/dashboard-summary');
+  }
+
+  async assignStaff(sector, staffCount) {
+    return this.request('/manager/assign-staff', {
+      method: 'POST',
+      body: JSON.stringify({ sector, staff_count: staffCount }),
+    });
+  }
+
+  async getManagerReports() {
+    return this.request('/manager/reports');
+  }
+
+  async approveAiRecommendation(recommendationId, action) {
+    return this.request('/manager/approve-ai-recommendation', {
+      method: 'POST',
+      body: JSON.stringify({ recommendation_id: recommendationId, action }),
+    });
+  }
+
+  async allocateResources(resourceType, location) {
+    return this.request('/manager/allocate-resources', {
+      method: 'POST',
+      body: JSON.stringify({ resource_type: resourceType, location }),
+    });
+  }
+
+  // ── Operator Operations ──
+  async getCrowdAnalytics() {
+    return this.request('/operator/crowd-analytics');
+  }
+
+  async getIncidents() {
+    return this.request('/operator/incidents');
   }
 
   async createIncident(data) {
-    return this.request('/incidents', {
+    return this.request('/operator/incidents', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateIncident(id, data) {
-    return this.request(`/incidents/${id}`, {
-      method: 'PATCH',
+    return this.request(`/operator/incidents/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
-  // ── Analytics ──
-  async getAnalyticsOverview() {
-    return this.request('/analytics/overview');
-  }
-
-  async getAnalyticsTrends() {
-    return this.request('/analytics/trends');
-  }
-
-  async getAnalyticsPerformance() {
-    return this.request('/analytics/performance');
-  }
-
-  async getAnalyticsRevenue() {
-    return this.request('/analytics/revenue');
-  }
-
-  // ── Broadcast ──
-  async getBroadcasts(venueId, status) {
-    const params = new URLSearchParams();
-    if (venueId) params.set('venue_id', venueId);
-    if (status) params.set('status', status);
-    const qs = params.toString();
-    return this.request(`/broadcast/messages${qs ? `?${qs}` : ''}`);
-  }
-
-  async createBroadcast(data) {
-    return this.request('/broadcast/messages', {
+  async queryAiAssistant(prompt) {
+    return this.request('/operator/ai-assistant', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ prompt }),
     });
   }
 
-  async updateBroadcast(id, data) {
-    return this.request(`/broadcast/messages/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    });
+  // ── Security Personnel Operations ──
+  async getSecurityDashboard() {
+    return this.request('/security/dashboard');
   }
 
-  async deleteBroadcast(id) {
-    return this.request(`/broadcast/messages/${id}`, { method: 'DELETE' });
+  async getCctvStatus() {
+    return this.request('/security/cctv-status');
   }
 
-  // ── AI Assistant ──
-  async aiChat(message, sessionId) {
-    return this.request('/ai/chat', {
+  async verifyAlert(alertId, status) {
+    return this.request('/security/verify-alert', {
       method: 'POST',
-      body: JSON.stringify({ message, session_id: sessionId }),
+      body: JSON.stringify({ alert_id: alertId, status }),
     });
   }
 
-  async aiHistory(sessionId) {
-    return this.request(`/ai/history?session_id=${sessionId}`);
-  }
-
-  async aiSuggestions() {
-    return this.request('/ai/suggestions');
-  }
-
-  // ── Users ──
-  async getUserProfile() {
-    return this.request('/users/profile');
-  }
-
-  async updateUserProfile(data) {
-    return this.request('/users/profile', {
-      method: 'PATCH',
-      body: JSON.stringify(data),
+  async respondToIncident(incidentId, team) {
+    return this.request('/security/respond-incident', {
+      method: 'POST',
+      body: JSON.stringify({ incident_id: incidentId, team }),
     });
   }
 
-  async changePassword(currentPassword, newPassword) {
-    return this.request('/users/password', {
-      method: 'PATCH',
-      body: JSON.stringify({ currentPassword, newPassword }),
+  async updateEmergencyStatus(emergencyLevel, reason) {
+    return this.request('/security/emergency-status', {
+      method: 'POST',
+      body: JSON.stringify({ emergency_level: emergencyLevel, reason }),
     });
   }
 
-  // ── Health ──
+  // ── Health Check ──
   async health() {
     return this.request('/health');
   }
@@ -196,3 +198,4 @@ class ApiClient {
 
 const api = new ApiClient();
 export default api;
+

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff, Shield } from 'lucide-react';
+import { Zap, Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff, Shield, CheckSquare, Square, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { StadiumBackdrop } from '../components/StadiumBackdrop';
 
@@ -9,7 +9,6 @@ const ROLE_BRAND = {
   admin: {
     gradient: 'from-rose-500 to-orange-500',
     glow: 'shadow-[0_0_25px_rgba(239,68,68,0.45)]',
-    logoGlow: 'shadow-[0_0_30px_rgba(239,68,68,0.25)]',
     buttonGradient: 'from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 shadow-[0_0_20px_rgba(239,68,68,0.2)]',
     text: 'text-rose-400 hover:text-rose-300',
     icon: 'text-rose-400',
@@ -17,7 +16,6 @@ const ROLE_BRAND = {
   manager: {
     gradient: 'from-violet-500 to-purple-600',
     glow: 'shadow-[0_0_25px_rgba(139,92,246,0.45)]',
-    logoGlow: 'shadow-[0_0_30px_rgba(139,92,246,0.25)]',
     buttonGradient: 'from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shadow-[0_0_20px_rgba(139,92,246,0.2)]',
     text: 'text-violet-400 hover:text-violet-300',
     icon: 'text-violet-400',
@@ -25,7 +23,6 @@ const ROLE_BRAND = {
   security: {
     gradient: 'from-amber-500 to-yellow-500',
     glow: 'shadow-[0_0_25px_rgba(245,158,11,0.45)]',
-    logoGlow: 'shadow-[0_0_30px_rgba(245,158,11,0.25)]',
     buttonGradient: 'from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 shadow-[0_0_20px_rgba(245,158,11,0.2)]',
     text: 'text-amber-400 hover:text-amber-300',
     icon: 'text-amber-400',
@@ -33,7 +30,6 @@ const ROLE_BRAND = {
   operator: {
     gradient: 'from-brand-500 to-accent-500',
     glow: 'shadow-[0_0_25px_rgba(51,120,255,0.45)]',
-    logoGlow: 'shadow-[0_0_30px_rgba(51,120,255,0.25)]',
     buttonGradient: 'from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 glow-brand',
     text: 'text-brand-400 hover:text-brand-300',
     icon: 'text-brand-400',
@@ -51,10 +47,13 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState('operator');
-  const { login } = useAuth();
+
+  const { loginWithAuth0, loginMock, triggerPasswordReset } = useAuth();
   const navigate = useNavigate();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
@@ -74,13 +73,25 @@ export default function Login() {
     }
   };
 
+  const handleAuth0UniversalLogin = async (connection = null) => {
+    setError('');
+    setIsLoading(true);
+    try {
+      await loginWithAuth0(role, connection);
+    } catch (err) {
+      setError(err.message || 'Auth0 redirection failed.');
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      // Execute demo login / backend sync
+      await loginMock(role, email);
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
@@ -89,12 +100,24 @@ export default function Login() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address to reset password.');
+      return;
+    }
+    setError('');
+    setSuccessMsg('');
+    try {
+      await triggerPasswordReset(email);
+      setSuccessMsg('Auth0 password reset requested. Redirecting to reset screen...');
+    } catch (err) {
+      setError(err.message || 'Password reset request failed.');
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-950 p-4 overflow-hidden relative z-0">
-      {/* Dynamic interactive stadium wireframe backdrop */}
       <StadiumBackdrop role={role} />
-
-      {/* Animated scanline */}
       <div className={`fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent to-transparent animate-scanline pointer-events-none z-1 transition-all duration-1000 ease-in-out ${ROLE_SCANLINE[role] || ROLE_SCANLINE.operator}`} />
 
       <motion.div
@@ -103,32 +126,32 @@ export default function Login() {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-md relative z-10"
       >
-        {/* Logo */}
-        <div className="text-center mb-8">
+        {/* Header Branding */}
+        <div className="text-center mb-6">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center mx-auto mb-4 ${brand.glow} transition-all duration-500`}
+            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center mx-auto mb-3 ${brand.glow} transition-all duration-500`}
           >
             <Zap className="w-8 h-8 text-white" />
           </motion.div>
           <h1 className="text-2xl font-bold font-display text-white tracking-tight">
             Stadium<span className="text-gradient">Genius</span>
           </h1>
-          <p className="text-sm text-white/40 mt-1">AI-Powered Smart Stadium Platform</p>
+          <p className="text-xs text-surface-400 mt-1">Enterprise Smart Stadium Authentication</p>
         </div>
 
         {/* Login Card */}
-        <div className="glass-card rounded-2xl p-8 border border-white/[0.08]">
-          <div className="mb-6 flex justify-between items-start gap-4">
+        <div className="glass-card rounded-2xl p-7 border border-white/[0.08]">
+          <div className="mb-5 flex justify-between items-center">
             <div>
-              <h2 className="text-lg font-bold font-display text-white/90">Welcome back</h2>
-              <p className="text-sm text-white/40 mt-1">Sign in to your operations console</p>
+              <h2 className="text-lg font-bold text-white">Operations Console</h2>
+              <p className="text-xs text-surface-400">Select role & sign in</p>
             </div>
             
-            {/* Quick role profile selector */}
-            <div className="flex gap-1 p-1 bg-white/[0.02] border border-white/[0.06] rounded-xl self-center shrink-0">
+            {/* Role Switcher */}
+            <div className="flex gap-1 p-1 bg-surface-950/80 border border-surface-800 rounded-xl">
               {['operator', 'security', 'manager', 'admin'].map((r) => {
                 const colors = {
                   operator: 'bg-brand-500/20 text-brand-400 border-brand-500/30',
@@ -137,19 +160,19 @@ export default function Login() {
                   admin: 'bg-rose-500/20 text-rose-400 border-rose-500/30'
                 };
                 const activeColor = {
-                  operator: 'bg-brand-500 text-white font-bold shadow-[0_0_10px_rgba(51,120,255,0.5)]',
-                  security: 'bg-amber-500 text-white font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]',
-                  manager: 'bg-violet-500 text-white font-bold shadow-[0_0_10px_rgba(139,92,246,0.5)]',
-                  admin: 'bg-rose-500 text-white font-bold shadow-[0_0_10px_rgba(244,63,94,0.5)]'
+                  operator: 'bg-brand-500 text-white font-bold shadow-glow',
+                  security: 'bg-amber-500 text-white font-bold shadow-glow',
+                  manager: 'bg-violet-500 text-white font-bold shadow-glow',
+                  admin: 'bg-rose-500 text-white font-bold shadow-glow'
                 };
                 return (
                   <button
                     key={r}
                     type="button"
-                    title={`Preview Console: ${r.charAt(0).toUpperCase() + r.slice(1)}`}
+                    title={`Role: ${r.toUpperCase()}`}
                     onClick={() => setRole(r)}
-                    className={`px-2 py-1 text-[11px] rounded-lg border transition-all duration-200 cursor-pointer capitalize ${
-                      role === r ? activeColor[r] + ' scale-110' : colors[r] + ' opacity-60 hover:opacity-100'
+                    className={`px-2 py-1 text-[10px] rounded-lg border transition-all duration-200 cursor-pointer capitalize ${
+                      role === r ? activeColor[r] + ' scale-105' : colors[r] + ' opacity-50 hover:opacity-100'
                     }`}
                   >
                     {r}
@@ -159,119 +182,157 @@ export default function Login() {
             </div>
           </div>
 
+          {/* Social Logins via Auth0 */}
+          <div className="grid grid-cols-2 gap-2.5 mb-4">
+            <button
+              type="button"
+              onClick={() => handleAuth0UniversalLogin('google-oauth2')}
+              className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-surface-900 hover:bg-surface-800 text-xs font-semibold text-white border border-surface-700/60 transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+              Google Login
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAuth0UniversalLogin('windowslive')}
+              className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-surface-900 hover:bg-surface-800 text-xs font-semibold text-white border border-surface-700/60 transition-all cursor-pointer"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 23 23">
+                <path fill="#f35325" d="M1 1h10v10H1z"/>
+                <path fill="#81bc06" d="M12 1h10v10H12z"/>
+                <path fill="#05a6f0" d="M1 12h10v10H1z"/>
+                <path fill="#ffba08" d="M12 12h10v10H12z"/>
+              </svg>
+              Microsoft Login
+            </button>
+          </div>
+
           <button
             type="button"
-            onClick={async () => {
-              setError('');
-              try {
-                await login(undefined, undefined, role);
-                navigate('/', { replace: true });
-              } catch (err) {
-                setError(err.message || 'Auth0 login failed.');
-              }
-            }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1]
-              text-sm font-semibold text-white border border-white/[0.08] transition-all duration-200 mb-5 cursor-pointer"
+            onClick={() => handleAuth0UniversalLogin()}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-xs font-bold text-white shadow-lg transition-all mb-4 cursor-pointer"
           >
-            <Shield className={`w-4 h-4 ${brand.icon} animate-pulse`} />
-            Continue with Auth0
+            <Shield className="w-4 h-4 text-cyan-200" />
+            Auth0 Universal Login (PKCE + OIDC)
           </button>
 
           <div className="relative flex py-2 items-center mb-4">
-            <div className="flex-grow border-t border-white/[0.06]"></div>
-            <span className="flex-shrink mx-4 text-white/20 text-[10px] font-semibold uppercase tracking-wider">or sign in with email</span>
-            <div className="flex-grow border-t border-white/[0.06]"></div>
+            <div className="flex-grow border-t border-surface-800"></div>
+            <span className="flex-shrink mx-3 text-surface-500 text-[10px] font-mono uppercase tracking-wider">or sign in with password</span>
+            <div className="flex-grow border-t border-surface-800"></div>
           </div>
 
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-5"
+              className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-4"
             >
               <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
               <span className="text-xs text-rose-300">{error}</span>
             </motion.div>
           )}
 
+          {successMsg && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-4"
+            >
+              <Globe className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <span className="text-xs text-emerald-300">{successMsg}</span>
+            </motion.div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
             <div>
-              <label className="text-xs text-white/50 font-medium block mb-1.5">Email Address</label>
+              <label className="text-xs text-surface-400 font-medium block mb-1.5">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
                 <input
                   type="email"
                   value={email}
                   onChange={handleEmailChange}
-                  placeholder="operator@stadiumgenius.io"
+                  placeholder={`${role}@stadiumgenius.io`}
                   required
-                  className={`w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                    text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:bg-white/[0.06] transition-all duration-200
-                    ${role === 'admin' ? 'focus:border-rose-500/40' : role === 'manager' ? 'focus:border-violet-500/40' : role === 'security' ? 'focus:border-amber-500/40' : 'focus:border-brand-500/40'}`}
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface-950/80 border border-surface-800 text-xs text-white placeholder:text-surface-600 focus:outline-none focus:border-cyan-500 transition-colors"
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div>
-              <label className="text-xs text-white/50 font-medium block mb-1.5">Password</label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="text-xs text-surface-400 font-medium">Password</label>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-xs text-cyan-400 hover:underline cursor-pointer"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="••••••••••••"
                   required
                   minLength={6}
-                  className={`w-full pl-11 pr-11 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                    text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:bg-white/[0.06] transition-all duration-200
-                    ${role === 'admin' ? 'focus:border-rose-500/40' : role === 'manager' ? 'focus:border-violet-500/40' : role === 'security' ? 'focus:border-amber-500/40' : 'focus:border-brand-500/40'}`}
+                  className="w-full pl-11 pr-11 py-3 rounded-xl bg-surface-950/80 border border-surface-800 text-xs text-white placeholder:text-surface-600 focus:outline-none focus:border-cyan-500 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-surface-500 hover:text-surface-300"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Remember Me */}
+            <div className="flex items-center justify-between pt-1">
+              <button
+                type="button"
+                onClick={() => setRememberMe(!rememberMe)}
+                className="flex items-center gap-2 text-xs text-surface-400 hover:text-surface-200 cursor-pointer"
+              >
+                {rememberMe ? (
+                  <CheckSquare className="w-4 h-4 text-cyan-400" />
+                ) : (
+                  <Square className="w-4 h-4 text-surface-600" />
+                )}
+                Remember session on this device
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient}
-                text-sm font-semibold text-white transition-all duration-200 mt-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient} text-xs font-bold text-white transition-all disabled:opacity-50 cursor-pointer`}
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Sign In
+                  Sign In to {role.toUpperCase()} Console
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
-
-          {/* Register Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white/30">
-              Don't have an account?{' '}
-              <Link to="/register" className={`${brand.text} font-medium transition-colors`}>
-                Create one
-              </Link>
-            </p>
-          </div>
         </div>
 
-        {/* Footer */}
-        <p className="text-center text-[10px] text-white/20 mt-6 uppercase tracking-wider">
-          FIFA World Cup 2026 — Venue Operations Platform
+        <p className="text-center text-[10px] text-surface-600 mt-6 uppercase tracking-wider">
+          StadiumGenius v1.0 • Auth0 & RBAC Enterprise Security
         </p>
       </motion.div>
     </div>
