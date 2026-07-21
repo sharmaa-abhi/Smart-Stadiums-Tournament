@@ -1,0 +1,40 @@
+# Dependencies
+node_modules
+server/node_modules
+
+# Build output
+dist
+dev-dist
+
+# Git & IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Environment files
+.env
+.env.*
+server/.env
+
+# Databases (will be created at runtime)
+*.db
+*.db-shm
+*.db-wal
+
+# Documentation & config (not needed in container)
+README.md
+*.md
+.agents
+
+# Tests
+coverage
+test-results
+__pycache__
+.pytest_cache
+
+# Docker files
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
