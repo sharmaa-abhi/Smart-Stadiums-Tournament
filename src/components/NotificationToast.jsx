@@ -53,36 +53,16 @@ const SEVERITY_STYLES = {
 const MAX_TOASTS = 3;
 const AUTO_DISMISS_MS = 5000;
 
-export default function NotificationToast() {
-  const { notifications, dismissNotification } = useNotifications();
-  const [visibleToasts, setVisibleToasts] = useState([]);
-  const shownIdsRef = useRef(new Set());
-
-  // Watch for new notifications and add them as toasts
+function ToastItem({ toast, onDismiss }) {
   useEffect(() => {
-    if (notifications.length === 0) return;
-
-    const latest = notifications[0];
-    if (!latest || shownIdsRef.current.has(latest.id)) return;
-
-    shownIdsRef.current.add(latest.id);
-
-    setVisibleToasts(prev => {
-      const next = [latest, ...prev].slice(0, MAX_TOASTS);
-      return next;
-    });
-
-    // Auto-dismiss after timeout
     const timer = setTimeout(() => {
-      setVisibleToasts(prev => prev.filter(t => t.id !== latest.id));
+      onDismiss(toast.id);
     }, AUTO_DISMISS_MS);
-
     return () => clearTimeout(timer);
-  }, [notifications]);
+  }, [toast.id, onDismiss]);
 
-  const handleDismiss = (id) => {
-    setVisibleToasts(prev => prev.filter(t => t.id !== id));
-  };
+  const sev = SEVERITY_STYLES[toast.severity] || SEVERITY_STYLES.info;
+  const TypeIcon = TYPE_ICONS[toast.type] || Server;
 
   const formatTime = (timestamp) => {
     const d = new Date(timestamp);
@@ -90,71 +70,106 @@ export default function NotificationToast() {
   };
 
   return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, x: 80, scale: 0.9 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      exit={{ opacity: 0, x: 80, scale: 0.9 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      className={`pointer-events-auto ${sev.bg} ${sev.glow} border ${sev.border}
+        backdrop-blur-xl rounded-2xl p-4 cursor-pointer group relative overflow-hidden`}
+      onClick={() => onDismiss(toast.id)}
+    >
+      {/* Progress bar */}
+      <motion.div
+        initial={{ scaleX: 1 }}
+        animate={{ scaleX: 0 }}
+        transition={{ duration: AUTO_DISMISS_MS / 1000, ease: 'linear' }}
+        className={`absolute bottom-0 left-0 h-[2px] w-full origin-left ${sev.badge}`}
+      />
+
+      {/* Critical pulse */}
+      {toast.severity === 'critical' && (
+        <div className="absolute inset-0 rounded-2xl animate-pulse bg-rose-500/5 pointer-events-none" />
+      )}
+
+      <div className="flex items-start gap-3">
+        {/* Icon */}
+        <div className={`p-2 rounded-xl bg-white/[0.06] border border-white/[0.08] flex-shrink-0`}>
+          <TypeIcon className={`w-4 h-4 ${sev.iconColor}`} />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${sev.badge} ${toast.severity === 'critical' ? 'pulse-dot' : ''}`} />
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${sev.iconColor}`}>
+              {toast.type}
+            </span>
+            <span className="text-[9px] text-white/25 ml-auto font-mono">
+              {formatTime(toast.timestamp)}
+            </span>
+          </div>
+          <p className="text-xs font-semibold text-white/90 leading-snug line-clamp-2">
+            {toast.title}
+          </p>
+        </div>
+
+        {/* Close */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onDismiss(toast.id); }}
+          className="p-1 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06]
+            transition-all opacity-0 group-hover:opacity-100 flex-shrink-0"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function NotificationToast() {
+  const { notifications } = useNotifications();
+  const [visibleToasts, setVisibleToasts] = useState([]);
+  const shownIdsRef = useRef(new Set());
+
+  // Watch for new notifications and add them as toasts
+  useEffect(() => {
+    if (notifications.length === 0) return;
+
+    const newToasts = [];
+    // Process from oldest to newest in the current batch
+    for (let i = notifications.length - 1; i >= 0; i--) {
+      const n = notifications[i];
+      if (n && !shownIdsRef.current.has(n.id)) {
+        shownIdsRef.current.add(n.id);
+        newToasts.push(n);
+      }
+    }
+
+    if (newToasts.length > 0) {
+      setVisibleToasts(prev => {
+        // Place newer toasts at the top and maintain list constraints
+        const next = [...newToasts.reverse(), ...prev].slice(0, MAX_TOASTS);
+        return next;
+      });
+    }
+  }, [notifications]);
+
+  const handleDismiss = useCallback((id) => {
+    setVisibleToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  return (
     <div className="fixed bottom-5 right-5 z-[100] flex flex-col-reverse gap-3 pointer-events-none max-w-sm w-full">
       <AnimatePresence mode="popLayout">
-        {visibleToasts.map((toast) => {
-          const sev = SEVERITY_STYLES[toast.severity] || SEVERITY_STYLES.info;
-          const TypeIcon = TYPE_ICONS[toast.type] || Server;
-
-          return (
-            <motion.div
-              key={toast.id}
-              layout
-              initial={{ opacity: 0, x: 80, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 80, scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className={`pointer-events-auto ${sev.bg} ${sev.glow} border ${sev.border}
-                backdrop-blur-xl rounded-2xl p-4 cursor-pointer group relative overflow-hidden`}
-              onClick={() => handleDismiss(toast.id)}
-            >
-              {/* Progress bar */}
-              <motion.div
-                initial={{ scaleX: 1 }}
-                animate={{ scaleX: 0 }}
-                transition={{ duration: AUTO_DISMISS_MS / 1000, ease: 'linear' }}
-                className={`absolute bottom-0 left-0 h-[2px] w-full origin-left ${sev.badge}`}
-              />
-
-              {/* Critical pulse */}
-              {toast.severity === 'critical' && (
-                <div className="absolute inset-0 rounded-2xl animate-pulse bg-rose-500/5 pointer-events-none" />
-              )}
-
-              <div className="flex items-start gap-3">
-                {/* Icon */}
-                <div className={`p-2 rounded-xl bg-white/[0.06] border border-white/[0.08] flex-shrink-0`}>
-                  <TypeIcon className={`w-4 h-4 ${sev.iconColor}`} />
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${sev.badge} ${toast.severity === 'critical' ? 'pulse-dot' : ''}`} />
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${sev.iconColor}`}>
-                      {toast.type}
-                    </span>
-                    <span className="text-[9px] text-white/25 ml-auto font-mono">
-                      {formatTime(toast.timestamp)}
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-white/90 leading-snug line-clamp-2">
-                    {toast.title}
-                  </p>
-                </div>
-
-                {/* Close */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleDismiss(toast.id); }}
-                  className="p-1 rounded-lg text-white/20 hover:text-white/60 hover:bg-white/[0.06]
-                    transition-all opacity-0 group-hover:opacity-100 flex-shrink-0"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </motion.div>
-          );
-        })}
+        {visibleToasts.map((toast) => (
+          <ToastItem 
+            key={toast.id} 
+            toast={toast} 
+            onDismiss={handleDismiss} 
+          />
+        ))}
       </AnimatePresence>
     </div>
   );
