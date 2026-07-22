@@ -39,9 +39,6 @@ jobs:
   backend:
     name: Backend Lint & Test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./server
     steps:
       - uses: actions/checkout@v4
 
@@ -55,7 +52,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: python -m pytest tests/ -v --tb=short || echo "No tests found — skipping"
+        run: python -m pytest server/tests/ -v --tb=short || echo "No tests found — skipping"
         env:
           ENVIRONMENT: development
           SECRET_KEY: ci-test-secret-key-not-for-production
