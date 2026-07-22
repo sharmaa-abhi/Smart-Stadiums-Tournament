@@ -54,3 +54,6 @@ venv
 *.sw?
 Thumbs.db
 
+
+
+.env 
