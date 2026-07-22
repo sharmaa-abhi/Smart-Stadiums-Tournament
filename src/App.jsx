@@ -9,6 +9,7 @@ import Sidebar from './components/Sidebar';
 import ScrollToTop from './components/ScrollToTop';
 import NotificationToast from './components/NotificationToast';
 import ErrorBoundary from './components/ErrorBoundary';
+import { StadiumBackdrop } from './components/StadiumBackdrop';
 import { RouteFallbackSkeleton, AuthPageSkeleton, FanPortalSkeleton } from './components/skeleton';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -27,12 +28,14 @@ const Register = lazy(() => import('./pages/Register'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function AppLayout({ children }) {
-  const { sidebarCollapsed } = useAuth();
+  const { sidebarCollapsed, user } = useAuth();
+  const currentRole = user?.role || 'operator';
   return (
-    <div className="flex min-h-screen bg-surface-950 stadium-grid">
+    <div className="flex min-h-screen bg-surface-950 stadium-grid relative overflow-hidden">
+      <StadiumBackdrop role={currentRole} />
       <Sidebar />
       <NotificationToast />
-      <main className={`flex-1 min-w-0 transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
+      <main className={`flex-1 min-w-0 transition-all duration-300 ease-in-out relative z-[1] ${sidebarCollapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
         {children}
       </main>
     </div>
