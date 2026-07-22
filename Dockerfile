@@ -17,7 +17,7 @@ RUN groupadd -r stadium && useradd -r -g stadium stadium
 WORKDIR /app
 
 # Install Python dependencies
-COPY server/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend code
