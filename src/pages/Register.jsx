@@ -5,6 +5,11 @@ import { Zap, Mail, Lock, User, Shield, AlertCircle, ArrowRight, Eye, EyeOff } f
 import { useAuth } from '../context/AuthContext';
 import { StadiumBackdrop } from '../components/StadiumBackdrop';
 
+import AuthThemeToggle, { THEMES } from '../components/auth/AuthThemeToggle';
+import MatchDayHypeWidget from '../components/auth/MatchDayHypeWidget';
+import AuthMascotWidget from '../components/auth/AuthMascotWidget';
+import StadiumGateMapPreview from '../components/auth/StadiumGateMapPreview';
+
 const roles = [
   { value: 'operator', label: 'Operator', desc: 'Stadium operations control' },
   { value: 'security', label: 'Security', desc: 'Security & safety monitoring' },
@@ -61,10 +66,14 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTheme, setActiveTheme] = useState('cyberpunk');
+  const [selectedSector, setSelectedSector] = useState('north_stand');
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
+  const themeObj = THEMES[activeTheme] || THEMES.cyberpunk;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,200 +91,211 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-950 p-4 overflow-hidden relative z-0">
-      {/* Dynamic interactive stadium wireframe backdrop */}
+    <div className={`min-h-screen bg-gradient-to-br ${themeObj.bgClass} p-4 md:p-8 overflow-x-hidden relative z-0 flex flex-col justify-center items-center`}>
       <StadiumBackdrop role={role} />
-
-      {/* Animated scanline */}
       <div className={`fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent to-transparent animate-scanline pointer-events-none z-1 transition-all duration-1000 ease-in-out ${ROLE_SCANLINE[role] || ROLE_SCANLINE.operator}`} />
 
-      <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md relative z-10"
-      >
-        {/* Logo */}
-        <div className="text-center mb-8">
+      {/* Header & Theme Switcher */}
+      <div className="w-full max-w-6xl mb-6 flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+        <div className="flex items-center gap-3">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center mx-auto mb-4 ${brand.glow}`}
+            transition={{ type: 'spring', stiffness: 200 }}
+            className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow}`}
           >
-            <Zap className="w-8 h-8 text-white" />
+            <Zap className="w-6 h-6 text-white" />
           </motion.div>
-          <h1 className="text-2xl font-bold font-display text-white tracking-tight">
-            Stadium<span className="text-gradient">Genius</span>
-          </h1>
-          <p className="text-sm text-white/40 mt-1">Join the operations team</p>
+          <div>
+            <h1 className="text-2xl font-bold font-display text-white tracking-tight">
+              Stadium<span className="text-gradient">Genius</span>
+            </h1>
+            <p className="text-xs text-slate-400">Join Venue Operations & Fan Pass</p>
+          </div>
         </div>
 
-        {/* Register Card */}
-        <div className="glass-card rounded-2xl p-8 border border-white/[0.08]">
-          <div className="mb-6">
-            <h2 className="text-lg font-bold font-display text-white/90">Create account</h2>
-            <p className="text-sm text-white/40 mt-1">Set up your credentials</p>
-          </div>
+        <AuthThemeToggle activeTheme={activeTheme} onThemeChange={setActiveTheme} />
+      </div>
 
-          <button
-            type="button"
-            onClick={async () => {
-              setError('');
-              try {
-                await register(undefined, undefined, undefined, role);
-                navigate('/', { replace: true });
-              } catch (err) {
-                setError(err.message || 'Auth0 registration failed.');
-              }
-            }}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.1]
-              text-sm font-semibold text-white border border-white/[0.08] transition-all duration-200 mb-5 cursor-pointer"
-          >
-            <Shield className="w-4 h-4 text-brand-400 animate-pulse" />
-            Continue with Auth0
-          </button>
+      {/* Main Grid Layout */}
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10 items-start">
+        {/* Left Side: Stadium Map Preview */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="lg:col-span-4 space-y-4"
+        >
+          <StadiumGateMapPreview selectedSector={selectedSector} onSelectSector={setSelectedSector} />
+          <MatchDayHypeWidget />
+        </motion.div>
 
-          <div className="relative flex py-2 items-center mb-4">
-            <div className="flex-grow border-t border-white/[0.06]"></div>
-            <span className="flex-shrink mx-4 text-white/20 text-[10px] font-semibold uppercase tracking-wider">or register with email</span>
-            <div className="flex-grow border-t border-white/[0.06]"></div>
-          </div>
-
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-5"
-            >
-              <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-              <span className="text-xs text-rose-300">{error}</span>
-            </motion.div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
-            <div>
-              <label className="text-xs text-white/50 font-medium block mb-1.5">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                    text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:border-brand-500/40
-                    focus:bg-white/[0.06] transition-all duration-200"
-                />
-              </div>
+        {/* Center: Register Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="lg:col-span-5"
+        >
+          <div className={`glass-card rounded-2xl p-6 border ${themeObj.cardBorder} shadow-2xl backdrop-blur-2xl`}>
+            <div className="mb-5">
+              <h2 className="text-lg font-bold font-display text-white">Create Account</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Set up credentials & sector preference</p>
             </div>
 
-            {/* Email */}
-            <div>
-              <label className="text-xs text-white/50 font-medium block mb-1.5">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="operator@stadiumgenius.io"
-                  required
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                    text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:border-brand-500/40
-                    focus:bg-white/[0.06] transition-all duration-200"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="text-xs text-white/50 font-medium block mb-1.5">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 characters"
-                  required
-                  minLength={6}
-                  className="w-full pl-11 pr-11 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                    text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:border-brand-500/40
-                    focus:bg-white/[0.06] transition-all duration-200"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/50 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Role Selector */}
-            <div>
-              <label className="text-xs text-white/50 font-medium block mb-1.5">
-                <Shield className="w-3 h-3 inline mr-1 text-white/40" />
-                Role Profile
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {roles.map((r) => (
-                  <button
-                    key={r.value}
-                    type="button"
-                    onClick={() => setRole(r.value)}
-                    className={`p-2.5 rounded-xl text-left transition-all duration-200 border
-                      ${role === r.value
-                        ? ROLE_HIGHLIGHTS[r.value]
-                        : 'bg-white/[0.02] border-white/[0.06] text-white/50 hover:bg-white/[0.05] hover:text-white/70'
-                      }`}
-                  >
-                    <p className="text-xs font-semibold">{r.label}</p>
-                    <p className="text-[9px] opacity-60 mt-0.5">{r.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Submit */}
             <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient}
-                text-sm font-semibold text-white transition-all duration-200 ${brand.logoGlow} mt-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              type="button"
+              onClick={async () => {
+                setError('');
+                try {
+                  await register(undefined, undefined, undefined, role);
+                  navigate('/', { replace: true });
+                } catch (err) {
+                  setError(err.message || 'Auth0 registration failed.');
+                }
+              }}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white border border-slate-700/60 transition-all mb-4 cursor-pointer"
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              <Shield className="w-4 h-4 text-cyan-400 animate-pulse" />
+              Register via Auth0 Universal Pass
             </button>
-          </form>
 
-          {/* Login Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white/30">
-              Already have an account?{' '}
-              <Link to="/login" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
+            <div className="relative flex py-2 items-center mb-4">
+              <div className="flex-grow border-t border-slate-800"></div>
+              <span className="flex-shrink mx-3 text-slate-500 text-[10px] font-mono uppercase tracking-wider">or register with email</span>
+              <div className="flex-grow border-t border-slate-800"></div>
+            </div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-4"
+              >
+                <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                <span className="text-xs text-rose-300">{error}</span>
+              </motion.div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Name */}
+              <div>
+                <label className="text-xs text-slate-400 font-medium block mb-1">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Alex Morgan"
+                    required
+                    className="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="text-xs text-slate-400 font-medium block mb-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="fan@stadiumgenius.io"
+                    required
+                    className="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="text-xs text-slate-400 font-medium block mb-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Min 6 characters"
+                    required
+                    minLength={6}
+                    className="w-full pl-11 pr-11 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Role Selector */}
+              <div>
+                <label className="text-xs text-slate-400 font-medium block mb-1">Role Profile</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {roles.map((r) => (
+                    <button
+                      key={r.value}
+                      type="button"
+                      onClick={() => setRole(r.value)}
+                      className={`p-2 rounded-xl text-left transition-all duration-200 border ${
+                        role === r.value
+                          ? ROLE_HIGHLIGHTS[r.value]
+                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <p className="text-xs font-semibold">{r.label}</p>
+                      <p className="text-[9px] opacity-60">{r.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient} text-xs font-bold text-white transition-all disabled:opacity-50 cursor-pointer`}
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Complete Registration
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-4 pt-3 border-t border-slate-800 text-center">
+              <span className="text-xs text-slate-400">Already registered? </span>
+              <Link to="/login" className="text-xs font-bold text-cyan-400 hover:underline">
                 Sign in
               </Link>
-            </p>
+            </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Footer */}
-        <p className="text-center text-[10px] text-white/20 mt-6 uppercase tracking-wider">
-          FIFA World Cup 2026 — Venue Operations Platform
-        </p>
-      </motion.div>
+        {/* Right Side: AI Mascot */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="lg:col-span-3 space-y-4"
+        >
+          <AuthMascotWidget />
+        </motion.div>
+      </div>
+
+      <p className="text-center text-[10px] text-slate-600 mt-6 uppercase tracking-wider relative z-10">
+        FIFA World Cup 2026 — Venue Operations Platform
+      </p>
     </div>
   );
 }
