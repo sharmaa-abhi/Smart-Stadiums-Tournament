@@ -93,7 +93,7 @@ const ACTIVE_STYLE = {
 };
 
 export default function Sidebar() {
-  const { user, logout, sidebarCollapsed: collapsed, toggleSidebar, isProfileOpen, openProfile, closeProfile } = useAuth();
+  const { user, logout, sidebarCollapsed: collapsed, toggleSidebar, isProfileOpen, openProfile, closeProfile, mobileSidebarOpen, closeMobileSidebar } = useAuth();
   const navigate = useNavigate();
 
   const role = user?.role || 'operator';
@@ -103,35 +103,56 @@ export default function Sidebar() {
   const RoleIcon = brand.icon;
 
   const handleLogout = () => {
+    closeMobileSidebar();
     logout();
     navigate('/login', { replace: true });
   };
 
   return (
     <>
+      {/* Mobile Drawer Overlay Backdrop */}
+      {mobileSidebarOpen && (
+        <div
+          onClick={closeMobileSidebar}
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity"
+          aria-hidden="true"
+        />
+      )}
+
       <aside
-        className={`fixed top-0 left-0 h-screen z-40 flex flex-col transition-all duration-300 ease-in-out
+        className={`fixed top-0 left-0 h-screen z-50 flex flex-col transition-all duration-300 ease-in-out
           ${collapsed ? 'w-[72px]' : 'w-[260px]'}
-          bg-surface-950/80 backdrop-blur-xl border-r border-white/[0.06]`}
+          ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          bg-surface-950/95 backdrop-blur-2xl border-r border-white/[0.08] shadow-2xl`}
       >
         {/* Logo + Role Badge */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
-          <div className="relative flex-shrink-0">
-            <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow}`}>
-              <RoleIcon className="w-5 h-5 text-white" />
+        <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow}`}>
+                <RoleIcon className="w-5 h-5 text-white" />
+              </div>
+              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full pulse-dot border-2 border-surface-950" />
             </div>
-            <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full pulse-dot border-2 border-surface-950" />
+            {(!collapsed || mobileSidebarOpen) && (
+              <div className="overflow-hidden">
+                <h1 className="text-base font-bold font-display tracking-tight text-white whitespace-nowrap">
+                  Stadium<span className="text-gradient">Genius</span>
+                </h1>
+                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${brand.badge}`}>
+                  {brand.label}
+                </span>
+              </div>
+            )}
           </div>
-          {!collapsed && (
-            <div className="overflow-hidden">
-              <h1 className="text-base font-bold font-display tracking-tight text-white whitespace-nowrap">
-                Stadium<span className="text-gradient">Genius</span>
-              </h1>
-              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${brand.badge}`}>
-                {brand.label}
-              </span>
-            </div>
-          )}
+          {/* Mobile Close Button */}
+          <button
+            onClick={closeMobileSidebar}
+            className="md:hidden text-white/50 hover:text-white p-2 rounded-lg hover:bg-white/10"
+            aria-label="Close menu"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -141,14 +162,15 @@ export default function Sidebar() {
               key={`${role}-${to}`}
               to={to}
               end={to === '/'}
+              onClick={closeMobileSidebar}
               className={({ isActive }) =>
                 `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                 ${isActive ? activeStyle : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'}
-                ${collapsed ? 'justify-center' : ''}`
+                ${collapsed && !mobileSidebarOpen ? 'justify-center' : ''}`
               }
             >
               <Icon className="w-[18px] h-[18px] flex-shrink-0 transition-colors" />
-              {!collapsed && (
+              {(!collapsed || mobileSidebarOpen) && (
                 <div className="overflow-hidden">
                   <span className="block whitespace-nowrap leading-tight">{label}</span>
                   <span className="block text-[10px] text-white/30 leading-tight whitespace-nowrap">{desc}</span>
@@ -160,9 +182,9 @@ export default function Sidebar() {
 
         {/* Bottom — User info + Logout */}
         <div className="px-3 pb-4 space-y-1 border-t border-white/[0.06] pt-3">
-          {user && !collapsed && (
+          {user && (!collapsed || mobileSidebarOpen) && (
             <button
-              onClick={openProfile}
+              onClick={() => { closeMobileSidebar(); openProfile(); }}
               className="flex items-center gap-3 px-3 py-2.5 mb-1 w-full rounded-xl hover:bg-white/[0.06] transition-colors text-left group"
             >
               {user.avatar ? (
@@ -182,7 +204,7 @@ export default function Sidebar() {
               </div>
             </button>
           )}
-          {user && collapsed && (
+          {user && collapsed && !mobileSidebarOpen && (
             <div className="flex justify-center py-2">
               <button onClick={openProfile} title="View Profile">
                 {user.avatar ? (
@@ -204,15 +226,15 @@ export default function Sidebar() {
             onClick={handleLogout}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
               text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/[0.06] transition-all duration-200
-              ${collapsed ? 'justify-center' : ''}`}
+              ${collapsed && !mobileSidebarOpen ? 'justify-center' : ''}`}
           >
             <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
-            {!collapsed && <span>Logout</span>}
+            {(!collapsed || mobileSidebarOpen) && <span>Logout</span>}
           </button>
 
           <button
             onClick={toggleSidebar}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
+            className={`hidden md:flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
               text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all duration-200
               ${collapsed ? 'justify-center' : ''}`}
           >

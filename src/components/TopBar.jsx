@@ -1,4 +1,4 @@
-import { Bell, Search, Globe, Wifi, Clock, Shield, TrendingUp, ShieldAlert, Zap, X } from 'lucide-react';
+import { Bell, Search, Globe, Wifi, Clock, Shield, TrendingUp, ShieldAlert, Zap, X, Menu } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -35,7 +35,7 @@ const ROLE_BRAND = {
 
 export default function TopBar({ title, subtitle }) {
   const [time, setTime] = useState(new Date());
-  const { user, logout } = useAuth();
+  const { user, logout, openMobileSidebar } = useAuth();
   const { unreadCount } = useNotifications();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -67,12 +67,21 @@ export default function TopBar({ title, subtitle }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between px-6 py-3
+    <header className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3
       bg-surface-950/70 backdrop-blur-xl border-b border-white/[0.06]">
-      {/* Left - Title */}
-      <div>
-        <h1 className="text-lg font-bold font-display text-white tracking-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>}
+      {/* Left - Hamburger & Title */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={openMobileSidebar}
+          className="md:hidden text-white/70 hover:text-white p-2 rounded-xl bg-white/[0.05] border border-white/[0.08] active:scale-95 transition-all"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <h1 className="text-sm sm:text-lg font-bold font-display text-white tracking-tight leading-tight truncate">{title}</h1>
+          {subtitle && <p className="text-[10px] sm:text-xs text-white/40 mt-0.5 truncate">{subtitle}</p>}
+        </div>
       </div>
 
       {/* Right - Controls */}

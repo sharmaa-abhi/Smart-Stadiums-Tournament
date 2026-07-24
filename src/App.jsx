@@ -27,17 +27,20 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
+import BottomNav from './components/BottomNav';
+
 function AppLayout({ children }) {
   const { sidebarCollapsed, user } = useAuth();
   const currentRole = user?.role || 'operator';
   return (
-    <div className="flex min-h-screen bg-surface-950 stadium-grid relative overflow-hidden">
+    <div className="flex min-h-screen bg-surface-950 stadium-grid relative overflow-x-hidden">
       <StadiumBackdrop role={currentRole} />
       <Sidebar />
       <NotificationToast />
-      <main className={`flex-1 min-w-0 transition-all duration-300 ease-in-out relative z-[1] ${sidebarCollapsed ? 'ml-[72px]' : 'ml-[260px]'}`}>
+      <main className={`flex-1 min-w-0 transition-all duration-300 ease-in-out relative z-[1] pb-20 md:pb-6 ${sidebarCollapsed ? 'md:ml-[72px]' : 'md:ml-[260px]'}`}>
         {children}
       </main>
+      <BottomNav />
     </div>
   );
 }

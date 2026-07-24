@@ -130,7 +130,7 @@ export default function AdminPanel() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: 'Total Users', value: users.length, icon: Users, color: 'from-brand-500 to-accent-500' },
           { label: 'Admins', value: roleCount('admin'), icon: Shield, color: 'from-rose-500 to-orange-500' },
@@ -149,9 +149,9 @@ export default function AdminPanel() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Table */}
-        <div className="col-span-2 glass-card p-5 space-y-4">
+        <div className="lg:col-span-2 glass-card p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-white">All Users</h2>
             <button onClick={() => window.location.reload()} className="p-2 rounded-lg hover:bg-white/[0.05] text-white/40 hover:text-white/70 transition-colors">

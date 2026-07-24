@@ -242,12 +242,19 @@ export function AuthProvider({ children }) {
     return user.role.toLowerCase() === roleName.toLowerCase() || user.role.toLowerCase() === 'admin';
   }, [user]);
 
+  // Mobile Sidebar Drawer State
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const openMobileSidebar = useCallback(() => setMobileSidebarOpen(true), []);
+  const closeMobileSidebar = useCallback(() => setMobileSidebarOpen(false), []);
+  const toggleMobileSidebar = useCallback(() => setMobileSidebarOpen(prev => !prev), []);
+
   return (
     <AuthContext.Provider value={{
       user, token, loading, isAuthenticated, 
       loginWithAuth0, loginMock, triggerPasswordReset, logout,
       login: loginMock, register: loginMock, // Backward-compatible aliases for legacy callers/tests
       sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId,
+      mobileSidebarOpen, openMobileSidebar, closeMobileSidebar, toggleMobileSidebar,
       hasPermission, hasRole,
       isProfileOpen, openProfile: () => setIsProfileOpen(true), closeProfile: () => setIsProfileOpen(false),
       sessionExpired, setSessionExpired

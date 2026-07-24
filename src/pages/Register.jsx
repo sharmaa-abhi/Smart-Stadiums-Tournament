@@ -69,7 +69,7 @@ export default function Register() {
   const [activeTheme, setActiveTheme] = useState('cyberpunk');
   const [selectedSector, setSelectedSector] = useState('north_stand');
 
-  const { register } = useAuth();
+  const { register, loginMock } = useAuth();
   const navigate = useNavigate();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
@@ -81,7 +81,11 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register(name, email, password, role);
+      if (typeof register === 'function') {
+        await register(name, email, password, role);
+      } else {
+        await loginMock(role, email);
+      }
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');

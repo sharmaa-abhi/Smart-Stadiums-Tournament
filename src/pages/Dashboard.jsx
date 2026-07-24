@@ -161,18 +161,18 @@ export default function Dashboard() {
           style={{ background: 'rgba(255,255,255,0.02)' }}
         >
           <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient} opacity-5`} />
-          <div className="relative flex items-center justify-between">
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <p className="text-xs text-white/40 uppercase tracking-widest font-medium mb-1">Welcome back, {user?.name?.split(' ')[0]}</p>
               <h2 className="text-lg font-bold text-white">{config.title}</h2>
               <p className="text-sm text-white/50 mt-0.5">{config.subtitle}</p>
             </div>
-            <div className="hidden md:flex items-center gap-3">
+            <div className="grid grid-cols-2 sm:flex items-center gap-3 w-full md:w-auto">
               {config.quick.map(({ label, icon: Icon, to, color }) => (
                 <button
                   key={to}
                   onClick={() => navigate(to)}
-                  className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-all duration-200 group"
+                  className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-all duration-200 group w-full sm:w-auto"
                 >
                   <Icon className={`w-4 h-4 ${color} group-hover:scale-110 transition-transform`} />
                   <span className="text-[10px] text-white/50 whitespace-nowrap">{label}</span>
@@ -183,7 +183,7 @@ export default function Dashboard() {
         </motion.div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Users} label="Total Fans In-Venue" value={kpis?.totalFans?.toLocaleString() ?? '—'} color="brand" delay={0} trend="up" trendValue="+1,240 last 15m" />
           <StatCard icon={Timer} label="Avg Queue Time" value={kpis?.avgQueueTime ?? '—'} unit="min" color="accent" delay={0.05} trend="down" trendValue="-0.8 min" />
           <StatCard icon={ShieldCheck} label="Incidents Resolved" value={kpis?.incidentsResolved ?? '—'} color="emerald" delay={0.1} trend="up" trendValue="+3 today" />
