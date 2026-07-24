@@ -14,7 +14,8 @@ dev-dist
 
 # Environment files
 .env
-.env.*
+.env
+.env.example
 server/.env
 
 # Databases (will be created at runtime)
