@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, AlertCircle, ArrowRight, Eye, EyeOff, Shield, CheckSquare, Square, Globe } from 'lucide-react';
+import { Zap, AlertCircle, Shield, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { StadiumBackdrop } from '../components/StadiumBackdrop';
 
@@ -49,76 +49,25 @@ const ROLE_SCANLINE = {
 };
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [role, setRole] = useState('operator');
   const [activeTheme, setActiveTheme] = useState('cyberpunk');
   const [selectedSector, setSelectedSector] = useState('north_stand');
 
-  const { loginWithAuth0, loginMock, triggerPasswordReset } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
   const themeObj = THEMES[activeTheme] || THEMES.cyberpunk;
 
-  const handleEmailChange = (e) => {
-    const val = e.target.value;
-    setEmail(val);
-    const lowerVal = val.toLowerCase();
-    if (lowerVal.includes('admin')) {
-      setRole('admin');
-    } else if (lowerVal.includes('security') || lowerVal.includes('guard')) {
-      setRole('security');
-    } else if (lowerVal.includes('manager') || lowerVal.includes('director')) {
-      setRole('manager');
-    } else if (lowerVal.includes('operator') || lowerVal.includes('staff')) {
-      setRole('operator');
-    }
-  };
-
-  const handleAuth0UniversalLogin = async (connection = null) => {
+  const handleAuth0Login = async (connection = null) => {
     setError('');
     setIsLoading(true);
     try {
-      await loginWithAuth0(role, connection);
+      await login(role, connection);
     } catch (err) {
       setError(err.message || 'Auth0 redirection failed.');
       setIsLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
-    try {
-      await loginMock(role, email);
-      navigate('/', { replace: true });
-    } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setError('Please enter your email address to reset password.');
-      return;
-    }
-    setError('');
-    setSuccessMsg('');
-    try {
-      await triggerPasswordReset(email);
-      setSuccessMsg('Auth0 password reset requested. Redirecting to reset screen...');
-    } catch (err) {
-      setError(err.message || 'Password reset request failed.');
     }
   };
 
@@ -162,7 +111,7 @@ export default function Login() {
           <StadiumGateMapPreview selectedSector={selectedSector} onSelectSector={setSelectedSector} />
         </motion.div>
 
-        {/* Center: Main Authentication Card */}
+        {/* Center: Auth0 Authentication Card */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -173,7 +122,7 @@ export default function Login() {
             <div className="mb-5 flex justify-between items-center">
               <div>
                 <h2 className="text-lg font-bold text-white">Operations Console</h2>
-                <p className="text-xs text-slate-400">Select role & sign in</p>
+                <p className="text-xs text-slate-400">Select role & sign in via Auth0</p>
               </div>
 
               {/* Role Switcher */}
@@ -208,12 +157,13 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Social Logins via Auth0 */}
+            {/* Auth0 Social Logins */}
             <div className="grid grid-cols-2 gap-2.5 mb-4">
               <button
                 type="button"
-                onClick={() => handleAuth0UniversalLogin('google-oauth2')}
-                className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white border border-slate-700/60 transition-all cursor-pointer"
+                onClick={() => handleAuth0Login('google-oauth2')}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white border border-slate-700/60 transition-all cursor-pointer disabled:opacity-50"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -226,8 +176,9 @@ export default function Login() {
 
               <button
                 type="button"
-                onClick={() => handleAuth0UniversalLogin('windowslive')}
-                className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white border border-slate-700/60 transition-all cursor-pointer"
+                onClick={() => handleAuth0Login('windowslive')}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-white border border-slate-700/60 transition-all cursor-pointer disabled:opacity-50"
               >
                 <svg className="w-4 h-4" viewBox="0 0 23 23">
                   <path fill="#f35325" d="M1 1h10v10H1z"/>
@@ -239,128 +190,47 @@ export default function Login() {
               </button>
             </div>
 
+            {/* Auth0 Universal Login — Primary CTA */}
             <button
               type="button"
-              onClick={() => handleAuth0UniversalLogin()}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-xs font-bold text-white shadow-lg transition-all mb-4 cursor-pointer"
+              onClick={() => handleAuth0Login()}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-sm font-bold text-white shadow-lg transition-all cursor-pointer disabled:opacity-50"
             >
-              <Shield className="w-4 h-4 text-cyan-200" />
-              Auth0 Universal Login (PKCE + OIDC)
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Shield className="w-4 h-4 text-cyan-200" />
+                  Sign In with Auth0 (PKCE + OIDC)
+                </>
+              )}
             </button>
-
-            <div className="relative flex py-2 items-center mb-4">
-              <div className="flex-grow border-t border-slate-800"></div>
-              <span className="flex-shrink mx-3 text-slate-500 text-[10px] font-mono uppercase tracking-wider">or sign in with password</span>
-              <div className="flex-grow border-t border-slate-800"></div>
-            </div>
 
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mb-4"
+                className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 mt-4"
               >
                 <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
                 <span className="text-xs text-rose-300">{error}</span>
               </motion.div>
             )}
 
-            {successMsg && (
-              <motion.div
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-4"
-              >
-                <Globe className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span className="text-xs text-emerald-300">{successMsg}</span>
-              </motion.div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1.5">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={handleEmailChange}
-                    placeholder={`${role}@stadiumgenius.io`}
-                    required
-                    className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
-                  />
-                </div>
+            {/* Security Badge */}
+            <div className="mt-5 pt-4 border-t border-slate-800/80">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[10px] text-emerald-400 font-mono uppercase tracking-wider">Auth0 Enterprise Security — No Passwords Stored Locally</span>
               </div>
 
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs text-slate-400 font-medium">Password</label>
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="text-xs text-cyan-400 hover:underline cursor-pointer"
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    required
-                    minLength={6}
-                    className="w-full pl-11 pr-11 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+              <div className="text-center">
+                <span className="text-xs text-slate-400">Don't have a Fan or Ops account? </span>
+                <Link to="/register" className="text-xs font-bold text-cyan-400 hover:underline">
+                  Register Fan Pass
+                </Link>
               </div>
-
-              {/* Remember Me */}
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={() => setRememberMe(!rememberMe)}
-                  className="flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
-                >
-                  {rememberMe ? (
-                    <CheckSquare className="w-4 h-4 text-cyan-400" />
-                  ) : (
-                    <Square className="w-4 h-4 text-slate-600" />
-                  )}
-                  Remember session on this device
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient} text-xs font-bold text-white transition-all disabled:opacity-50 cursor-pointer`}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Sign In to {role.toUpperCase()} Console
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
-              <span className="text-xs text-slate-400">Don't have a Fan or Ops account? </span>
-              <Link to="/register" className="text-xs font-bold text-cyan-400 hover:underline">
-                Register Fan Pass
-              </Link>
             </div>
           </div>
         </motion.div>
@@ -377,7 +247,7 @@ export default function Login() {
       </div>
 
       <p className="text-center text-[10px] text-slate-600 mt-6 uppercase tracking-wider relative z-10">
-        StadiumGenius v1.0 • Auth0 & RBAC Enterprise Security
+        StadiumGenius v1.0 • Auth0 RBAC Enterprise Security • No Local Passwords
       </p>
     </div>
   );

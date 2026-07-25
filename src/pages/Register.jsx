@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Mail, Lock, User, Shield, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Zap, Shield, AlertCircle, Globe } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { StadiumBackdrop } from '../components/StadiumBackdrop';
 
@@ -59,37 +59,24 @@ const ROLE_SCANLINE = {
 };
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [role, setRole] = useState('operator');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTheme, setActiveTheme] = useState('cyberpunk');
   const [selectedSector, setSelectedSector] = useState('north_stand');
 
-  const { register, loginMock } = useAuth();
-  const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
   const themeObj = THEMES[activeTheme] || THEMES.cyberpunk;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleAuth0Signup = async () => {
     setError('');
     setIsLoading(true);
-
     try {
-      if (typeof register === 'function') {
-        await register(name, email, password, role);
-      } else {
-        await loginMock(role, email);
-      }
-      navigate('/', { replace: true });
+      await signup(role);
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
+      setError(err.message || 'Auth0 signup redirection failed.');
       setIsLoading(false);
     }
   };
@@ -134,7 +121,7 @@ export default function Register() {
           <MatchDayHypeWidget />
         </motion.div>
 
-        {/* Center: Register Form */}
+        {/* Center: Register Card — Auth0 Only */}
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -144,30 +131,7 @@ export default function Register() {
           <div className={`glass-card rounded-2xl p-6 border ${themeObj.cardBorder} shadow-2xl backdrop-blur-2xl`}>
             <div className="mb-5">
               <h2 className="text-lg font-bold font-display text-white">Create Account</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Set up credentials & sector preference</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={async () => {
-                setError('');
-                try {
-                  await register(undefined, undefined, undefined, role);
-                  navigate('/', { replace: true });
-                } catch (err) {
-                  setError(err.message || 'Auth0 registration failed.');
-                }
-              }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-white border border-slate-700/60 transition-all mb-4 cursor-pointer"
-            >
-              <Shield className="w-4 h-4 text-cyan-400 animate-pulse" />
-              Register via Auth0 Universal Pass
-            </button>
-
-            <div className="relative flex py-2 items-center mb-4">
-              <div className="flex-grow border-t border-slate-800"></div>
-              <span className="flex-shrink mx-3 text-slate-500 text-[10px] font-mono uppercase tracking-wider">or register with email</span>
-              <div className="flex-grow border-t border-slate-800"></div>
+              <p className="text-xs text-slate-400 mt-0.5">Select your role & register securely via Auth0</p>
             </div>
 
             {error && (
@@ -181,107 +145,58 @@ export default function Register() {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              {/* Name */}
-              <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Full Name</label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Alex Morgan"
-                    required
-                    className="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="fan@stadiumgenius.io"
-                    required
-                    className="w-full pl-11 pr-4 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 characters"
-                    required
-                    minLength={6}
-                    className="w-full pl-11 pr-11 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 transition-colors"
-                  />
+            {/* Role Selector */}
+            <div className="mb-5">
+              <label className="text-xs text-slate-400 font-medium block mb-2">Select Role Profile</label>
+              <div className="grid grid-cols-2 gap-2">
+                {roles.map((r) => (
                   <button
+                    key={r.value}
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                    onClick={() => setRole(r.value)}
+                    className={`p-2.5 rounded-xl text-left transition-all duration-200 border ${
+                      role === r.value
+                        ? ROLE_HIGHLIGHTS[r.value]
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800/60'
+                    }`}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    <p className="text-xs font-semibold">{r.label}</p>
+                    <p className="text-[9px] opacity-60">{r.desc}</p>
                   </button>
-                </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Auth0 Signup — Primary CTA */}
+            <button
+              type="button"
+              onClick={handleAuth0Signup}
+              disabled={isLoading}
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient} text-sm font-bold text-white shadow-lg transition-all cursor-pointer disabled:opacity-50`}
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Shield className="w-4 h-4 text-white/80" />
+                  Register via Auth0 Secure Signup
+                </>
+              )}
+            </button>
+
+            {/* Security Info */}
+            <div className="mt-5 pt-4 border-t border-slate-800/80">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[10px] text-emerald-400 font-mono uppercase tracking-wider">Auth0 Enterprise Signup — Secure & Verified</span>
               </div>
 
-              {/* Role Selector */}
-              <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Role Profile</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.value}
-                      type="button"
-                      onClick={() => setRole(r.value)}
-                      className={`p-2 rounded-xl text-left transition-all duration-200 border ${
-                        role === r.value
-                          ? ROLE_HIGHLIGHTS[r.value]
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800/60'
-                      }`}
-                    >
-                      <p className="text-xs font-semibold">{r.label}</p>
-                      <p className="text-[9px] opacity-60">{r.desc}</p>
-                    </button>
-                  ))}
-                </div>
+              <div className="text-center">
+                <span className="text-xs text-slate-400">Already registered? </span>
+                <Link to="/login" className="text-xs font-bold text-cyan-400 hover:underline">
+                  Sign in
+                </Link>
               </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r ${brand.buttonGradient} text-xs font-bold text-white transition-all disabled:opacity-50 cursor-pointer`}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Complete Registration
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-4 pt-3 border-t border-slate-800 text-center">
-              <span className="text-xs text-slate-400">Already registered? </span>
-              <Link to="/login" className="text-xs font-bold text-cyan-400 hover:underline">
-                Sign in
-              </Link>
             </div>
           </div>
         </motion.div>
@@ -298,7 +213,7 @@ export default function Register() {
       </div>
 
       <p className="text-center text-[10px] text-slate-600 mt-6 uppercase tracking-wider relative z-10">
-        FIFA World Cup 2026 — Venue Operations Platform
+        FIFA World Cup 2026 — Venue Operations Platform • Auth0 Verified
       </p>
     </div>
   );

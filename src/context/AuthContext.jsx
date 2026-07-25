@@ -39,16 +39,18 @@ export function AuthProvider({ children }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  const isAuthenticated = !!user && !!token;
+  // Auth is valid ONLY when Auth0 says so AND we have a user object
+  const isAuthenticated = auth0IsAuthenticated && !!user;
 
-  // Sync authentication state with Auth0 and FastAPI Backend
+  // Sync authentication state with Auth0
   useEffect(() => {
     const initAuth = async () => {
       if (auth0Loading) return;
 
+      // If Auth0 authenticated — sync user profile
       if (auth0IsAuthenticated && auth0User) {
         try {
-          // Attempt to get real JWT access token from Auth0
+          // Get real JWT access token from Auth0
           let accessToken = null;
           try {
             accessToken = await getAccessTokenSilently();
@@ -57,13 +59,13 @@ export function AuthProvider({ children }) {
           }
 
           const pendingRole = localStorage.getItem('sg_auth0_role') || 'operator';
-          
+
           if (accessToken) {
             localStorage.setItem('sg_token', accessToken);
             setToken(accessToken);
           }
 
-          // Sync with FastAPI Backend
+          // Sync with Backend
           try {
             const syncResult = await api.syncAuth0User();
             setUser({
@@ -71,7 +73,7 @@ export function AuthProvider({ children }) {
               permissions: syncResult.permissions || DEFAULT_ROLE_PERMISSIONS[syncResult.user.role] || []
             });
           } catch (syncErr) {
-            // Fallback sync payload if backend running in offline/mock mode
+            // Backend unavailable — build user from Auth0 profile
             const role = pendingRole.toLowerCase();
             const fallbackUser = {
               auth0_id: auth0User.sub,
@@ -85,11 +87,6 @@ export function AuthProvider({ children }) {
               permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
             };
             setUser(fallbackUser);
-            if (!accessToken) {
-              const mockToken = `mock-${role}-jwt-token`;
-              localStorage.setItem('sg_token', mockToken);
-              setToken(mockToken);
-            }
           }
           localStorage.removeItem('sg_auth0_role');
         } catch (err) {
@@ -98,54 +95,19 @@ export function AuthProvider({ children }) {
           setLoading(false);
         }
       } else {
-        const storedToken = localStorage.getItem('sg_token');
-        if (!storedToken) {
-          setUser(null);
-          setToken(null);
-          setLoading(false);
-          return;
-        }
-
-        try {
-          const profile = await api.getMe();
-          setUser({
-            ...profile,
-            permissions: profile.permissions || DEFAULT_ROLE_PERMISSIONS[profile.role] || []
-          });
-          setToken(storedToken);
-        } catch (err) {
-          console.warn('Token validation failed on startup:', err);
-          // If token valid locally (mock or stored)
-          if (storedToken.startsWith('mock-')) {
-            const role = storedToken.includes('admin') ? 'admin' :
-                         storedToken.includes('manager') ? 'manager' :
-                         storedToken.includes('security') ? 'security' : 'operator';
-            setUser({
-              auth0_id: `mock-${role}-id`,
-              name: `Stadium ${role.charAt(0).toUpperCase() + role.slice(1)}`,
-              email: `${role}@stadiumgenius.io`,
-              role: role,
-              account_status: 'active',
-              email_verified: true,
-              last_login: new Date().toISOString(),
-              permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
-            });
-          } else {
-            localStorage.removeItem('sg_token');
-            setUser(null);
-            setToken(null);
-          }
-        } finally {
-          setLoading(false);
-        }
+        // Not authenticated via Auth0 — clear everything
+        localStorage.removeItem('sg_token');
+        setUser(null);
+        setToken(null);
+        setLoading(false);
       }
     };
 
     initAuth();
   }, [auth0Loading, auth0IsAuthenticated, auth0User, getAccessTokenSilently]);
 
-  // Auth0 Login Triggers
-  const loginWithAuth0 = useCallback(async (selectedRole, connection = null) => {
+  // Auth0 Login — the ONLY way to authenticate
+  const login = useCallback(async (selectedRole, connection = null) => {
     if (selectedRole) {
       localStorage.setItem('sg_auth0_role', selectedRole);
     }
@@ -157,28 +119,19 @@ export function AuthProvider({ children }) {
     await loginWithRedirect(params);
   }, [loginWithRedirect]);
 
-  // Direct Mock Login for testing / dev demo
-  const loginMock = useCallback(async (role = 'operator', email = null) => {
-    const userRole = role.toLowerCase();
-    const mockToken = `mock-${userRole}-jwt-token`;
-    const mockUser = {
-      auth0_id: `mock-${userRole}-id-100`,
-      name: `Stadium ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}`,
-      email: email || `${userRole}@stadiumgenius.io`,
-      role: userRole,
-      account_status: 'active',
-      email_verified: true,
-      last_login: new Date().toISOString(),
-      permissions: DEFAULT_ROLE_PERMISSIONS[userRole] || []
-    };
+  // Auth0 Signup — redirect to Auth0 with signup screen hint
+  const signup = useCallback(async (selectedRole) => {
+    if (selectedRole) {
+      localStorage.setItem('sg_auth0_role', selectedRole);
+    }
+    await loginWithRedirect({
+      authorizationParams: {
+        screen_hint: 'signup',
+      }
+    });
+  }, [loginWithRedirect]);
 
-    localStorage.setItem('sg_token', mockToken);
-    setToken(mockToken);
-    setUser(mockUser);
-    return { user: mockUser, token: mockToken };
-  }, []);
-
-  // Password Reset Flow
+  // Password Reset via Auth0
   const triggerPasswordReset = useCallback(async (email) => {
     await loginWithRedirect({
       authorizationParams: {
@@ -188,7 +141,7 @@ export function AuthProvider({ children }) {
     });
   }, [loginWithRedirect]);
 
-  // Logout Handler
+  // Logout — clears local state + Auth0 session
   const logout = useCallback(async () => {
     try {
       await api.logout();
@@ -201,10 +154,8 @@ export function AuthProvider({ children }) {
     setUser(null);
     setIsProfileOpen(false);
 
-    if (auth0IsAuthenticated) {
-      auth0Logout({ logoutParams: { returnTo: window.location.origin } });
-    }
-  }, [auth0IsAuthenticated, auth0Logout]);
+    auth0Logout({ logoutParams: { returnTo: window.location.origin } });
+  }, [auth0Logout]);
 
   // Sidebar & Venue State
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -250,9 +201,9 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, token, loading, isAuthenticated, 
-      loginWithAuth0, loginMock, triggerPasswordReset, logout,
-      login: loginMock, register: loginMock, // Backward-compatible aliases for legacy callers/tests
+      user, token, loading, isAuthenticated,
+      login, signup, triggerPasswordReset, logout,
+      loginWithAuth0: login, // Alias for backward compat in components
       sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId,
       mobileSidebarOpen, openMobileSidebar, closeMobileSidebar, toggleMobileSidebar,
       hasPermission, hasRole,

@@ -15,97 +15,7 @@ function generateToken(user) {
   );
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// ── POST /api/auth/register ──
-router.post('/register', async (req, res) => {
-  const { name, email, password, role } = req.body;
-  console.log(`[API] Register attempt: name="${name}", email="${email}", role="${role}"`);
-  try {
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required.' });
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      return res.status(400).json({ error: 'Please provide a valid email address.' });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
-    }
-
-    const isDev = !process.env.NODE_ENV || process.env.NODE_ENV === 'development';
-    const allowedRoles = isDev
-      ? ['operator', 'security', 'manager', 'admin']
-      : ['operator', 'security', 'manager'];
-
-    const safeRole = (role && allowedRoles.includes(role)) ? role : 'operator';
-
-    // Check if user already exists
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) {
-      return res.status(409).json({ error: 'Email already registered.' });
-    }
-
-    // Hash password
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Insert user
-    const stmt = db.prepare(`
-      INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
-    `);
-    const result = stmt.run(name, email, hashedPassword, safeRole);
-
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
-    const token = generateToken(user);
-    console.log(`[API] Register success for ${email}`);
-
-    res.status(201).json({
-      message: 'Account created successfully.',
-      token,
-      user: sanitizeUser(user),
-    });
-  } catch (err) {
-    console.error('[API] Register error:', err);
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-});
-
-// ── POST /api/auth/login ──
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required.' });
-    }
-
-    // Find user
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    // Compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
-    }
-
-    const token = generateToken(user);
-
-    res.json({
-      message: 'Login successful.',
-      token,
-      user: sanitizeUser(user),
-    });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Internal server error.' });
-  }
-});
-
-// ── POST /api/auth/auth0-login ──
+// ── POST /api/auth/auth0-login ── (The ONLY login method)
 router.post('/auth0-login', async (req, res) => {
   const { email, name, avatar, role } = req.body;
   try {
@@ -148,6 +58,36 @@ router.post('/auth0-login', async (req, res) => {
   }
 });
 
+// ── POST /api/auth/sync ── (Sync Auth0 user with backend)
+router.post('/sync', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const email = req.user.email;
+    const role = req.user.role || 'operator';
+
+    let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+
+    if (!user) {
+      // Auto-create user from Auth0 token data
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(Math.random().toString(36), salt);
+      const stmt = db.prepare(`
+        INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
+      `);
+      const result = stmt.run(email.split('@')[0], email, hashedPassword, role);
+      user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
+    }
+
+    res.json({
+      user: sanitizeUser(user),
+      permissions: [],
+    });
+  } catch (err) {
+    console.error('Auth sync error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
 // ── GET /api/auth/me ──
 router.get('/me', authMiddleware, (req, res) => {
   try {
@@ -160,6 +100,11 @@ router.get('/me', authMiddleware, (req, res) => {
     console.error('Me error:', err);
     res.status(500).json({ error: 'Internal server error.' });
   }
+});
+
+// ── POST /api/auth/logout ──
+router.post('/logout', authMiddleware, (req, res) => {
+  res.json({ message: 'Logged out successfully.' });
 });
 
 export default router;

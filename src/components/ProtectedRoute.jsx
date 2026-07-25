@@ -1,17 +1,5 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { AppShellSkeleton } from './skeleton';
-
+// ProtectedRoute is no longer needed — Auth0Gate in App.jsx handles all authentication.
+// This component now simply renders its children for backward compatibility.
 export default function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return <AppShellSkeleton />;
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
   return children;
 }
