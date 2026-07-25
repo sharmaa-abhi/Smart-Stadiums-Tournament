@@ -56,4 +56,8 @@ Thumbs.db
 
 
 
-.env 
+.env
+
+# Auth0 user creation script (contains secrets)
+create_auth0_users.mjs
+
