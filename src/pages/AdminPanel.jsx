@@ -59,11 +59,6 @@ export default function AdminPanel() {
   const [search, setSearch] = useState('');
   const [filterRole, setFilterRole] = useState('all');
 
-  // Guard: admin check bypassed for dev/testing
-  useEffect(() => {
-    // Bypassed for development
-  }, [user, navigate]);
-
   useEffect(() => {
     api.request('/users/all')
       .then(d => setUsers(d.users || []))

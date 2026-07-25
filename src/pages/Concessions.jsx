@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  UtensilsCrossed, TrendingUp, DollarSign, Clock, Users,
+  UtensilsCrossed, TrendingUp, DollarSign, Clock,
   ShoppingBag, Coffee, Beer, ChefHat, Zap, ArrowUpRight
 } from 'lucide-react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import TopBar from '../components/TopBar';

@@ -118,6 +118,67 @@ class ApiClient {
     return this.request('/auth/csrf-token');
   }
 
+  // ── Venue & Telemetry Operations ──
+  async getVenues() {
+    return this.request('/venues');
+  }
+
+  async getVenueAlerts(venueId) {
+    return this.request(`/venues/${venueId}/alerts`);
+  }
+
+  async getVenueOccupancy(venueId) {
+    return this.request(`/venues/${venueId}/occupancy`);
+  }
+
+  async getVenueHeatmap(venueId) {
+    return this.request(`/venues/${venueId}/heatmap`);
+  }
+
+  async getVenueTimeseries(venueId, points = 24) {
+    return this.request(`/venues/${venueId}/timeseries?points=${points}`);
+  }
+
+  async getVenueConcessions(venueId) {
+    return this.request(`/venues/${venueId}/concessions`);
+  }
+
+  async getBroadcasts(venueId) {
+    return this.request(`/broadcast/${venueId}`);
+  }
+
+  // ── Analytics Operations ──
+  async getAnalyticsTrends() {
+    return this.request('/analytics/trends');
+  }
+
+  async getAnalyticsOverview() {
+    return this.request('/analytics/overview');
+  }
+
+  async getAnalyticsPerformance() {
+    return this.request('/analytics/performance');
+  }
+
+  async getAnalyticsRevenue() {
+    return this.request('/analytics/revenue');
+  }
+
+  // ── Profile Operations ──
+  async updateUserProfile(data) {
+    return this.request('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async resetUserPassword(data) {
+    return this.request('/users/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   // ── Administrator Operations ──
   async getAdminUsers() {
     return this.request('/admin/users');

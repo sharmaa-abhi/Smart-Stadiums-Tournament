@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Lock } from 'lucide-react';
 
@@ -9,7 +7,6 @@ import { Lock } from 'lucide-react';
  */
 export default function PermissionGuard({ permission, children, fallback = null }) {
   const { hasPermission, user } = useAuth();
-  const navigate = useNavigate();
 
   const allowed = hasPermission(permission);
 

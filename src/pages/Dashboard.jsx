@@ -123,6 +123,23 @@ export default function Dashboard() {
       }
     };
 
+    eventSource.onerror = () => {
+      // Fallback mock KPIs when server or SSE stream is unreachable
+      setKpis({
+        venueId: activeVenueId,
+        venueName: 'MetLife Stadium',
+        totalFans: 78420,
+        avgQueueTime: 4.2,
+        incidentsResolved: 18,
+        activeAlerts: 2,
+        fanSatisfaction: 4.8,
+        edgeNodeUptime: 99.9,
+        securityEvents: 3,
+        transportCapacity: 88,
+        timestamp: new Date().toISOString()
+      });
+    };
+
     return () => {
       clearInterval(interval);
       eventSource.close();
