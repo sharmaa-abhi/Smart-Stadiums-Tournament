@@ -1,649 +1,207 @@
-# 🧠 BRAIN.md — StadiumGenius Project Intelligence File
+# 🧠 BRAIN.md — StadiumGenius Complete Project Map & AI Guide
 
-> **Purpose**: Yeh file kisi bhi AI agent (Copilot, Gemini, Claude, GPT, Cursor, etc.) ko poora project samajhne mein madad karti hai — bina har file ko scan kiye. Isko padho, samjho, aur directly kaam shuru karo.
-
-> **Last Updated**: 2026-07-22
-> **Owner**: Abhi Sharma
-
----
-
-## 📌 PROJECT IDENTITY
-
-| Key | Value |
-|-----|-------|
-| **Project Name** | StadiumGenius |
-| **Tagline** | AI-Powered Smart Stadium Operations Platform |
-| **Domain** | FIFA World Cup 2026 — Stadium Operations & Crowd Management |
-| **Repo** | `Smart-Stadiums-Tournament` |
-| **License** | MIT |
-| **Version** | 1.0.0 |
+> **Target Audience**: AI Agents (Claude, Gemini, GPT, Cursor, Copilot) & Developers.  
+> **Goal**: Simple 1-line explanation of **EVERY single file and folder** in the project so any agent or developer understands what each file does instantly.  
+> **Language**: English  
+> **Last Updated**: 2026-07-26  
 
 ---
 
-## 🏗️ HIGH-LEVEL ARCHITECTURE
+## ⚡ QUICK OVERVIEW
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        BROWSER (Client)                         │
-│  React 19 + Vite 8 + Tailwind CSS v4 + Framer Motion           │
-│  Auth0 SDK + React Router v7 + Recharts + Lucide Icons          │
-│  PWA (Service Worker via vite-plugin-pwa)                       │
-└──────────────────┬──────────────────────┬───────────────────────┘
-                   │ REST API (JSON)      │ SSE (Server-Sent Events)
-                   ▼                      ▼
-┌──────────────────────────────┐  ┌───────────────────────────────┐
-│  🐍 FastAPI Backend (PRIMARY)│  │  📦 Express.js Backend (LEGACY│
-│  Port: 8000                  │  │  /DEMO) Port: 5000            │
-│  SQLAlchemy ORM              │  │  node:sqlite (DatabaseSync)   │
-│  Auth0 RS256 JWT             │  │  JWT + bcrypt                 │
-│  Pydantic Schemas            │  │  SSE Notifications Stream     │
-│  RBAC + Audit Logging        │  │  Rate Limiting                │
-│  CSRF + Rate Limiting        │  │                               │
-└──────────┬───────────────────┘  └──────────┬────────────────────┘
-           │                                  │
-           ▼                                  ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    SQLite Database(s)                             │
-│  FastAPI: stadiumgenius.db (via SQLAlchemy, root or server/app/) │
-│  Express: server/db/stadiumgenius.db (via node:sqlite)           │
-└──────────────────────────────────────────────────────────────────┘
-```
-
-### Two Backend Architecture (IMPORTANT!)
-
-This project has **TWO backend servers** that coexist:
-
-1. **FastAPI (Python)** — `server/app/` — **PRIMARY production backend** (port 8000)
-   - Uses SQLAlchemy ORM with Pydantic models
-   - Auth0 RS256 JWT verification with JWKS
-   - Full RBAC with permission-based access control
-   - Runs via: `uvicorn server.app.main:app --reload`
-
-2. **Express.js (Node.js)** — `server/index.js` — **Legacy/Demo backend** (port 5000)
-   - Uses Node.js built-in `node:sqlite` (DatabaseSync)
-   - JWT + bcrypt authentication
-   - SSE notification streaming
-   - Runs via: `cd server && npm run dev`
-
-> ⚠️ **The frontend API client (`src/lib/api.js`) defaults to `http://127.0.0.1:8000/api/v1`** (FastAPI). The SSE notification stream connects to port 5000 (Express).
+- **Project**: StadiumGenius (AI-Powered Smart Stadium Operations Platform for FIFA World Cup 2026)
+- **Frontend**: React 19 + Vite 8 + Tailwind CSS v4 ([src/](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/))
+- **Primary Backend (Port 8000)**: Python FastAPI ([server/app/](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/app/))
+- **Demo Backend (Port 5000)**: Express.js ([server/index.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/index.js))
+- **Database**: SQLite 3 (`stadiumgenius.db`)
 
 ---
 
-## 📁 COMPLETE FILE MAP
+## 📁 1. ROOT DIRECTORY (Configuration & Scripts)
 
-```
-Smart-Stadiums-Tournament/
-│
-├── 🧠 BRAIN.md                          ← THIS FILE (AI agent guide)
-├── 📖 README.md                          ← Project overview & quick start
-├── 📋 extreme_audit_report.md            ← Security audit report
-│
-├── ⚙️ CONFIGURATION FILES
-│   ├── package.json                      ← Frontend deps (React, Tailwind, Recharts)
-│   ├── vite.config.js                    ← Vite + PWA + Tailwind plugin config
-│   ├── vitest.config.js                  ← Test runner config (vitest + jsdom)
-│   ├── playwright.config.js              ← E2E test config (Playwright)
-│   ├── .oxlintrc.json                    ← Linter config (OxLint)
-│   ├── .env                              ← Frontend env (VITE_AUTH0_DOMAIN, VITE_AUTH0_CLIENT_ID)
-│   ├── .env.example                      ← Template for frontend env
-│   ├── requirements.txt                  ← Python deps (FastAPI, SQLAlchemy, PyJWT)
-│   ├── Dockerfile                        ← Multi-stage: Node build → Python prod image
-│   ├── docker-compose.yml                ← 3 services: api(FastAPI), express, nginx
-│   └── .dockerignore / .gitignore
-│
-├── 🌐 index.html                         ← SPA entry (loads /src/main.jsx)
-│
-├── 📂 src/                               ← ★ REACT FRONTEND ★
-│   ├── main.jsx                          ← App bootstrap (Auth0Provider + BrowserRouter)
-│   ├── App.jsx                           ← Route definitions + Layout + RBAC guards
-│   ├── index.css                         ← Global styles (Tailwind v4 base)
-│   │
-│   ├── 📂 context/                       ← React Context Providers
-│   │   ├── AuthContext.jsx               ← Auth state, login/logout, RBAC, sidebar, venue
-│   │   └── NotificationContext.jsx       ← SSE-based real-time notifications
-│   │
-│   ├── 📂 lib/                           ← Client Libraries
-│   │   └── api.js                        ← ApiClient class (fetch wrapper, JWT, retry, abort)
-│   │
-│   ├── 📂 data/                          ← Static/Mock Data
-│   │   └── mockData.js                   ← Simulated venues, zones, KPIs, heatmaps, alerts
-│   │
-│   ├── 📂 components/                    ← Shared UI Components
-│   │   ├── Sidebar.jsx                   ← Main navigation sidebar (collapsible)
-│   │   ├── TopBar.jsx                    ← Top header bar with search, venue selector
-│   │   ├── ProtectedRoute.jsx            ← Redirect to /login if not authenticated
-│   │   ├── RoleGuard.jsx                 ← RBAC route guard (checks user.role)
-│   │   ├── PermissionGuard.jsx           ← Permission-level guard (checks permission codes)
-│   │   ├── ErrorBoundary.jsx             ← React error boundary with fallback UI
-│   │   ├── ScrollToTop.jsx               ← Scroll to top on route change
-│   │   ├── PWAInstallBanner.jsx          ← PWA install prompt banner
-│   │   ├── NotificationPanel.jsx         ← Notification dropdown panel
-│   │   ├── NotificationToast.jsx         ← Toast notification popups
-│   │   ├── UserProfilePopup.jsx          ← User profile modal
-│   │   ├── AlertCard.jsx                 ← Alert display card
-│   │   ├── StatCard.jsx                  ← KPI stat display card
-│   │   ├── StadiumBackdrop.jsx           ← Animated stadium background
-│   │   ├── StadiumHeatmap.jsx            ← Crowd density heatmap visualization
-│   │   └── 📂 skeleton/                  ← Loading skeleton components
-│   │       ├── index.js                  ← Barrel exports
-│   │       ├── primitives.jsx            ← Base skeleton primitives
-│   │       ├── page-skeletons.jsx        ← Full page skeleton layouts
-│   │       ├── Skeleton.jsx, StatCardSkeleton.jsx, ChartSkeleton.jsx, etc.
-│   │
-│   ├── 📂 pages/                         ← Feature Pages (lazy-loaded)
-│   │   ├── Dashboard.jsx                 ← Main operator dashboard (KPIs, charts, alerts)
-│   │   ├── DigitalTwin.jsx               ← Stadium digital twin visualization
-│   │   ├── CrowdManagement.jsx           ← Zone occupancy & crowd control
-│   │   ├── Security.jsx                  ← Security dashboard (incidents, patrols, CCTV)
-│   │   ├── Concessions.jsx               ← Food/beverage queue monitoring
-│   │   ├── AIAssistant.jsx               ← AI chatbot interface
-│   │   ├── Broadcast.jsx                 ← PA/App/Screen broadcast management
-│   │   ├── Analytics.jsx                 ← Manager-level analytics & reports
-│   │   ├── AdminPanel.jsx                ← Admin user/role/config management
-│   │   ├── Settings.jsx                  ← User settings & preferences
-│   │   ├── FanPortal.jsx                 ← Public fan-facing portal (no auth)
-│   │   ├── Login.jsx                     ← Login page (Auth0 + local JWT)
-│   │   ├── Register.jsx                  ← Registration page
-│   │   └── NotFound.jsx                  ← 404 page
-│   │
-│   ├── 📂 __tests__/                     ← Frontend Unit Tests (vitest + testing-library)
-│   │   ├── AuthContext.test.jsx
-│   │   ├── Login.test.jsx
-│   │   ├── Register.test.jsx
-│   │   ├── ErrorBoundary.test.jsx
-│   │   └── Accessibility.test.jsx
-│   │
-│   └── setupTests.jsx                    ← Test setup (mocks for Auth0, IntersectionObserver)
-│
-├── 📂 server/                            ← ★ BACKEND(S) ★
-│   ├── .env / .env.example               ← Server env vars
-│   ├── package.json                      ← Express deps (express 5, bcryptjs, jwt, cors)
-│   ├── index.js                          ← Express server entry point (port 5000)
-│   ├── run_server.py                     ← Python script to start FastAPI via uvicorn
-│   │
-│   ├── 📂 db/                            ← Express Database (SQLite via node:sqlite)
-│   │   ├── database.js                   ← DB init, table creation, seed data
-│   │   └── stadiumgenius.db              ← SQLite database file
-│   │
-│   ├── 📂 middleware/                    ← Express Middleware
-│   │   └── auth.js                       ← JWT verification (mock + local + Auth0 fallback)
-│   │
-│   ├── 📂 routes/                        ← Express API Routes (/api/*)
-│   │   ├── auth.js                       ← /api/auth (register, login, auth0-login, me)
-│   │   ├── venues.js                     ← /api/venues (CRUD for stadiums)
-│   │   ├── incidents.js                  ← /api/incidents (incident management)
-│   │   ├── analytics.js                  ← /api/analytics (dashboard stats)
-│   │   ├── broadcast.js                  ← /api/broadcast (PA/app messages)
-│   │   ├── ai.js                         ← /api/ai (AI assistant queries)
-│   │   ├── users.js                      ← /api/users (user management)
-│   │   └── notifications.js              ← /api/notifications (SSE stream)
-│   │
-│   ├── 📂 utils/
-│   │   └── sanitize.js                   ← User object sanitization (strip password)
-│   │
-│   ├── 📂 app/                           ← ★ FastAPI Backend (PRIMARY) ★
-│   │   ├── __init__.py
-│   │   ├── main.py                       ← FastAPI app factory, middleware, router setup
-│   │   ├── config.py                     ← Settings (pydantic-settings, env vars)
-│   │   │
-│   │   ├── 📂 core/                      ← Core Business Logic
-│   │   │   ├── auth0.py                  ← Auth0 JWT validator (RS256/JWKS), ROLE_PERMISSIONS_MAP
-│   │   │   └── security.py              ← get_current_user, require_permission, require_role, audit_log
-│   │   │
-│   │   ├── 📂 db/                        ← Database Layer (SQLAlchemy)
-│   │   │   ├── database.py               ← Engine, SessionLocal, Base, get_db dependency
-│   │   │   └── models.py                 ← All ORM models (User, Role, Permission, Incident, Venue, etc.)
-│   │   │
-│   │   ├── 📂 schemas/                   ← Pydantic Schemas
-│   │   │   └── user.py                   ← UserCreate, UserResponse, etc.
-│   │   │
-│   │   ├── 📂 middleware/                ← FastAPI Middleware
-│   │   │   ├── security_headers.py       ← Security headers (X-Frame-Options, HSTS, CSP)
-│   │   │   ├── rate_limit.py             ← In-memory rate limiter (120 req/min)
-│   │   │   └── csrf.py                   ← CSRF token validation
-│   │   │
-│   │   └── 📂 api/v1/endpoints/          ← FastAPI API Routers
-│   │       ├── auth.py                   ← /api/v1/auth/* (sync, me, csrf-token, logout)
-│   │       ├── admin.py                  ← /api/v1/admin/* (users, roles, audit, config)
-│   │       ├── manager.py                ← /api/v1/manager/* (dashboard, staff, reports)
-│   │       ├── operator.py               ← /api/v1/operator/* (crowd, incidents, AI)
-│   │       └── security.py               ← /api/v1/security/* (dashboard, cctv, alerts)
-│   │
-│   └── 📂 __tests__/ & tests/            ← Backend tests
-│       └── api.test.js                   ← Express API integration tests
-│
-├── 📂 e2e/                               ← Playwright E2E Tests
-│   ├── auth.spec.js                      ← Auth flow E2E tests
-│   └── performance.spec.js               ← Performance E2E tests
-│
-├── 📂 docs/                              ← Documentation
-│   ├── architecture.md                   ← System architecture doc
-│   ├── api.md                            ← API endpoint documentation
-│   ├── database-schema.md                ← Database schema docs
-│   ├── data-flow.md                      ← Data flow documentation
-│   ├── security.md                       ← Security implementation docs
-│   ├── deployment.md                     ← Deployment guide
-│   ├── testing.md                        ← Testing strategy docs
-│   ├── ai-workflows.md                   ← AI assistant workflow docs
-│   ├── mvp-roadmap.md                    ← MVP roadmap
-│   ├── AUDIT_REPORT.md                   ← Security audit report
-│   ├── SYSTEM_GUIDE.md                   ← System operations guide
-│   └── user-stories.md                   ← User stories
-│
-├── 📂 public/                            ← Static assets (icons, favicon)
-├── 📂 dist/                              ← Production build output
-└── 📂 coverage/                          ← Test coverage reports
-```
+| File / Folder | Simple 1-Line Explanation |
+|---------------|---------------------------|
+| [package.json](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/package.json) | Frontend Node.js dependencies, scripts (`dev`, `build`, `test`), and test runners |
+| [vite.config.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/vite.config.js) | Vite bundler config with PWA plugin & Tailwind v4 support |
+| [vitest.config.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/vitest.config.js) | Unit test configuration (Vitest runner with jsdom browser environment) |
+| [playwright.config.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/playwright.config.js) | End-to-End (E2E) browser testing setup for Playwright |
+| [.oxlintrc.json](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/.oxlintrc.json) | Code linter rules for fast OxLint checks |
+| [.env](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/.env) / [.env.example](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/.env.example) | Frontend environment variables (Auth0 domain, Client ID, API URLs) |
+| [requirements.txt](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/requirements.txt) | Python dependencies for FastAPI, SQLAlchemy, PyJWT, & Pytest |
+| [Dockerfile](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/Dockerfile) | Production multi-stage Docker build file (Node frontend → Python backend) |
+| [docker-compose.yml](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docker-compose.yml) | Orchestrates FastAPI backend, Express server, and Nginx reverse proxy containers |
+| [index.html](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/index.html) | Single-page web application (SPA) main HTML entry file |
+| `stadiumgenius.db` | Local SQLite database containing seeded users, venues, alerts, & incidents |
+| [README.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/README.md) | Main user-facing project documentation and quick-start guide |
+| [BRAIN.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/BRAIN.md) | **THIS FILE** — Complete system blueprint & file guide for AI Agents |
+| [PROJECT_CODE_EXPLANATION.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/PROJECT_CODE_EXPLANATION.md) | Detailed technical breakdown of code architecture and data flows |
+| [extreme_audit_report.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/extreme_audit_report.md) | Complete security vulnerability assessment report |
+| [implementation_plan.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/implementation_plan.md) | Implementation blueprint & active feature development plan |
+
+### 🛠️ Root Utility & Test Verification Scripts
+- [create_auth0_users.mjs](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/create_auth0_users.mjs) — Script to create Auth0 test user accounts via Auth0 Management API.
+- [test_all_roles.mjs](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/test_all_roles.mjs) — Automated test script verifying role-based access across all 4 roles.
+- [test_auth0_fastapi_e2e.py](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/test_auth0_fastapi_e2e.py) — E2E test verifying Auth0 JWT authentication with FastAPI backend.
+- [verify_all_flows.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/verify_all_flows.js) — Master script verifying all user flows, navigation, & API endpoints.
+- [verify_login_phase.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/verify_login_phase.js) — Verifies authentication login cycle, session storage, and JWT token handling.
+- [verify_roles.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/verify_roles.js) — Verifies local role permissions and route access rules.
+- [verify_roles_auth0.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/verify_roles_auth0.js) — Verifies role synchronization between Auth0 cloud & local system.
 
 ---
 
-## 🔐 AUTHENTICATION & AUTHORIZATION SYSTEM
+## 💻 2. FRONTEND SOURCE DIRECTORY (`src/`)
 
-### Dual Auth Strategy
-
-```
-┌─────────────────────────────────────────────────┐
-│              Authentication Flow                 │
-├─────────────────────────────────────────────────┤
-│                                                  │
-│  Method 1: Auth0 SSO (Production)                │
-│  ├─ Auth0Provider wraps entire app (main.jsx)    │
-│  ├─ loginWithRedirect() → Auth0 hosted login     │
-│  ├─ Returns RS256 JWT Access Token               │
-│  ├─ Backend verifies via JWKS endpoint           │
-│  └─ User synced to local DB on first login       │
-│                                                  │
-│  Method 2: Local JWT (Dev/Demo)                  │
-│  ├─ POST /api/auth/register → bcrypt + JWT       │
-│  ├─ POST /api/auth/login → verify + JWT          │
-│  └─ JWT signed with JWT_SECRET (HS256)           │
-│                                                  │
-│  Method 3: Mock Tokens (Testing)                 │
-│  ├─ Token format: "mock-{role}-jwt-token"        │
-│  ├─ AuthContext.loginMock(role) creates instant   │
-│  └─ Only works when ALLOW_MOCK_TOKENS = true     │
-│                                                  │
-└─────────────────────────────────────────────────┘
-```
-
-### RBAC (Role-Based Access Control)
-
-**4 Roles with specific permissions:**
-
-| Role | Permissions | Accessible Pages |
-|------|------------|-------------------|
-| **admin** | `manage:users`, `manage:roles`, `configure:system`, `configure:ai`, `read:incidents`, `delete:incidents`, `read:audit_logs`, `manage:dashboard` | ALL pages + AdminPanel |
-| **manager** | `read:dashboard`, `assign:staff`, `read:reports`, `read:incidents`, `approve:ai`, `allocate:resources` | Dashboard, DigitalTwin, Crowd, Concessions, Analytics, Broadcast, Settings |
-| **operator** | `login`, `read:dashboard`, `update:incidents`, `read:crowd_analytics`, `create:incidents`, `use:ai_assistant` | Dashboard, DigitalTwin, Crowd, Concessions, Broadcast, AIAssistant, Settings |
-| **security** | `login`, `read:security_dashboard`, `respond:incidents`, `verify:alerts`, `read:cctv`, `update:emergency` | Dashboard, Crowd, Security, Broadcast, Settings |
-
-### Route Protection (Frontend)
-
-```jsx
-// In App.jsx — every protected page uses this pattern:
-<Route path="/security" element={
-  <Page roles={['security', 'admin']}>
-    <Security />
-  </Page>
-} />
-
-// Page component wraps: ProtectedRoute → AppLayout → ErrorBoundary → Suspense → RoleGuard
-```
-
-### Token Storage
-
-| Key | Location | Purpose |
-|-----|----------|---------|
-| `sg_token` | localStorage | JWT access token |
-| `sg_auth0_role` | localStorage | Temp role during Auth0 redirect |
-| `sg_sidebar_collapsed` | localStorage | UI preference |
-| `sg_active_venue_id` | localStorage | Selected venue ID (default: `metlife`) |
+### Core Bootstrap Files
+| File | Simple 1-Line Explanation |
+|------|---------------------------|
+| [src/main.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/main.jsx) | Entry point — initializes Auth0Provider, React Router, & renders App |
+| [src/App.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/App.jsx) | Defines all routes, layout structure, & RBAC route security wrappers |
+| [src/index.css](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/index.css) | Global Tailwind v4 styles, dark theme tokens, & custom utility classes |
+| [src/setupTests.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/setupTests.jsx) | Vitest test setup (mocks Auth0, browser APIs like IntersectionObserver) |
 
 ---
 
-## 🗄️ DATABASE SCHEMAS
-
-### Express SQLite (node:sqlite) — `server/db/database.js`
-
-| Table | Key Columns | Purpose |
-|-------|-------------|---------|
-| `users` | id, name, email, password (bcrypt), role, avatar | User accounts |
-| `venues` | id (text PK), name, city, capacity, country, lat, lng | FIFA 2026 stadiums (7 seeded) |
-| `incidents` | incident_id (text), type, zone, status, priority, assignee | Security/safety incidents |
-| `alerts` | type, severity, title, description, venue_id | Stadium alerts (6 seeded) |
-| `broadcast_messages` | title, message, channel, priority, status, venue_id | PA/app broadcasts (5 seeded) |
-| `ai_conversations` | session_id, role, content, user_id | AI chat history |
-
-### FastAPI SQLAlchemy — `server/app/db/models.py`
-
-| Model | Table | Key Fields | Purpose |
-|-------|-------|------------|---------|
-| `UserModel` | users | auth0_id, email, name, role, account_status, email_verified | Users with Auth0 sync |
-| `RoleModel` | roles | name, description | Role definitions |
-| `PermissionModel` | permissions | code, description | Permission codes |
-| `AuditLogModel` | audit_logs | user_id, action, resource, ip_address, status | Security audit trail |
-| `IncidentModel` | incidents | title, severity, category, status, location, assigned_to | Incident tracking |
-| `SystemConfigModel` | system_configs | key, value, description | System configuration |
-| `VenueModel` | venues_v2 | venue_code, name, city, country, capacity, lat/lng | Stadiums (v2 schema) |
-| `ZoneModel` | zones | code, venue_id, capacity, zone_type | Stadium zones |
-| `GateModel` | gates | name, venue_id, gate_type, status, throughput | Stadium gates |
-| `SensorModel` | sensors | sensor_id, sensor_type, location, status | IoT sensors |
-| `AIRecommendationModel` | ai_recommendations | recommendation_type, confidence, status | AI suggestions |
-| `CrowdSnapshotModel` | crowd_snapshots | venue_code, zone_code, density, occupancy_pct | Crowd telemetry |
-| `EmergencyModel` | emergencies | level, reason, is_active, venue_code | Emergency status |
+### 📂 `src/context/` (React Context Providers)
+- [AuthContext.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/context/AuthContext.jsx) — Manages user login/logout, JWT tokens, RBAC roles, sidebar state, & active venue.
+- [NotificationContext.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/context/NotificationContext.jsx) — Handles real-time SSE alerts from backend and manages toast notifications.
 
 ---
 
-## 🌐 API ENDPOINTS
-
-### FastAPI (PRIMARY — port 8000, prefix `/api/v1`)
-
-| Group | Endpoint | Method | Auth | Permission | Purpose |
-|-------|----------|--------|------|------------|---------|
-| **Auth** | `/auth/sync` | POST | Bearer | — | Sync Auth0 user to DB |
-| | `/auth/me` | GET | Bearer | — | Get current user profile |
-| | `/auth/csrf-token` | GET | — | — | Get CSRF token |
-| | `/auth/logout` | POST | Bearer | — | Logout |
-| **Admin** | `/admin/users` | GET | Bearer | `manage:users` | List all users |
-| | `/admin/users/{id}/role` | PUT | Bearer | `manage:roles` | Update user role |
-| | `/admin/roles` | GET | Bearer | `manage:roles` | Get roles matrix |
-| | `/admin/audit-logs` | GET | Bearer | `read:audit_logs` | Get audit logs |
-| | `/admin/system-config` | POST | Bearer | `configure:system` | Update system config |
-| | `/admin/ai-settings` | POST | Bearer | `configure:ai` | Update AI settings |
-| **Manager** | `/manager/dashboard-summary` | GET | Bearer | `read:dashboard` | Dashboard KPIs |
-| | `/manager/assign-staff` | POST | Bearer | `assign:staff` | Assign staff to sector |
-| | `/manager/reports` | GET | Bearer | `read:reports` | Get reports |
-| | `/manager/approve-ai-recommendation` | POST | Bearer | `approve:ai` | Approve AI suggestion |
-| | `/manager/allocate-resources` | POST | Bearer | `allocate:resources` | Allocate resources |
-| **Operator** | `/operator/crowd-analytics` | GET | Bearer | `read:crowd_analytics` | Crowd density data |
-| | `/operator/incidents` | GET/POST | Bearer | `read/create:incidents` | Incident CRUD |
-| | `/operator/incidents/{id}` | PUT | Bearer | `update:incidents` | Update incident |
-| | `/operator/ai-assistant` | POST | Bearer | `use:ai_assistant` | AI chatbot query |
-| **Security** | `/security/dashboard` | GET | Bearer | `read:security_dashboard` | Security overview |
-| | `/security/cctv-status` | GET | Bearer | `read:cctv` | CCTV camera status |
-| | `/security/verify-alert` | POST | Bearer | `verify:alerts` | Verify/dismiss alert |
-| | `/security/respond-incident` | POST | Bearer | `respond:incidents` | Respond to incident |
-| | `/security/emergency-status` | POST | Bearer | `update:emergency` | Update emergency level |
-
-### Express (LEGACY — port 5000, prefix `/api`)
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/auth/register` | POST | Register new user |
-| `/api/auth/login` | POST | Login with email/password |
-| `/api/auth/auth0-login` | POST | Login via Auth0 callback |
-| `/api/auth/me` | GET | Get current user (JWT required) |
-| `/api/venues/*` | CRUD | Venue management |
-| `/api/incidents/*` | CRUD | Incident management |
-| `/api/analytics/*` | GET | Analytics data |
-| `/api/broadcast/*` | CRUD | Broadcast messages |
-| `/api/ai/*` | POST | AI assistant |
-| `/api/users/*` | CRUD | User management |
-| `/api/notifications/stream` | GET (SSE) | Real-time notification stream |
-| `/api/health` | GET | Health check |
+### 📂 `src/lib/` (Client Helper Libraries)
+- [api.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/lib/api.js) — Central API client singleton (handles HTTP requests, JWT headers, auto-retry, & errors).
 
 ---
 
-## 🎨 FRONTEND PATTERNS & CONVENTIONS
-
-### Tech Stack
-- **React 19** with functional components & hooks
-- **Vite 8** for bundling and HMR
-- **Tailwind CSS v4** (via `@tailwindcss/vite` plugin)
-- **Framer Motion 12** for animations
-- **Recharts 3** for data visualization
-- **Lucide React** for icons
-- **React Router v7** (`react-router-dom`) for routing
-- **Auth0 React SDK** (`@auth0/auth0-react`) for SSO
-
-### Component Patterns
-```
-1. Pages are LAZY LOADED via React.lazy() + Suspense
-2. All pages wrapped in: ProtectedRoute → AppLayout → ErrorBoundary → Suspense → RoleGuard
-3. Skeleton components used as loading fallbacks
-4. Custom hooks: useAuth() from AuthContext, useNotifications() from NotificationContext
-5. API calls go through singleton ApiClient (src/lib/api.js)
-```
-
-### State Management
-- **AuthContext** — User auth state, login/logout, RBAC, sidebar state, venue selection
-- **NotificationContext** — SSE-based real-time notifications
-- **No Redux/Zustand** — Everything via React Context + local state
-
-### Styling Convention
-- Tailwind CSS v4 utility classes
-- Custom CSS in `src/index.css`
-- Dark theme dominant (`bg-surface-950`, dark color tokens)
-- Responsive layout with collapsible sidebar
-
-### Key Custom CSS Classes
-- `stadium-grid` — Background grid pattern
-- `bg-surface-950` — Main dark background
-- Sidebar widths: collapsed=`72px`, expanded=`260px`
+### 📂 `src/data/` (Mock Data & Constants)
+- [mockData.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/data/mockData.js) — Seed data for 7 FIFA World Cup stadiums, crowd heatmaps, alerts, & incident logs.
 
 ---
 
-## 🔧 DEVELOPMENT COMMANDS
-
-```bash
-# ── Frontend ──
-npm install                    # Install frontend dependencies
-npm run dev                    # Start Vite dev server (port 5173)
-npm run build                  # Production build → dist/
-npm run preview                # Preview production build
-npm run lint                   # Run OxLint
-
-# ── Express Backend ──
-cd server
-npm install                    # Install backend dependencies
-npm run dev                    # Start Express with --watch (port 5000)
-npm start                      # Start Express (no watch)
-
-# ── FastAPI Backend ──
-pip install -r requirements.txt  # Install Python deps
-uvicorn server.app.main:app --reload  # Start FastAPI (port 8000)
-# OR
-python server/run_server.py
-
-# ── Testing ──
-npm run test                   # Vitest unit tests
-npm run test:watch             # Vitest watch mode
-npm run test:coverage          # Test coverage report
-npm run test:e2e               # Playwright E2E tests
-npm run test:auth0:extreme     # Auth0 role verification
-npm run test:all:extreme       # All flow verification
-
-# ── Docker ──
-docker compose up --build      # Start all services
-```
+### 📂 `src/components/` (Reusable UI Components)
+| File | Simple 1-Line Explanation |
+|------|---------------------------|
+| [Sidebar.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/Sidebar.jsx) | Left navigation sidebar with role-filtered menu items & collapse button |
+| [TopBar.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/TopBar.jsx) | Top navigation header with venue selector dropdown, search bar, & profile button |
+| [ProtectedRoute.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/ProtectedRoute.jsx) | Route wrapper that redirects unauthenticated users to `/login` |
+| [RoleGuard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/RoleGuard.jsx) | Security guard that blocks page access if user role is not authorized |
+| [PermissionGuard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/PermissionGuard.jsx) | UI element guard that conditionally renders buttons based on specific permissions |
+| [ErrorBoundary.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/ErrorBoundary.jsx) | React error boundary that catches component crashes and shows a fallback UI |
+| [ScrollToTop.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/ScrollToTop.jsx) | Auto-scrolls page to top whenever URL route changes |
+| [PWAInstallBanner.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/PWAInstallBanner.jsx) | Prompts user to install StadiumGenius as a Progressive Web App (PWA) |
+| [NotificationPanel.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/NotificationPanel.jsx) | Dropdown panel showing real-time alert feed history |
+| [NotificationToast.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/NotificationToast.jsx) | Pop-up toast alert overlay for instant security/crowd warnings |
+| [UserProfilePopup.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/UserProfilePopup.jsx) | Modal dialog displaying logged-in user profile & role information |
+| [AlertCard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/AlertCard.jsx) | Card widget displaying alert details (severity, zone, time) |
+| [StatCard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/StatCard.jsx) | Key metric card displaying stadium KPIs (capacity, incidents, gate flow) |
+| [StadiumBackdrop.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/StadiumBackdrop.jsx) | Animated background graphics for dark stadium theme |
+| [StadiumHeatmap.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/components/StadiumHeatmap.jsx) | Visual heatmap widget showing crowd density across stadium sectors |
+| `src/components/skeleton/` | Contains UI skeleton loading state placeholders (`Skeleton.jsx`, `ChartSkeleton.jsx`, `page-skeletons.jsx`) |
 
 ---
 
-## 🏟️ SEEDED DATA (Auto-populated on first run)
-
-### 7 FIFA World Cup 2026 Venues
-| ID | Stadium | City | Capacity |
-|----|---------|------|----------|
-| metlife | MetLife Stadium | New York/NJ | 82,500 |
-| sofi | SoFi Stadium | Los Angeles | 70,240 |
-| attstadium | AT&T Stadium | Dallas | 80,000 |
-| arrowhead | Arrowhead Stadium | Kansas City | 76,416 |
-| lumen | Lumen Field | Seattle | 68,740 |
-| azteca | Estadio Azteca | Mexico City | 87,523 |
-| bmo | BMO Field | Toronto | 45,736 |
-
-### Default Seeded Data
-- **6 alerts** (crowd, security, medical, concession, transport, system)
-- **5 incidents** (unauthorized access, lost child, crowd surge, suspicious package, medical)
-- **5 broadcast messages** (welcome, transport, medical, concession, security)
-
----
-
-## ⚙️ ENVIRONMENT VARIABLES
-
-### Frontend (`.env`)
-```env
-VITE_AUTH0_DOMAIN=dev-rx0mbg0jq10om5js.us.auth0.com
-VITE_AUTH0_CLIENT_ID=aQlxQVzhReZYEieH3NTj0BWLal3upoQm
-VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1     # FastAPI
-VITE_SSE_BASE_URL=http://localhost:5000               # Express SSE
-```
-
-### Server (`server/.env`)
-```env
-# Express
-PORT=5000
-NODE_ENV=development
-JWT_SECRET=<generated>
-JWT_EXPIRES_IN=7d
-
-# FastAPI
-ENVIRONMENT=development
-DATABASE_URL=sqlite:///./stadiumgenius.db
-SECRET_KEY=<generated>
-CSRF_SECRET=<generated>
-
-# Auth0
-AUTH0_DOMAIN=dev-rx0mbg0jq10om5js.us.auth0.com
-AUTH0_AUDIENCE=https://dev-rx0mbg0jq10om5js.us.auth0.com/api/v2/
-AUTH0_ISSUER=https://dev-rx0mbg0jq10om5js.us.auth0.com/
-```
+### 📂 `src/pages/` (Feature Views — Lazy Loaded)
+| Page | Simple 1-Line Explanation |
+|------|---------------------------|
+| [Dashboard.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Dashboard.jsx) | Main command center dashboard with live KPIs, crowd charts, and real-time alert feed |
+| [DigitalTwin.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/DigitalTwin.jsx) | Interactive 2D/3D digital twin visualization of stadium zones and gate throughput |
+| [CrowdManagement.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/CrowdManagement.jsx) | Real-time crowd density tracking, sector capacity meters, and corridor redirection controls |
+| [Security.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Security.jsx) | Incident ticket management, patrol allocations, and live CCTV grid views |
+| [Concessions.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Concessions.jsx) | Food & beverage outlet queue monitoring, wait time tracking, and express lane activation |
+| [AIAssistant.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/AIAssistant.jsx) | Conversational AI chatbot for natural-language operational queries |
+| [Broadcast.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Broadcast.jsx) | Venue-wide public announcement (PA), mobile app, and screen broadcast creation manager |
+| [Analytics.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Analytics.jsx) | High-level operations reporting, historical trends, and manager metrics |
+| [AdminPanel.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/AdminPanel.jsx) | System admin view for managing user roles, permissions, audit logs, & AI settings |
+| [Settings.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Settings.jsx) | User profile, notification preferences, and system preferences configuration |
+| [FanPortal.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/FanPortal.jsx) | Public fan portal for match schedules, stadium maps, and concessions (no login needed) |
+| [Login.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Login.jsx) | User login page supporting Auth0 SSO redirect and local email/password login |
+| [Register.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/Register.jsx) | Account registration form for new users |
+| [NotFound.jsx](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/src/pages/NotFound.jsx) | 404 page for invalid route URLs |
 
 ---
 
-## 🔒 SECURITY FEATURES
-
-| Feature | Implementation |
-|---------|---------------|
-| **JWT Auth** | RS256 (Auth0) + HS256 (local), auto-refresh |
-| **Password Hashing** | bcrypt with 12 salt rounds |
-| **RBAC** | 4 roles × 6-8 permissions each |
-| **Rate Limiting** | 120 req/min (FastAPI), 200 req/15min auth (Express) |
-| **CSRF Protection** | Token-based CSRF middleware (FastAPI) |
-| **Security Headers** | X-Frame-Options: DENY, HSTS, CSP, X-Content-Type-Options |
-| **Input Sanitization** | User object sanitization (strip passwords) |
-| **Audit Logging** | Full audit trail in audit_logs table |
-| **401 Auto-Redirect** | Client-side token invalidation + redirect to /login |
-| **Mock Token Guard** | Only allowed in development mode |
+### 📂 `src/__tests__/` (Frontend Unit Tests)
+- `AuthContext.test.jsx` — Tests authentication context state, login, and logout.
+- `Login.test.jsx` — Tests Login page rendering and form validation.
+- `Register.test.jsx` — Tests Registration page user signup flow.
+- `ErrorBoundary.test.jsx` — Tests React error boundary fallback rendering.
+- `Accessibility.test.jsx` — Tests accessibility standards (aria-labels, keyboard navigation).
 
 ---
 
-## 🧪 TESTING STRATEGY
+## ⚙️ 3. BACKEND DIRECTORY (`server/`)
 
-| Layer | Tool | Command | Files |
-|-------|------|---------|-------|
-| **Unit Tests** | Vitest + Testing Library + jsdom | `npm run test` | `src/__tests__/*.test.jsx` |
-| **API Tests** | Supertest (Express) | — | `server/__tests__/api.test.js` |
-| **E2E Tests** | Playwright | `npm run test:e2e` | `e2e/*.spec.js` |
-| **Auth0 Verification** | Custom Node scripts | `npm run test:auth0:extreme` | `verify_roles_auth0.js` |
-| **Full Flow Tests** | Custom Node scripts | `npm run test:all:extreme` | `verify_all_flows.js` |
-| **Python Tests** | Pytest + HTTPX | `pytest` | `server/tests/` |
+### Root Server Files
+- [server/index.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/index.js) — Express.js server entry point (Port 5000), runs REST routes & SSE stream.
+- [server/run_server.py](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/run_server.py) — Python launcher script that starts the FastAPI Uvicorn server (Port 8000).
+- [server/package.json](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/package.json) — Express server dependencies (`express`, `bcryptjs`, `jsonwebtoken`, `cors`).
 
 ---
 
-## 📊 REAL-TIME DATA FLOW
-
-```
-┌──────────────────────┐
-│  Mock Data Generator │ ← src/data/mockData.js
-│  (Client-side)       │   generates: occupancy, gates, KPIs,
-│                      │   alerts, heatmaps, time-series
-└──────────┬───────────┘
-           │ Used directly by Dashboard, DigitalTwin, etc.
-           ▼
-┌──────────────────────┐
-│  SSE Notification    │ ← Express /api/notifications/stream
-│  Stream (Port 5000)  │   Push real-time alerts to frontend
-│                      │   Uses fetch-based SSE (not EventSource)
-│                      │   for custom Authorization header support
-└──────────────────────┘
-```
-
-> **Note**: Currently most real-time data is **client-side generated** from `mockData.js`. The SSE stream provides server-push notifications. Future work includes real IoT sensor integration.
+### 📂 `server/db/` (Express SQLite Setup)
+- [server/db/database.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/db/database.js) — Initializes `node:sqlite` connection, creates database tables, and seeds initial data.
+- `server/db/stadiumgenius.db` — SQLite database file accessed by Express server.
 
 ---
 
-## 🐳 DOCKER ARCHITECTURE
-
-```yaml
-Services:
-  api:        # FastAPI (PRIMARY) — port 8000, Dockerfile (multi-stage)
-  express:    # Express (LEGACY) — port 5000, Dockerfile.node
-  nginx:      # Reverse proxy — port 80/443, nginx:alpine
-
-Volumes:
-  db-data:    # Persistent database storage for FastAPI
-```
+### 📂 `server/routes/` (Express API Routers — Port 5000)
+- `auth.js` — User register, login, Auth0 sync, and current user endpoints (`/api/auth`).
+- `venues.js` — Stadium venue and sector information endpoints (`/api/venues`).
+- `incidents.js` — Incident creation, tracking, and priority update endpoints (`/api/incidents`).
+- `analytics.js` — Operations overview and analytics data endpoints (`/api/analytics`).
+- `broadcast.js` — PA and mobile alert message endpoints (`/api/broadcast`).
+- `ai.js` — AI assistant query endpoints (`/api/ai`).
+- `users.js` — User profile and account management endpoints (`/api/users`).
+- `notifications.js` — Real-time Server-Sent Events (SSE) notification stream (`/api/notifications/stream`).
 
 ---
 
-## 🚧 KNOWN LIMITATIONS & FUTURE WORK
+### 📂 `server/app/` (FastAPI Production Backend — Port 8000)
 
-| Area | Current State | Future Plan |
-|------|--------------|-------------|
-| **AI Chatbot** | Keyword-based mock responses | Real Google Gemini API integration |
-| **IoT Sensors** | Client-side simulated data | MQTT/WebSocket real sensor feeds |
-| **MFA** | Not implemented | OTP via Speakeasy + Nodemailer |
-| **Reports** | Dashboard only | PDF export for managers |
-| **Database** | SQLite (single file) | PostgreSQL for production |
-| **Caching** | None | Redis for API caching |
-| **WebSocket** | SSE only | Full WebSocket for bi-directional |
-
----
-
-## 📝 CODING CONVENTIONS
-
-1. **File naming**: PascalCase for components (`Dashboard.jsx`), camelCase for utilities (`mockData.js`)
-2. **Imports**: Named exports for contexts, default exports for pages/components
-3. **API calls**: Always through `src/lib/api.js` singleton — never raw `fetch()`
-4. **Auth checks**: Use `useAuth()` hook — never access localStorage directly for auth state
-5. **Route protection**: Use `<Page roles={[...]}> ` wrapper in App.jsx
-6. **Error handling**: ErrorBoundary wraps all pages, ApiClient auto-redirects on 401
-7. **Module system**: ESM (`"type": "module"`) in both frontend and backend
-8. **Node version**: Requires Node.js ≥ 22.5.0 (for `node:sqlite`)
-9. **Python version**: Python 3.12+ recommended
+| Subfolder / File | Simple 1-Line Explanation |
+|------------------|---------------------------|
+| [server/app/main.py](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/app/main.py) | FastAPI app factory, CORS policy, security middleware, and router registration |
+| [server/app/config.py](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/app/config.py) | Application settings loader using Pydantic Settings & environment variables |
+| `server/app/core/auth0.py` | Auth0 RS256 JWT validator via JWKS & RBAC permission mapping matrix |
+| `server/app/core/security.py` | FastAPI user dependency injection (`get_current_user`, `require_role`, audit logger) |
+| [server/app/db/database.py](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/app/db/database.py) | SQLAlchemy database engine, SessionLocal generator, & `get_db` dependency |
+| [server/app/db/models.py](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/server/app/db/models.py) | All SQLAlchemy ORM models (`UserModel`, `IncidentModel`, `VenueModel`, `AuditLogModel`) |
+| `server/app/schemas/user.py` | Pydantic data validation schemas for user requests and responses |
+| `server/app/middleware/security_headers.py` | Security headers middleware (CSP, HSTS, X-Frame-Options: DENY) |
+| `server/app/middleware/rate_limit.py` | Rate-limiting middleware enforcing 120 req/min limit per client IP |
+| `server/app/middleware/csrf.py` | Double-submit cookie Anti-CSRF token verification middleware |
+| **`server/app/api/v1/endpoints/`** | Version 1 REST API routers: |
+| ├── `auth.py` | Auth0 user sync, CSRF token, & profile endpoints (`/api/v1/auth`) |
+| ├── `admin.py` | User role updates, system configs, & audit logs (`/api/v1/admin`) |
+| ├── `manager.py` | Manager dashboard summary & staff assignment endpoints (`/api/v1/manager`) |
+| ├── `operator.py` | Crowd analytics, incident CRUD, & AI assistant endpoints (`/api/v1/operator`) |
+| └── `security.py` | Security dashboard, CCTV camera status, & alert verification (`/api/v1/security`) |
 
 ---
 
-## 🔗 KEY DEPENDENCY DECISIONS
-
-| Decision | Choice | Reason |
-|----------|--------|--------|
-| Frontend framework | React 19 | Latest features, compiler-ready |
-| Bundler | Vite 8 | Fast HMR, ESM-native |
-| CSS | Tailwind v4 | Utility-first, v4 plugin via Vite |
-| Charts | Recharts 3 | React-native charting |
-| Icons | Lucide React | Clean SVG icons, tree-shakeable |
-| Animations | Framer Motion 12 | Declarative React animations |
-| Auth Provider | Auth0 | Enterprise SSO, social logins |
-| Primary Backend | FastAPI | Async, Pydantic validation, auto-docs |
-| Legacy Backend | Express 5 | SSE support, rapid prototyping |
-| ORM | SQLAlchemy 2 | Mature Python ORM |
-| DB (Dev) | SQLite | Zero-config, embedded |
-| Testing | Vitest + Playwright | Fast unit + reliable E2E |
-| PWA | vite-plugin-pwa | Workbox-based offline support |
+### 📂 `server/tests/` (Python Backend Tests)
+- `conftest.py` — Pytest configuration, test database setup, and HTTP client fixtures.
+- `test_auth_rbac.py` — Pytest test suite testing RBAC role permissions and token validation.
 
 ---
 
-## 🏁 QUICK CONTEXT FOR AI AGENTS
+## 📖 4. DOCUMENTATION DIRECTORY (`docs/`)
 
-**If you need to:**
-
-| Task | Go To |
-|------|-------|
-| Add a new page | Create in `src/pages/`, add lazy import + route in `App.jsx` |
-| Add a new API endpoint | FastAPI: `server/app/api/v1/endpoints/`, Express: `server/routes/` |
-| Modify auth/roles | `src/context/AuthContext.jsx` + `server/app/core/auth0.py` |
-| Add a new DB table | FastAPI: `server/app/db/models.py`, Express: `server/db/database.js` |
-| Add a component | Create in `src/components/`, import where needed |
-| Add a new API method | Add to `src/lib/api.js` ApiClient class |
-| Modify sidebar nav | `src/components/Sidebar.jsx` |
-| Add test | Unit: `src/__tests__/`, E2E: `e2e/`, API: `server/__tests__/` |
-| Change styling | `src/index.css` or Tailwind classes inline |
-| Update env vars | Frontend: `.env`, Backend: `server/.env` |
-| Check existing docs | `docs/` folder (architecture, api, security, testing, etc.) |
-| Understand data models | `server/app/db/models.py` (FastAPI) or `server/db/database.js` (Express) |
+- [docs/architecture.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/architecture.md) — High-level system architecture and component interactions.
+- [docs/api.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/api.md) — API endpoint documentation and request/response examples.
+- [docs/database-schema.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/database-schema.md) — Database schema, table relationships, and field descriptions.
+- [docs/data-flow.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/data-flow.md) — Data flow diagrams from frontend client to backend & database.
+- [docs/security.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/security.md) — Security mechanisms (Auth0, JWT, CSRF, RBAC, Rate Limiting).
+- [docs/deployment.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/deployment.md) — Docker build & production deployment instructions.
+- [docs/testing.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/testing.md) — Testing guide (Unit, Integration, E2E, & Pytest).
+- [docs/ai-workflows.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/ai-workflows.md) — AI assistant design, prompt engineering, and operational query rules.
+- [docs/mvp-roadmap.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/mvp-roadmap.md) — MVP milestone roadmap and future feature goals.
+- [docs/AUDIT_REPORT.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/AUDIT_REPORT.md) — Detailed security audit report and resolution history.
+- [docs/SYSTEM_GUIDE.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/SYSTEM_GUIDE.md) — Complete system setup, startup commands, and operational guide.
+- [docs/user-stories.md](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/docs/user-stories.md) — User personas and story requirements for Admin, Manager, Operator, Security.
 
 ---
 
-> 🤖 **AI Agent Instructions**: Is file ko read karo, project samjho, aur seedha kaam shuru karo. Poora codebase scan karne ki zaroorat nahi hai. Agar koi specific file ka detail chahiye to `docs/` folder check karo ya specific file padho.
+## 🧪 5. AUTOMATED E2E TESTS DIRECTORY (`e2e/`)
+
+- [e2e/auth.spec.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/e2e/auth.spec.js) — Playwright E2E test verifying user login, registration, and logout flows.
+- [e2e/performance.spec.js](file:///c:/Users/ABHI%20SHARMA/OneDrive/Desktop/projects/Smart-Stadiums-Tournament/e2e/performance.spec.js) — Playwright E2E test measuring page load speed and Core Web Vitals.
