@@ -44,8 +44,8 @@ class Settings(BaseSettings):
     AUTH0_ALGORITHMS: List[str] = ["RS256"]
     CUSTOM_CLAIM_NAMESPACE: str = "https://stadiumgenius.io"
 
-    # Database Configuration
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./stadiumgenius.db")
+    # Database Configuration (Supabase / PostgreSQL)
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:your-supabase-password@db.your-supabase-project.supabase.co:5432/postgres")
 
     # Security Configurations — NO hardcoded secrets
     SECRET_KEY: str = _require_secret("SECRET_KEY")

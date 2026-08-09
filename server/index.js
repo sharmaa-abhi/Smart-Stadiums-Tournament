@@ -11,7 +11,7 @@ if (!process.env.JWT_SECRET) {
   console.warn('   Sessions will be invalidated on every server restart. Set a persistent secret in server/.env');
 }
 
-// Import database (runs table creation + seeding)
+// Import database stub (ready for Supabase initialization)
 import './db/database.js';
 
 // Import routes

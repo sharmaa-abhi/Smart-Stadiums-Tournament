@@ -28,7 +28,6 @@ COPY --from=frontend-builder /app/dist ./dist
 
 # Environment defaults (override with docker-compose or -e flags)
 ENV ENVIRONMENT=production \
-    DATABASE_URL=sqlite:///./stadiumgenius.db \
     PYTHONUNBUFFERED=1
 
 # Don't run as root
