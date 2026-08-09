@@ -18,9 +18,13 @@ dev-dist
 
 # Environment files (NEVER commit secrets)
 .env
-.env.local
-.env.production
-.env.staging
+.env.*
+!.env.example
+*.env
+server/.env
+server/.env.*
+!server/.env.example
+
 
 # SQLite databases (both root and server)
 *.db
@@ -53,11 +57,6 @@ venv
 *.sln
 *.sw?
 Thumbs.db
-
-
-
-.env
-
 # Auth0 user creation script (contains secrets)
 create_auth0_users.mjs
 
