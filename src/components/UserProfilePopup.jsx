@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
-  User, Shield, Key, Mail, CheckCircle2, AlertTriangle, 
-  LogOut, X, Clock, Settings, Sparkles, Activity 
+  Shield, Mail, CheckCircle2, AlertTriangle, 
+  LogOut, X, Clock, Sparkles, Activity 
 } from 'lucide-react';
 
 export default function UserProfilePopup({ isOpen, onClose }) {

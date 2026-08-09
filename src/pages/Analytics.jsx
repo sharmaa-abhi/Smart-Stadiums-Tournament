@@ -34,7 +34,7 @@ export default function Analytics() {
       api.getAnalyticsOverview(),
       api.getAnalyticsPerformance(),
       api.getAnalyticsRevenue(),
-    ]).then(([trendsRes, overviewRes, perfRes, revRes]) => {
+    ]).then(([trendsRes, _overviewRes, perfRes, _revRes]) => {
       setTrends(trendsRes.trends || []);
       setPerformance(perfRes.performance || []);
     }).catch(console.error).finally(() => setLoading(false));

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, Navigation, Shield, Users, Ticket, CheckCircle2 } from 'lucide-react';
+import { MapPin, Navigation, Users, Ticket } from 'lucide-react';
 
 const SECTORS = [
   {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Clock, Users, Zap, Volume2, VolumeX } from 'lucide-react';
+import { Flame, Users, Zap, Volume2, VolumeX } from 'lucide-react';
 
 export default function MatchDayHypeWidget() {
   const [hypeLevel, setHypeLevel] = useState(88);

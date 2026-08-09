@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Map, ShieldAlert, MessageSquareText, Users,
   UtensilsCrossed, Radio, BarChart3, Settings, Zap, ChevronLeft,
   ChevronRight, LogOut, UserCog, TrendingUp,
-  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket, User as UserIcon
+  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';

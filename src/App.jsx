@@ -64,17 +64,7 @@ function Auth0Gate() {
   const {
     isLoading,
     isAuthenticated,
-    error,
-    loginWithRedirect: login,
-    logout: auth0Logout,
-    user,
   } = useAuth0();
-
-  const signup = () =>
-    login({ authorizationParams: { screen_hint: "signup" } });
-
-  const logout = () =>
-    auth0Logout({ logoutParams: { returnTo: window.location.origin } });
 
   // Auth0 SDK is still loading — show skeleton
   if (isLoading) {
