@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// StadiumGenius Prisma Schema Definition
 
 generator client {
   provider = "prisma-client-js"
@@ -7,4 +6,53 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String
+  email     String     @unique
+  password  String
+  role      String     @default("operator")
+  avatar    String?
+  createdAt DateTime   @default(now())
+  incidents Incident[]
+}
+
+model Venue {
+  id        String     @id
+  name      String
+  location  String
+  capacity  Int
+  status    String     @default("active")
+  incidents Incident[]
+  alerts    Alert[]
+}
+
+model Incident {
+  id          Int      @id @default(autoincrement())
+  incidentId  String   @unique
+  type        String
+  zone        String
+  time        String
+  status      String   @default("active")
+  priority    String   @default("medium")
+  response    String   @default("-")
+  assignee    String   @default("Unassigned")
+  venueId     String
+  venue       Venue    @relation(fields: [venueId], references: [id])
+  description String?
+  createdBy   Int
+  creator     User     @relation(fields: [createdBy], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  severity  String
+  message   String
+  createdAt DateTime @default(now())
 }

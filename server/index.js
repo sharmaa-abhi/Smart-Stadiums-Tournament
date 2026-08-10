@@ -4,14 +4,16 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 
-// ── Auto-generate JWT_SECRET if not provided ──
+// ── Auto-generate JWT_SECRET fallback with production warning ──
 if (!process.env.JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('CRITICAL: JWT_SECRET environment variable must be set in production mode.');
+  }
   process.env.JWT_SECRET = crypto.randomBytes(64).toString('hex');
   console.warn('⚠️  WARNING: JWT_SECRET is not set in .env — using auto-generated random secret.');
-  console.warn('   Sessions will be invalidated on every server restart. Set a persistent secret in server/.env');
 }
 
-// Import database stub (ready for Supabase initialization)
+// Import database engine
 import './db/database.js';
 
 // Import routes
@@ -27,14 +29,14 @@ import notificationRoutes from './routes/notifications.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
+// Trust reverse proxy for IP rate limiting behind Nginx/ALB
+app.set('trust proxy', 1);
 
 // ── Rate Limiting (auth endpoints) ──
 const authRateLimitMap = new Map();
 const AUTH_RATE_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const AUTH_RATE_MAX = process.env.NODE_ENV === 'production' ? 20 : 200; // max attempts per window
+const AUTH_RATE_MAX = process.env.NODE_ENV === 'production' ? 20 : 200;
 
-// Periodically clean up expired rate limit entries to prevent memory leaks
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of authRateLimitMap.entries()) {
@@ -42,10 +44,10 @@ setInterval(() => {
       authRateLimitMap.delete(key);
     }
   }
-}, 60 * 1000); // run every 1 minute
+}, 60 * 1000);
 
 function authRateLimiter(req, res, next) {
-  const key = req.ip || req.connection.remoteAddress;
+  const key = req.ip || req.connection.remoteAddress || '127.0.0.1';
   const now = Date.now();
   const entry = authRateLimitMap.get(key);
 
@@ -61,11 +63,22 @@ function authRateLimiter(req, res, next) {
   return next();
 }
 
-// ── Middleware ──
+// ── CORS Middleware ──
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(s => s.trim())
+  : ['http://localhost:5173', 'http://localhost:5178', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000', 'https://stadiumgenius.io'];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5178', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy rejection: Origin not permitted.'));
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
 
@@ -77,9 +90,8 @@ app.use((req, res, next) => {
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.setHeader('Content-Security-Policy',
-    "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none';"
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.auth0.com https://*.supabase.co http://127.0.0.1:8000 http://localhost:8000 http://localhost:5000; img-src 'self' data: https:; font-src 'self' data: https:; frame-ancestors 'none';"
   );
-  // Prevent caching of API responses
   if (req.path.startsWith('/api/')) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   }
@@ -112,16 +124,20 @@ app.use((req, res) => {
 });
 
 // ── Error Handler ──
-app.use((err, req, res, next) => {
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.error('Server error:', err);
   res.status(500).json({ error: 'Internal server error.' });
 });
 
 // ── Start Server ──
-app.listen(PORT, () => {
-  console.log(`\n🏟️  StadiumGenius API Server`);
-  console.log(`   ├─ Port:    ${PORT}`);
-  console.log(`   ├─ Env:     ${process.env.NODE_ENV || 'development'}`);
-  console.log(`   ├─ Auth:    JWT (${process.env.JWT_EXPIRES_IN || '7d'} expiry)`);
-  console.log(`   └─ Status:  Ready ✅\n`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`\n🏟️  StadiumGenius API Server`);
+    console.log(`   ├─ Port:    ${PORT}`);
+    console.log(`   ├─ Env:     ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   ├─ Auth:    JWT (${process.env.JWT_EXPIRES_IN || '7d'} expiry)`);
+    console.log(`   └─ Status:  Ready ✅\n`);
+  });
+}
+
+export default app;

@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act, renderHook } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import api from '../lib/api';
-import { useAuth0 } from '@auth0/auth0-react';
 
 // Mock API client
 vi.mock('../lib/api', () => {
@@ -19,7 +18,7 @@ vi.mock('../lib/api', () => {
 
 // Helper component to access useAuth hooks in tests
 function TestComponent() {
-  const { user, token, isAuthenticated, login, register, logout } = useAuth();
+  const { user, isAuthenticated, login, register, logout } = useAuth();
   return (
     <div>
       <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>

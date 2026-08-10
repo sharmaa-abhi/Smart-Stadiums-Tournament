@@ -15,10 +15,10 @@ export default function authMiddleware(req, res, next) {
   try {
     // 1. Verify locally-signed Express JWT tokens
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
       req.user = decoded;
       return next();
-    } catch (err) {
+    } catch (_err) {
       // 2. Support for Auth0 tokens (RS256) — decode and verify issuer
       const decoded = jwt.decode(token);
       if (decoded && (decoded.iss?.includes('auth0.com') || decoded.sub?.startsWith('auth0|'))) {
@@ -30,9 +30,9 @@ export default function authMiddleware(req, res, next) {
         };
         return next();
       }
-      throw err;
+      throw _err;
     }
-  } catch (err) {
+  } catch (_err) {
     return res.status(401).json({ error: 'Invalid or expired token.' });
   }
 }

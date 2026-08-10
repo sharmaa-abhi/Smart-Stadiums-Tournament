@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import StadiumHeatmap from '../components/StadiumHeatmap';
-import { generateStadiumHeatmap, generateGateData, ZONES } from '../data/mockData';
+import { generateStadiumHeatmap, generateGateData } from '../data/mockData';
 import { DigitalTwinSkeleton } from '../components/skeleton';
 
 export default function DigitalTwin() {

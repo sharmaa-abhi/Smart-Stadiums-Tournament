@@ -5,7 +5,6 @@ import {
   CheckCircle, Eye
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { AdminPanelSkeleton } from '../components/skeleton';
 
@@ -53,7 +52,6 @@ const USER_ROLE_GRADIENTS = {
 
 export default function AdminPanel() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

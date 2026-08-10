@@ -123,8 +123,8 @@ async function syncOfflineIncidents() {
       await fetch(req);
       await cache.delete(req);
       console.log('[SW] Synced offline incident:', req.url);
-    } catch (e) {
-      console.warn('[SW] Sync failed, will retry:', req.url);
+    } catch (err) {
+      console.warn('[SW] Sync failed, will retry:', req.url, err.message);
     }
   }
 }

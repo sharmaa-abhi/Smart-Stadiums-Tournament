@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  RadialBarChart, RadialBar, Legend
+  RadialBarChart, RadialBar
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
@@ -49,7 +49,7 @@ export default function CrowdManagement() {
   const totalCapacity = occupancy.reduce((sum, z) => sum + z.capacity, 0);
   const overallOccupancy = totalCapacity > 0 ? ((totalFans / totalCapacity) * 100).toFixed(1) : '0.0';
 
-  const radialData = occupancy.slice(0, 6).map((z, i) => ({
+  const radialData = occupancy.slice(0, 6).map((z) => ({
     name: `Zone ${z.zone}`,
     value: z.occupancy,
     fill: z.occupancy > 80 ? '#f43f5e' : z.occupancy > 65 ? '#f59e0b' : '#3378ff',

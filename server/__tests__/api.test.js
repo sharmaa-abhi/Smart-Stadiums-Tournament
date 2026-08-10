@@ -1,18 +1,15 @@
 // @vitest-environment node
 process.env.JWT_SECRET = 'test_secret_key_12345';
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 
-// Setup mock express app with the same middlewares & routers
 import authRoutes from '../routes/auth.js';
 import venueRoutes from '../routes/venues.js';
 import incidentRoutes from '../routes/incidents.js';
-import db from '../db/database.js';
 
 const app = express();
 
@@ -20,7 +17,6 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-// Replicate main security headers middleware
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -49,7 +45,7 @@ describe('Backend API & Security Audits', () => {
   it('fails registration if required fields are missing', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ email: testEmail }); // missing name, password, role
+      .send({ email: testEmail });
 
     expect(res.status).toBe(400);
     expect(res.body.error).toContain('are required');
@@ -69,8 +65,6 @@ describe('Backend API & Security Audits', () => {
     expect(res.body.token).toBeDefined();
     expect(res.body.user.email).toBe(testEmail);
     expect(res.body.user.role).toBe('manager');
-
-    // Password security check verified via API response object
     expect(res.body.user.password).toBeUndefined();
   });
 
@@ -98,7 +92,6 @@ describe('Backend API & Security Audits', () => {
     expect(res.body.token).toBeDefined();
     jwtToken = res.body.token;
 
-    // Verify JWT payload claims
     const decoded = jwt.decode(jwtToken);
     expect(decoded.email).toBe(testEmail);
     expect(decoded.role).toBe('manager');
@@ -146,9 +139,6 @@ describe('Backend API & Security Audits', () => {
       expect(res.body.token).toBeDefined();
       expect(res.body.user.email).toBe(auth0Email);
       expect(res.body.user.role).toBe('security');
-
-      // User role verified via response object
-      expect(res.body.user.role).toBe('security');
     });
 
     it('falls back to operator role if specified role is invalid', async () => {
@@ -158,7 +148,7 @@ describe('Backend API & Security Audits', () => {
         .send({
           email: invalidEmail,
           name: 'Auth0 Invalid Role User',
-          role: 'attacker_admin', // Should be rejected/ignored
+          role: 'attacker_admin',
         });
 
       expect(res.status).toBe(200);
@@ -166,17 +156,16 @@ describe('Backend API & Security Audits', () => {
     });
 
     it('does not modify existing user role on subsequent logins', async () => {
-      // Login again but try to escalate to admin role
       const res = await request(app)
         .post('/api/auth/auth0-login')
         .send({
           email: auth0Email,
           name: 'Auth0 Security User',
-          role: 'admin', // Trying to change role to admin
+          role: 'admin',
         });
 
       expect(res.status).toBe(200);
-      expect(res.body.user.role).toBe('security'); // Must remain security
+      expect(res.body.user.role).toBe('security');
     });
   });
 });
