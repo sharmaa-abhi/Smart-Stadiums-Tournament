@@ -10,7 +10,7 @@
  * - AbortController support for request cancellation
  */
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 class ApiClient {
   constructor() {
@@ -144,7 +144,27 @@ class ApiClient {
   }
 
   async getBroadcasts(venueId) {
-    return this.request(`/broadcast/${venueId}`);
+    return this.request(`/broadcast/messages${venueId ? `?venue_id=${venueId}` : ''}`);
+  }
+
+  async createBroadcast(data) {
+    return this.request('/broadcast/messages', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateBroadcast(id, data) {
+    return this.request(`/broadcast/messages/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteBroadcast(id) {
+    return this.request(`/broadcast/messages/${id}`, {
+      method: 'DELETE',
+    });
   }
 
   // ── Analytics Operations ──
@@ -248,8 +268,8 @@ class ApiClient {
     return this.request('/operator/crowd-analytics');
   }
 
-  async getIncidents() {
-    return this.request('/operator/incidents');
+  async getIncidents(venueId) {
+    return this.request(`/operator/incidents${venueId ? `?venue_id=${venueId}` : ''}`);
   }
 
   async createIncident(data) {

@@ -80,6 +80,7 @@ export default function Security() {
   const [liveAccessLog, setLiveAccessLog] = useState(accessLog);
   const [incidents, setIncidents] = useState([]);
   const [loadingIncidents, setLoadingIncidents] = useState(true);
+  const [_selectedZone, setSelectedZone] = useState(null);
   const [newIncidentForm, setNewIncidentForm] = useState({ type: 'Unauthorized Access', zone: '', priority: 'medium', description: '' });
 
   const fetchIncidents = useCallback(async () => {
@@ -159,6 +160,7 @@ export default function Security() {
     critical: 'bg-rose-500/20 text-rose-300',
     high: 'bg-amber-500/20 text-amber-300',
     medium: 'bg-brand-500/20 text-brand-300',
+    low: 'bg-emerald-500/20 text-emerald-300',
   };
 
   const statusColors = {

@@ -104,11 +104,13 @@ const memoryDB = {
       timestamp: new Date().toISOString(),
     },
   ],
+  broadcast_messages: [],
   nextIds: {
     users: 4,
     incidents: 3,
     alerts: 3,
     venues: 4,
+    broadcast_messages: 1,
   },
 };
 
@@ -128,6 +130,8 @@ function parseQuery(sql) {
     tableName = 'incidents';
   } else if (normalized.includes('FROM alerts') || normalized.includes('INTO alerts') || normalized.includes('UPDATE alerts')) {
     tableName = 'alerts';
+  } else if (normalized.includes('FROM broadcast_messages') || normalized.includes('INTO broadcast_messages') || normalized.includes('UPDATE broadcast_messages') || normalized.includes('DELETE FROM broadcast_messages')) {
+    tableName = 'broadcast_messages';
   }
 
   return { normalized, isSelect, isInsert, isUpdate, isDelete, tableName };
@@ -135,7 +139,7 @@ function parseQuery(sql) {
 
 const db = {
   prepare: (sql) => {
-    const { normalized, _isSelect, isInsert, isUpdate, _isDelete, tableName } = parseQuery(sql);
+    const { normalized, isInsert, isUpdate, isDelete, tableName } = parseQuery(sql);
 
     return {
       get: (...params) => {
@@ -203,6 +207,20 @@ const db = {
               created_by: params[7] || 1,
             };
             memoryDB.incidents.push(newIncident);
+          } else if (tableName === 'broadcast_messages') {
+            const newMsg = {
+              id: nextId,
+              title: params[0],
+              message: params[1],
+              channel: params[2] || 'all',
+              priority: params[3] || 'normal',
+              status: params[4] || 'active',
+              venue_id: params[5] || 'metlife',
+              created_by: params[6] || 1,
+              expires_at: params[7] || null,
+              created_at: new Date().toISOString(),
+            };
+            memoryDB.broadcast_messages.push(newMsg);
           }
           return { lastInsertRowid: nextId, changes: 1 };
         }
@@ -224,6 +242,30 @@ const db = {
               if (normalized.includes('assignee = ?')) incident.assignee = params[1] || params[0];
             }
             return { changes: 1 };
+          }
+          if (tableName === 'broadcast_messages' && normalized.includes('WHERE id = ?')) {
+            const targetId = params[params.length - 1];
+            const msg = memoryDB.broadcast_messages.find((m) => String(m.id) === String(targetId));
+            if (msg) {
+              // Apply all SET field = ? updates
+              params.slice(0, -1).forEach((val, idx) => {
+                const setFields = normalized.match(/SET\s+(.+?)\s+WHERE/i)?.[1]?.split(',').map(s => s.trim().split(/\s*=\s*/)[0]) || [];
+                if (setFields[idx]) msg[setFields[idx]] = val;
+              });
+            }
+            return { changes: msg ? 1 : 0 };
+          }
+        }
+
+        if (isDelete) {
+          if (tableName === 'broadcast_messages' && normalized.includes('WHERE id = ?')) {
+            const targetId = params[0];
+            const idx = memoryDB.broadcast_messages.findIndex((m) => String(m.id) === String(targetId));
+            if (idx !== -1) {
+              memoryDB.broadcast_messages.splice(idx, 1);
+              return { changes: 1 };
+            }
+            return { changes: 0 };
           }
         }
 

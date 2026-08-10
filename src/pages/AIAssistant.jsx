@@ -24,7 +24,6 @@ export default function AIAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [sessionId] = useState(() => crypto.randomUUID());
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const chatEndRef = useRef(null);
@@ -60,12 +59,12 @@ export default function AIAssistant() {
     try {
       const res = await api.queryAiAssistant(msg);
       setMessages(prev => [...prev, { role: 'assistant', content: res.ai_response || res.content }]);
-    } catch (_err) {
+    } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error connecting to the AI service. Please try again.' }]);
     } finally {
       setIsTyping(false);
     }
-  }, [sessionId]);
+  }, [input]);
 
   const handleQuickAction = (template) => handleSend(template);
 

@@ -109,40 +109,66 @@ export default function Dashboard() {
     fetchOthers();
     const interval = setInterval(fetchOthers, 10000);
 
-    // SSE connection for KPIs
+    // SSE connection for KPIs — using fetch-based SSE to avoid leaking token in URL
     const token = localStorage.getItem('sg_token');
-    const sseUrl = `${api.baseUrl}/venues/${activeVenueId}/live-kpis?token=${token}`;
-    const eventSource = new EventSource(sseUrl);
+    const sseUrl = `${api.baseUrl}/venues/${activeVenueId}/live-kpis`;
+    const sseController = new AbortController();
 
-    eventSource.onmessage = (event) => {
+    async function connectKpiSSE() {
       try {
-        const data = JSON.parse(event.data);
-        setKpis(data);
-      } catch (err) {
-        console.error('Error parsing live KPIs:', err);
-      }
-    };
+        const response = await fetch(sseUrl, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: sseController.signal,
+        });
+        if (!response.ok) throw new Error('SSE response not ok');
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No reader');
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-    eventSource.onerror = () => {
-      // Fallback mock KPIs when server or SSE stream is unreachable
-      setKpis({
-        venueId: activeVenueId,
-        venueName: 'MetLife Stadium',
-        totalFans: 78420,
-        avgQueueTime: 4.2,
-        incidentsResolved: 18,
-        activeAlerts: 2,
-        fanSatisfaction: 4.8,
-        edgeNodeUptime: 99.9,
-        securityEvents: 3,
-        transportCapacity: 88,
-        timestamp: new Date().toISOString()
-      });
-    };
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                setKpis(data);
+              } catch (err) {
+                console.error('Error parsing live KPIs:', err);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          // Fallback mock KPIs when server or SSE stream is unreachable
+          setKpis({
+            venueId: activeVenueId,
+            venueName: 'MetLife Stadium',
+            totalFans: 78420,
+            avgQueueTime: 4.2,
+            incidentsResolved: 18,
+            activeAlerts: 2,
+            fanSatisfaction: 4.8,
+            edgeNodeUptime: 99.9,
+            securityEvents: 3,
+            transportCapacity: 88,
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+    }
+
+    connectKpiSSE();
 
     return () => {
       clearInterval(interval);
-      eventSource.close();
+      sseController.abort();
     };
   }, [activeVenueId]);
 

@@ -72,7 +72,7 @@ export function AuthProvider({ children }) {
               ...syncResult.user,
               permissions: syncResult.permissions || DEFAULT_ROLE_PERMISSIONS[syncResult.user.role] || []
             });
-          } catch (_syncErr) {
+          } catch {
             // Backend unavailable — build user from Auth0 profile
             const role = pendingRole.toLowerCase();
             const fallbackUser = {
