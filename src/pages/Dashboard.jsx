@@ -15,7 +15,7 @@ import StatCard from '../components/StatCard';
 import AlertCard from '../components/AlertCard';
 import StadiumHeatmap from '../components/StadiumHeatmap';
 import api from '../lib/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { DashboardSkeleton } from '../components/skeleton';
 
 // ── Role-specific dashboard config ─────────────────────────────────────────

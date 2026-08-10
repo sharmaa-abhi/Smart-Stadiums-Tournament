@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
 import { NotificationProvider } from './context/NotificationContext';
 import RoleGuard from './components/RoleGuard';
 import PWAInstallBanner from './components/PWAInstallBanner';

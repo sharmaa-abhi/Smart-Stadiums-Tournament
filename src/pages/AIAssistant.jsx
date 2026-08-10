@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { AIAssistantSkeleton } from '../components/skeleton';
 
 const USER_ROLE_BG = {

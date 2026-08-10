@@ -1,7 +1,6 @@
-import { createContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from './AuthContext';
-
-export const NotificationContext = createContext(null);
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from './useAuth';
+import { NotificationContext } from './contexts';
 
 const MAX_NOTIFICATIONS = 50;
 
@@ -116,5 +115,4 @@ export function NotificationProvider({ children }) {
     </NotificationContext.Provider>
   );
 }
-// Re-export hook for backward compatibility
-export { useNotifications } from './useNotifications';
+

@@ -1,7 +1,7 @@
 import { Bell, Search, Globe, Wifi, Clock, Shield, TrendingUp, ShieldAlert, Zap, X, Menu } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNotifications } from '../context/NotificationContext';
+import { useAuth } from '../context/useAuth';
+import { useNotifications } from '../context/useNotifications';
 import NotificationPanel from './NotificationPanel';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';

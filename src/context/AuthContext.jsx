@@ -1,8 +1,7 @@
-import { createContext, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import api from '../lib/api';
-
-export const AuthContext = createContext(null);
+import { AuthContext } from './contexts';
 
 const DEFAULT_ROLE_PERMISSIONS = {
   admin: [
@@ -214,5 +213,4 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-// Re-export hook for backward compatibility
-export { useAuth } from './useAuth';
+

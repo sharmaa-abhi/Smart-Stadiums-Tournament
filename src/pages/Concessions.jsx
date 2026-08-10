@@ -11,7 +11,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { ConcessionsSkeleton } from '../components/skeleton';
 
 const COLORS = ['#3378ff', '#22d3ee', '#34d399', '#f59e0b', '#f43f5e', '#a78bfa'];

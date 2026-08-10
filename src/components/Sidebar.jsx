@@ -6,7 +6,7 @@ import {
   Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket
 } from 'lucide-react';
 
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import UserProfilePopup from './UserProfilePopup';
 
 // ── Unique nav items per role ──────────────────────────────────────────────

@@ -3,7 +3,7 @@ import {
   Trophy, Users, ShieldAlert, UtensilsCrossed, Server, Siren,
   X, Check, Trash2, BellOff, Clock
 } from 'lucide-react';
-import { useNotifications } from '../context/NotificationContext';
+import { useNotifications } from '../context/useNotifications';
 import { useEffect, useRef } from 'react';
 
 const TYPE_ICONS = {

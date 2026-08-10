@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Zap, AlertCircle, Shield, Globe } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { StadiumBackdrop } from '../components/StadiumBackdrop';
 
 import AuthThemeToggle, { THEMES } from '../components/auth/AuthThemeToggle';

@@ -4,7 +4,7 @@ import {
   Trophy, Users, ShieldAlert, UtensilsCrossed, Server, Siren,
   X, AlertTriangle, Info, CheckCircle2
 } from 'lucide-react';
-import { useNotifications } from '../context/NotificationContext';
+import { useNotifications } from '../context/useNotifications';
 
 const TYPE_ICONS = {
   match: Trophy,

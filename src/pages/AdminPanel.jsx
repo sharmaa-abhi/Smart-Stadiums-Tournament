@@ -4,7 +4,7 @@ import {
   RefreshCw, Search, ChevronDown, BarChart3, Clock,
   CheckCircle, Eye
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import api from '../lib/api';
 import { AdminPanelSkeleton } from '../components/skeleton';
 

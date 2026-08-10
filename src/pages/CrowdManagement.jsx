@@ -11,7 +11,7 @@ import {
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import api from '../lib/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { CrowdManagementSkeleton } from '../components/skeleton';
 
 export default function CrowdManagement() {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { 
   Shield, Mail, CheckCircle2, AlertTriangle, 
   LogOut, X, Clock, Sparkles, Activity 
