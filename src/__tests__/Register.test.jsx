@@ -23,27 +23,25 @@ vi.mock('react-router-dom', async (importOriginal) => {
 });
 
 describe('Register Page Component', () => {
-  const mockRegisterFn = vi.fn();
+  const mockSignupFn = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     useAuth.mockReturnValue({
-      register: mockRegisterFn,
+      signup: mockSignupFn,
     });
   });
 
-  it('renders all registration page fields and buttons correctly', () => {
+  it('renders all registration page components and Auth0 button correctly', () => {
     render(
       <BrowserRouter>
         <Register />
       </BrowserRouter>
     );
 
-    expect(screen.getByPlaceholderText('John Doe')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('operator@stadiumgenius.io')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Min 6 characters')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Create Account/i })).toBeInTheDocument();
-    expect(screen.getByText('Continue with Auth0')).toBeInTheDocument();
+    expect(screen.getByText('Create Account')).toBeInTheDocument();
+    expect(screen.getByText('Select Role Profile')).toBeInTheDocument();
+    expect(screen.getByText('Register via Auth0 Secure Signup')).toBeInTheDocument();
   });
 
   it('supports selecting different role profiles', () => {
@@ -58,7 +56,6 @@ describe('Register Page Component', () => {
 
     // Click Security Staff role button
     fireEvent.click(securityButton);
-    // Check selection highlighted
     expect(securityButton.closest('button').className).toContain('border-amber-500/35');
 
     // Click Venue Manager role button
@@ -66,86 +63,19 @@ describe('Register Page Component', () => {
     expect(managerButton.closest('button').className).toContain('border-violet-500/35');
   });
 
-  it('toggles password visibility when the eye button is clicked', () => {
+  it('triggers Auth0 registration flow when clicking the Register via Auth0 button', async () => {
     render(
       <BrowserRouter>
         <Register />
       </BrowserRouter>
     );
 
-    const passwordInput = screen.getByPlaceholderText('Min 6 characters');
-    const toggleButton = screen.getByLabelText('Show password');
-
-    expect(passwordInput.type).toBe('password');
-
-    // Click to show password
-    fireEvent.click(toggleButton);
-    expect(passwordInput.type).toBe('text');
-    expect(screen.getByLabelText('Hide password')).toBeInTheDocument();
-
-    // Click to hide password
-    fireEvent.click(screen.getByLabelText('Hide password'));
-    expect(passwordInput.type).toBe('password');
-  });
-
-  it('submits the form successfully and navigates to dashboard', async () => {
-    mockRegisterFn.mockResolvedValue({ user: { name: 'John Doe' } });
-
-    render(
-      <BrowserRouter>
-        <Register />
-      </BrowserRouter>
-    );
-
-    fireEvent.change(screen.getByPlaceholderText('John Doe'), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByPlaceholderText('operator@stadiumgenius.io'), { target: { value: 'john@stadiumgenius.io' } });
-    fireEvent.change(screen.getByPlaceholderText('Min 6 characters'), { target: { value: 'password123' } });
-
-    const submitBtn = screen.getByRole('button', { name: /Create Account/i });
-
-    await act(async () => {
-      fireEvent.click(submitBtn);
-    });
-
-    expect(mockRegisterFn).toHaveBeenCalledWith('John Doe', 'john@stadiumgenius.io', 'password123', 'operator');
-    expect(mockNavigate).toHaveBeenCalledWith('/', { replace: true });
-  });
-
-  it('renders validation error when registration fails', async () => {
-    mockRegisterFn.mockRejectedValue(new Error('Email is already registered.'));
-
-    render(
-      <BrowserRouter>
-        <Register />
-      </BrowserRouter>
-    );
-
-    fireEvent.change(screen.getByPlaceholderText('John Doe'), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByPlaceholderText('operator@stadiumgenius.io'), { target: { value: 'john@stadiumgenius.io' } });
-    fireEvent.change(screen.getByPlaceholderText('Min 6 characters'), { target: { value: 'password123' } });
-
-    const submitBtn = screen.getByRole('button', { name: /Create Account/i });
-
-    await act(async () => {
-      fireEvent.click(submitBtn);
-    });
-
-    expect(screen.getByText('Email is already registered.')).toBeInTheDocument();
-  });
-
-  it('triggers Auth0 registration flow when clicking the Continue with Auth0 button', async () => {
-    render(
-      <BrowserRouter>
-        <Register />
-      </BrowserRouter>
-    );
-
-    const auth0Btn = screen.getByText('Continue with Auth0');
+    const auth0Btn = screen.getByText('Register via Auth0 Secure Signup');
 
     await act(async () => {
       fireEvent.click(auth0Btn);
     });
 
-    expect(mockRegisterFn).toHaveBeenCalled();
+    expect(mockSignupFn).toHaveBeenCalledWith('operator');
   });
 });

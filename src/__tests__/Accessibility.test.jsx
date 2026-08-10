@@ -17,30 +17,31 @@ describe('WCAG 2.2 AA Accessibility Audits', () => {
   beforeEach(() => {
     useAuth.mockReturnValue({
       login: vi.fn(),
-      register: vi.fn(),
+      signup: vi.fn(),
     });
   });
 
-  it('verifies Login page inputs have linked accessibility labels', () => {
+  it('verifies Login page buttons have accessible names and aria attributes', () => {
     render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
 
-    // Verify inputs have label associations
-    const emailInput = screen.getByPlaceholderText('operator@stadiumgenius.io');
-    const passwordInput = screen.getByPlaceholderText('Enter your password');
+    // Verify main heading exists
+    const mainHeading = screen.getByRole('heading', { level: 1 });
+    expect(mainHeading).toHaveTextContent(/StadiumGenius/);
 
-    expect(emailInput).toBeInTheDocument();
-    expect(passwordInput).toBeInTheDocument();
-
-    // Verify icons are hidden from screen readers to prevent noise
-    const decorativeIcons = document.querySelectorAll('svg');
-    decorativeIcons.forEach((icon) => {
-      // Icons should either be aria-hidden or not screen-reader readable
-      expect(icon).toBeInTheDocument();
+    // Verify all buttons have accessible text names (are not empty)
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.length).toBeGreaterThan(0);
+    buttons.forEach((btn) => {
+      expect(btn.textContent || btn.getAttribute('aria-label') || btn.title).toBeTruthy();
     });
+
+    // Verify SVG icons exist in document
+    const decorativeIcons = document.querySelectorAll('svg');
+    expect(decorativeIcons.length).toBeGreaterThan(0);
   });
 
   it('verifies Register page has correct structural semantics and descriptive landmarks', () => {
@@ -54,7 +55,7 @@ describe('WCAG 2.2 AA Accessibility Audits', () => {
     const mainHeading = screen.getByRole('heading', { level: 1 });
     expect(mainHeading).toHaveTextContent(/StadiumGenius/);
 
-    // Check presence of submit buttons
+    // Check presence of buttons
     const buttons = screen.getAllByRole('button');
     buttons.forEach((btn) => {
       // Verify buttons have accessible text names (are not empty)
@@ -62,3 +63,4 @@ describe('WCAG 2.2 AA Accessibility Audits', () => {
     });
   });
 });
+

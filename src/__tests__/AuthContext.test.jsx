@@ -18,7 +18,7 @@ vi.mock('../lib/api', () => {
 
 // Helper component to access useAuth hooks in tests
 function TestComponent() {
-  const { user, isAuthenticated, login, register, logout } = useAuth();
+  const { user, isAuthenticated, login, signup, logout } = useAuth();
   return (
     <div>
       <div data-testid="is-authenticated">{isAuthenticated.toString()}</div>
@@ -26,7 +26,7 @@ function TestComponent() {
       <div data-testid="user-role">{user?.role || 'no-role'}</div>
       <button data-testid="login-btn" onClick={() => login('operator@stadiumgenius.io', 'password123')}>Login</button>
       <button data-testid="login-auth0-btn" onClick={() => login()}>Login Auth0</button>
-      <button data-testid="register-auth0-btn" onClick={() => register('Test User', null, null, 'security')}>Register Auth0</button>
+      <button data-testid="register-auth0-btn" onClick={() => signup('security')}>Register Auth0</button>
       <button data-testid="logout-btn" onClick={logout}>Logout</button>
     </div>
   );
@@ -56,10 +56,15 @@ describe('AuthContext & AuthProvider', () => {
     expect(screen.getByTestId('user-email').textContent).toBe('no-email');
   });
 
-  it('successfully logs in with email and password', async () => {
-    const mockUser = { id: 1, email: 'operator@stadiumgenius.io', role: 'operator', name: 'Operator' };
-    const mockToken = 'mock-jwt-token-123';
-    api.login.mockResolvedValue({ user: mockUser, token: mockToken });
+  it('successfully triggers Auth0 login with selected role', async () => {
+    const mockLoginWithRedirect = vi.fn();
+    global.mockUseAuth0.mockReturnValue({
+      isLoading: false,
+      isAuthenticated: false,
+      user: null,
+      loginWithRedirect: mockLoginWithRedirect,
+      logout: vi.fn(),
+    });
 
     render(
       <AuthProvider>
@@ -71,17 +76,18 @@ describe('AuthContext & AuthProvider', () => {
       screen.getByTestId('login-btn').click();
     });
 
-    expect(api.login).toHaveBeenCalledWith('operator@stadiumgenius.io', 'password123');
-    expect(window.localStorage.getItem('sg_token')).toBe(mockToken);
-    expect(screen.getByTestId('is-authenticated').textContent).toBe('true');
-    expect(screen.getByTestId('user-email').textContent).toBe('operator@stadiumgenius.io');
-    expect(screen.getByTestId('user-role').textContent).toBe('operator');
+    expect(mockLoginWithRedirect).toHaveBeenCalled();
   });
 
-  it('falls back to mock operator login when Auth0 keys are missing and no credentials provided', async () => {
-    // Override import.meta.env values during test
-    vi.stubEnv('VITE_AUTH0_DOMAIN', '');
-    vi.stubEnv('VITE_AUTH0_CLIENT_ID', '');
+  it('invokes loginWithRedirect when login is called', async () => {
+    const mockLoginWithRedirect = vi.fn();
+    global.mockUseAuth0.mockReturnValue({
+      isLoading: false,
+      isAuthenticated: false,
+      user: null,
+      loginWithRedirect: mockLoginWithRedirect,
+      logout: vi.fn(),
+    });
 
     render(
       <AuthProvider>
@@ -93,17 +99,18 @@ describe('AuthContext & AuthProvider', () => {
       screen.getByTestId('login-auth0-btn').click();
     });
 
-    expect(screen.getByTestId('is-authenticated').textContent).toBe('true');
-    expect(screen.getByTestId('user-email').textContent).toBe('operator@stadiumgenius.io');
-    expect(screen.getByTestId('user-role').textContent).toBe('operator');
-    expect(window.localStorage.getItem('sg_token')).toBe('mock-jwt-token');
-
-    vi.unstubAllEnvs();
+    expect(mockLoginWithRedirect).toHaveBeenCalled();
   });
 
-  it('falls back to mock registration when Auth0 keys are missing', async () => {
-    vi.stubEnv('VITE_AUTH0_DOMAIN', '');
-    vi.stubEnv('VITE_AUTH0_CLIENT_ID', '');
+  it('invokes loginWithRedirect with screen_hint when signup is called', async () => {
+    const mockLoginWithRedirect = vi.fn();
+    global.mockUseAuth0.mockReturnValue({
+      isLoading: false,
+      isAuthenticated: false,
+      user: null,
+      loginWithRedirect: mockLoginWithRedirect,
+      logout: vi.fn(),
+    });
 
     render(
       <AuthProvider>
@@ -115,17 +122,22 @@ describe('AuthContext & AuthProvider', () => {
       screen.getByTestId('register-auth0-btn').click();
     });
 
-    expect(screen.getByTestId('is-authenticated').textContent).toBe('true');
-    expect(screen.getByTestId('user-role').textContent).toBe('security');
-    expect(window.localStorage.getItem('sg_token')).toBe('mock-jwt-token');
-
-    vi.unstubAllEnvs();
+    expect(mockLoginWithRedirect).toHaveBeenCalledWith({
+      authorizationParams: {
+        screen_hint: 'signup',
+      }
+    });
   });
 
   it('logs out and clears storage state', async () => {
-    const mockUser = { id: 1, email: 'operator@stadiumgenius.io', role: 'operator', name: 'Operator' };
-    const mockToken = 'mock-jwt-token-123';
-    api.login.mockResolvedValue({ user: mockUser, token: mockToken });
+    const mockLogout = vi.fn();
+    global.mockUseAuth0.mockReturnValue({
+      isLoading: false,
+      isAuthenticated: true,
+      user: { sub: 'auth0|123', email: 'operator@stadiumgenius.io' },
+      loginWithRedirect: vi.fn(),
+      logout: mockLogout,
+    });
 
     render(
       <AuthProvider>
@@ -134,17 +146,11 @@ describe('AuthContext & AuthProvider', () => {
     );
 
     await act(async () => {
-      screen.getByTestId('login-btn').click();
-    });
-
-    expect(screen.getByTestId('is-authenticated').textContent).toBe('true');
-
-    await act(async () => {
       screen.getByTestId('logout-btn').click();
     });
 
     expect(window.localStorage.getItem('sg_token')).toBeNull();
-    expect(screen.getByTestId('is-authenticated').textContent).toBe('false');
+    expect(mockLogout).toHaveBeenCalled();
   });
 
   it('toggles sidebar state correctly', async () => {
@@ -167,24 +173,14 @@ describe('AuthContext & AuthProvider', () => {
   });
 
   it('updates user state details correctly', async () => {
-    const mockUser = { id: 1, email: 'operator@stadiumgenius.io', role: 'operator', name: 'Operator' };
-    const mockToken = 'mock-jwt-token-123';
-    api.login.mockResolvedValue({ user: mockUser, token: mockToken });
-
     const { result } = renderHook(() => useAuth(), {
       wrapper: AuthProvider,
     });
 
-    await act(async () => {
-      await result.current.login('operator@stadiumgenius.io', 'password123');
-    });
-
-    expect(result.current.user.name).toBe('Operator');
-
     act(() => {
       result.current.updateUser({ name: 'Updated Operator' });
     });
-    expect(result.current.user.name).toBe('Updated Operator');
+    expect(result.current.user?.name).toBe('Updated Operator');
   });
 
   it('throws an error if useAuth is invoked outside AuthProvider', () => {
@@ -219,7 +215,7 @@ describe('AuthContext & AuthProvider', () => {
     expect(mockLoginWithRedirect).toHaveBeenCalled();
 
     await act(async () => {
-      await result.current.register();
+      await result.current.signup();
     });
     expect(mockLoginWithRedirect).toHaveBeenCalled();
 
@@ -289,15 +285,28 @@ describe('AuthContext & AuthProvider', () => {
     expect(resultHook.current.token).toBeNull();
   });
 
-  it('registers successfully with email and password', async () => {
+  it('triggers signup redirect with role parameter', async () => {
+    const mockLoginWithRedirect = vi.fn();
+    global.mockUseAuth0.mockReturnValue({
+      isLoading: false,
+      isAuthenticated: false,
+      user: null,
+      loginWithRedirect: mockLoginWithRedirect,
+      logout: vi.fn(),
+    });
+
     const { result } = renderHook(() => useAuth(), {
       wrapper: AuthProvider,
     });
 
     await act(async () => {
-      await result.current.register('operator', 'new@stadiumgenius.io');
+      await result.current.signup('operator');
     });
 
-    expect(result.current.user.email).toBe('new@stadiumgenius.io');
+    expect(mockLoginWithRedirect).toHaveBeenCalledWith({
+      authorizationParams: {
+        screen_hint: 'signup',
+      }
+    });
   });
 });

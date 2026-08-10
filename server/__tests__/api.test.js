@@ -100,7 +100,7 @@ describe('Backend API & Security Audits', () => {
   it('blocks access to protected endpoints without a token', async () => {
     const res = await request(app).get('/api/auth/me');
     expect(res.status).toBe(401);
-    expect(res.body.error).toContain('No valid Bearer token provided');
+    expect(res.body.error).toContain('No valid token provided');
   });
 
   it('allows access to protected endpoints with a valid JWT token', async () => {
