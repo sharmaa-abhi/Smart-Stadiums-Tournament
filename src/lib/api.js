@@ -187,8 +187,15 @@ class ApiClient {
   // ── Profile Operations ──
   async updateUserProfile(data) {
     return this.request('/users/profile', {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
+    });
+  }
+
+  async changePassword(currentPassword, newPassword) {
+    return this.request('/users/password', {
+      method: 'PATCH',
+      body: JSON.stringify({ currentPassword, newPassword }),
     });
   }
 
@@ -269,27 +276,27 @@ class ApiClient {
   }
 
   async getIncidents(venueId) {
-    return this.request(`/operator/incidents${venueId ? `?venue_id=${venueId}` : ''}`);
+    return this.request(`/incidents${venueId ? `?venue_id=${venueId}` : ''}`);
   }
 
   async createIncident(data) {
-    return this.request('/operator/incidents', {
+    return this.request('/incidents', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateIncident(id, data) {
-    return this.request(`/operator/incidents/${id}`, {
-      method: 'PUT',
+    return this.request(`/incidents/${id}`, {
+      method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async queryAiAssistant(prompt) {
-    return this.request('/operator/ai-assistant', {
+    return this.request('/ai/chat', {
       method: 'POST',
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ message: prompt }),
     });
   }
 

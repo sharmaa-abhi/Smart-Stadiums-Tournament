@@ -105,12 +105,14 @@ const memoryDB = {
     },
   ],
   broadcast_messages: [],
+  ai_conversations: [],
   nextIds: {
     users: 4,
     incidents: 3,
     alerts: 3,
     venues: 4,
     broadcast_messages: 1,
+    ai_conversations: 1,
   },
 };
 
@@ -132,6 +134,8 @@ function parseQuery(sql) {
     tableName = 'alerts';
   } else if (normalized.includes('FROM broadcast_messages') || normalized.includes('INTO broadcast_messages') || normalized.includes('UPDATE broadcast_messages') || normalized.includes('DELETE FROM broadcast_messages')) {
     tableName = 'broadcast_messages';
+  } else if (normalized.includes('FROM ai_conversations') || normalized.includes('INTO ai_conversations')) {
+    tableName = 'ai_conversations';
   }
 
   return { normalized, isSelect, isInsert, isUpdate, isDelete, tableName };
@@ -207,6 +211,16 @@ const db = {
               created_by: params[7] || 1,
             };
             memoryDB.incidents.push(newIncident);
+          } else if (tableName === 'ai_conversations') {
+            const newConv = {
+              id: nextId,
+              session_id: params[0],
+              role: params[1] || 'user',
+              content: params[2] || '',
+              user_id: params[3] || 1,
+              created_at: new Date().toISOString(),
+            };
+            memoryDB.ai_conversations.push(newConv);
           } else if (tableName === 'broadcast_messages') {
             const newMsg = {
               id: nextId,
