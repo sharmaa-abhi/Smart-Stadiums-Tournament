@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Navigation, Users, Ticket, ChevronRight } from 'lucide-react';
+import { MapPin, Navigation, Users, Ticket } from 'lucide-react';
 
 const SECTORS = [
   {

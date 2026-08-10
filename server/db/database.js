@@ -135,7 +135,7 @@ function parseQuery(sql) {
 
 const db = {
   prepare: (sql) => {
-    const { normalized, isSelect, isInsert, isUpdate, isDelete, tableName } = parseQuery(sql);
+    const { normalized, _isSelect, isInsert, isUpdate, _isDelete, tableName } = parseQuery(sql);
 
     return {
       get: (...params) => {

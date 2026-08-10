@@ -60,12 +60,12 @@ export default function AIAssistant() {
     try {
       const res = await api.queryAiAssistant(msg);
       setMessages(prev => [...prev, { role: 'assistant', content: res.ai_response || res.content }]);
-    } catch (err) {
+    } catch (_err) {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error connecting to the AI service. Please try again.' }]);
     } finally {
       setIsTyping(false);
     }
-  }, [input, sessionId]);
+  }, [sessionId]);
 
   const handleQuickAction = (template) => handleSend(template);
 

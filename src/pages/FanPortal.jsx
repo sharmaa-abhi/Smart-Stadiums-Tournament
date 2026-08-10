@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  QrCode, MapPin, ShoppingCart, Star, Ticket, Clock, ChevronRight,
-  CheckCircle, Plus, Minus, Trash2, Wifi, Battery, Signal,
-  Trophy, Zap, Bell, Users, X, ArrowLeft, Search
+  QrCode, MapPin, ShoppingCart, Ticket, Clock,
+  CheckCircle, Plus, Minus, Wifi, Battery, Signal,
+  Trophy, Bell
 } from 'lucide-react';
 import { FanPortalSkeleton } from '../components/skeleton';
 

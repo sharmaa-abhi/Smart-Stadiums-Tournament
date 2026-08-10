@@ -126,7 +126,7 @@ async function run() {
         let isRestricted = false;
         try {
           isRestricted = await page.evaluate(() => document.body.textContent.includes('Access Restricted'));
-        } catch (evalErr) {
+        } catch (_evalErr) {
           console.log(`  ⚠️ Context destroyed, retrying evaluation after 1s...`);
           await delay(1000);
           isRestricted = await page.evaluate(() => document.body.textContent.includes('Access Restricted'));
