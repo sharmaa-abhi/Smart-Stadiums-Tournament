@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import api from '../lib/api';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 const DEFAULT_ROLE_PERMISSIONS = {
   admin: [
@@ -214,11 +214,5 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+// Re-export hook for backward compatibility
+export { useAuth } from './useAuth';

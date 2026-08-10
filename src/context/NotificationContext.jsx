@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 
-const NotificationContext = createContext(null);
+export const NotificationContext = createContext(null);
 
 const MAX_NOTIFICATIONS = 50;
 
@@ -116,11 +116,5 @@ export function NotificationProvider({ children }) {
     </NotificationContext.Provider>
   );
 }
-
-export function useNotifications() {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
-}
+// Re-export hook for backward compatibility
+export { useNotifications } from './useNotifications';
