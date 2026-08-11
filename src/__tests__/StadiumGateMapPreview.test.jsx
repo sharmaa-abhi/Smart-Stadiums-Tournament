@@ -22,7 +22,7 @@ describe('StadiumGateMapPreview Component', () => {
     render(<TestWrapper />);
 
     // Click VIP Skybox sector pill
-    const vipPill = screen.getByRole('button', { name: 'VIP Skybox & Director Suite' });
+    const vipPill = screen.getByRole('button', { name: 'VIP Skybox' });
     fireEvent.click(vipPill);
 
     expect(screen.getByText('VIP Skybox & Director Suite')).toBeInTheDocument();
@@ -31,7 +31,7 @@ describe('StadiumGateMapPreview Component', () => {
     expect(screen.getByText('0 mins wait')).toBeInTheDocument();
 
     // Click South Stand sector pill
-    const southPill = screen.getByRole('button', { name: 'South Family Tribune' });
+    const southPill = screen.getByRole('button', { name: 'South Stand' });
     fireEvent.click(southPill);
 
     expect(screen.getByText('South Family Tribune')).toBeInTheDocument();
