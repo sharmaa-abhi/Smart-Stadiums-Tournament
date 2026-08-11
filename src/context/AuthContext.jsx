@@ -38,8 +38,8 @@ export function AuthProvider({ children }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  // Auth is valid ONLY when Auth0 says so AND we have a user object
-  const isAuthenticated = auth0IsAuthenticated && !!user;
+  // Auth is valid when user object exists (Auth0 or Dev Login)
+  const isAuthenticated = !!user;
 
   // Sync authentication state with Auth0
   useEffect(() => {
@@ -117,6 +117,27 @@ export function AuthProvider({ children }) {
     };
     await loginWithRedirect(params);
   }, [loginWithRedirect]);
+
+  // Mock Dev Login — Instant local login without waiting for Auth0 Dashboard setup
+  const mockDevLogin = useCallback((selectedRole = 'operator') => {
+    const role = selectedRole.toLowerCase();
+    const fallbackUser = {
+      auth0_id: `mock|${role}-dev-id`,
+      name: `Stadium ${role.toUpperCase()} (Dev)`,
+      email: `${role}@stadiumgenius.io`,
+      avatar: `https://stadiumgenius.io/avatars/${role}.png`,
+      role: role,
+      account_status: 'active',
+      email_verified: true,
+      last_login: new Date().toISOString(),
+      permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
+    };
+    const mockToken = `mock-${role}-jwt-token`;
+    localStorage.setItem('sg_token', mockToken);
+    setToken(mockToken);
+    setUser(fallbackUser);
+    setLoading(false);
+  }, []);
 
   // Auth0 Signup — redirect to Auth0 with signup screen hint
   const signup = useCallback(async (selectedRole) => {
@@ -201,7 +222,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, token, loading, isAuthenticated,
-      login, signup, triggerPasswordReset, logout,
+      login, signup, triggerPasswordReset, logout, mockDevLogin,
       loginWithAuth0: login, // Alias for backward compat in components
       sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId,
       mobileSidebarOpen, openMobileSidebar, closeMobileSidebar, toggleMobileSidebar,

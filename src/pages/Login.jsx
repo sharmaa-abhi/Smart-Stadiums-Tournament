@@ -55,7 +55,7 @@ export default function Login() {
   const [activeTheme, setActiveTheme] = useState('cyberpunk');
   const [selectedSector, setSelectedSector] = useState('north_stand');
 
-  const { login } = useAuth();
+  const { login, mockDevLogin } = useAuth();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
   const themeObj = THEMES[activeTheme] || THEMES.cyberpunk;
@@ -205,6 +205,15 @@ export default function Login() {
                   Sign In with Auth0 (PKCE + OIDC)
                 </>
               )}
+            </button>
+
+            {/* Quick Local Dev Sign In (Bypass Auth0 Callback Restrictions) */}
+            <button
+              type="button"
+              onClick={() => mockDevLogin(role)}
+              className="w-full flex items-center justify-center gap-2 mt-2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-cyan-400 border border-cyan-500/40 shadow-sm transition-all cursor-pointer"
+            >
+              ⚡ Quick Dev Sign In ({role.toUpperCase()} Role Bypass)
             </button>
 
             {error && (

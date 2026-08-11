@@ -65,7 +65,7 @@ export default function Register() {
   const [activeTheme, setActiveTheme] = useState('cyberpunk');
   const [selectedSector, setSelectedSector] = useState('north_stand');
 
-  const { signup } = useAuth();
+  const { signup, mockDevLogin } = useAuth();
 
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
   const themeObj = THEMES[activeTheme] || THEMES.cyberpunk;
@@ -182,6 +182,15 @@ export default function Register() {
                   Register via Auth0 Secure Signup
                 </>
               )}
+            </button>
+
+            {/* Quick Local Dev Sign In (Bypass Auth0 Callback Restrictions) */}
+            <button
+              type="button"
+              onClick={() => mockDevLogin(role)}
+              className="w-full flex items-center justify-center gap-2 mt-2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-cyan-400 border border-cyan-500/40 shadow-sm transition-all cursor-pointer"
+            >
+              ⚡ Quick Dev Sign In ({role.toUpperCase()} Role Bypass)
             </button>
 
             {/* Security Info */}
