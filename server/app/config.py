@@ -36,10 +36,10 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
     # Auth0 Configuration
-    AUTH0_DOMAIN: str = os.getenv("AUTH0_DOMAIN", "stadiumgenius.us.auth0.com")
-    AUTH0_AUDIENCE: str = os.getenv("AUTH0_AUDIENCE", "https://api.stadiumgenius.io")
+    AUTH0_DOMAIN: str = os.getenv("AUTH0_DOMAIN", "dev-rx0mbg0jq10om5js.us.auth0.com")
+    AUTH0_AUDIENCE: str = os.getenv("AUTH0_AUDIENCE", "https://dev-rx0mbg0jq10om5js.us.auth0.com/api/v2/")
     AUTH0_ISSUER: str = os.getenv(
-        "AUTH0_ISSUER", f"https://{os.getenv('AUTH0_DOMAIN', 'stadiumgenius.us.auth0.com')}/"
+        "AUTH0_ISSUER", f"https://{os.getenv('AUTH0_DOMAIN', 'dev-rx0mbg0jq10om5js.us.auth0.com')}/"
     )
     AUTH0_ALGORITHMS: List[str] = ["RS256"]
     CUSTOM_CLAIM_NAMESPACE: str = "https://stadiumgenius.io"
