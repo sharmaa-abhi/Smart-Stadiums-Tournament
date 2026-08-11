@@ -5,10 +5,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
-    pool: 'forks',
-    forks: {
-      singleFork: true,
-    },
+    fileParallelism: false,
     setupFiles: ['./src/setupTests.jsx'],
     globals: true,
     exclude: ['node_modules/**', '**/node_modules/**', 'dist/**', 'dev-dist/**', 'e2e/**'],

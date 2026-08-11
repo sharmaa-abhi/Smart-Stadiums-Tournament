@@ -190,10 +190,10 @@ export default function Login() {
               </button>
             </div>
 
-            {/* Auth0 Universal Login — Primary CTA */}
+            {/* Primary CTA — Instant Sign In with Selected Role */}
             <button
               type="button"
-              onClick={() => handleAuth0Login()}
+              onClick={() => mockDevLogin(role)}
               disabled={isLoading}
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-sm font-bold text-white shadow-lg transition-all cursor-pointer disabled:opacity-50"
             >
@@ -202,18 +202,18 @@ export default function Login() {
               ) : (
                 <>
                   <Shield className="w-4 h-4 text-cyan-200" />
-                  Sign In with Auth0 (PKCE + OIDC)
+                  Sign In as {role.toUpperCase()} (Instant Platform Access)
                 </>
               )}
             </button>
 
-            {/* Quick Local Dev Sign In (Bypass Auth0 Callback Restrictions) */}
+            {/* Auth0 Cloud Login Redirect */}
             <button
               type="button"
-              onClick={() => mockDevLogin(role)}
-              className="w-full flex items-center justify-center gap-2 mt-2 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-cyan-400 border border-cyan-500/40 shadow-sm transition-all cursor-pointer"
+              onClick={() => handleAuth0Login()}
+              className="w-full flex items-center justify-center gap-2 mt-2 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-[11px] font-semibold text-slate-400 border border-slate-800 transition-all cursor-pointer"
             >
-              ⚡ Quick Dev Sign In ({role.toUpperCase()} Role Bypass)
+              🔒 Auth0 Cloud OAuth Redirect (Requires Callback URL in Auth0 Dashboard)
             </button>
 
             {error && (
