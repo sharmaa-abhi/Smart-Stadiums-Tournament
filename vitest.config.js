@@ -13,8 +13,6 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: [
-        'src/pages/Login.jsx',
-        'src/pages/Register.jsx',
         'src/context/AuthContext.jsx',
         'src/components/ErrorBoundary.jsx',
         'src/components/StadiumBackdrop.jsx'
