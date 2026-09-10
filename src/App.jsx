@@ -1,6 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import { NotificationProvider } from './context/NotificationContext';
@@ -11,7 +10,7 @@ import ScrollToTop from './components/ScrollToTop';
 import NotificationToast from './components/NotificationToast';
 import ErrorBoundary from './components/ErrorBoundary';
 import { StadiumBackdrop } from './components/StadiumBackdrop';
-import { RouteFallbackSkeleton, AuthPageSkeleton, FanPortalSkeleton } from './components/skeleton';
+import { RouteFallbackSkeleton, FanPortalSkeleton } from './components/skeleton';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const DigitalTwin = lazy(() => import('./pages/DigitalTwin'));
@@ -24,8 +23,6 @@ const Analytics = lazy(() => import('./pages/Analytics'));
 const Settings = lazy(() => import('./pages/Settings'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const FanPortal = lazy(() => import('./pages/FanPortal'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 import BottomNav from './components/BottomNav';
@@ -58,80 +55,46 @@ function Page({ roles = [], children }) {
   );
 }
 
-// ── Auth0 Gate — the ONLY entry point ──
-// If Auth0 says not authenticated → show Login/Register pages
-// If Auth0 says authenticated → show the full app
-function Auth0Gate() {
-  const {
-    isLoading,
-    isAuthenticated,
-  } = useAuth0();
-
-  // Auth0 SDK is still loading — show skeleton
-  if (isLoading) {
-    return <AuthPageSkeleton />;
-  }
-
-  // Authenticated via Auth0 → show full app with all routes
-  if (isAuthenticated) {
-    return (
-      <AuthProvider>
-        <NotificationProvider>
-          <ScrollToTop />
-          <PWAInstallBanner />
-          <ErrorBoundary>
-            <Suspense fallback={<RouteFallbackSkeleton />}>
-              <Routes>
-                <Route path="/fan" element={
-                  <Suspense fallback={<FanPortalSkeleton />}>
-                    <FanPortal />
-                  </Suspense>
-                } />
-
-                <Route path="/" element={<Page><Dashboard /></Page>} />
-                <Route path="/assistant" element={<Page><AIAssistant /></Page>} />
-                <Route path="/settings" element={<Page><Settings /></Page>} />
-
-                <Route path="/digital-twin" element={<Page roles={['operator', 'manager', 'admin']}><DigitalTwin /></Page>} />
-                <Route path="/crowd" element={<Page roles={['operator', 'manager', 'security', 'admin']}><CrowdManagement /></Page>} />
-                <Route path="/concessions" element={<Page roles={['operator', 'manager', 'admin']}><Concessions /></Page>} />
-
-                <Route path="/security" element={<Page roles={['security', 'admin']}><Security /></Page>} />
-
-                <Route path="/analytics" element={<Page roles={['manager', 'admin']}><Analytics /></Page>} />
-                <Route path="/broadcast" element={<Page roles={['manager', 'security', 'operator', 'admin']}><Broadcast /></Page>} />
-
-                <Route path="/admin-panel" element={<Page roles={['admin']}><AdminPanel /></Page>} />
-
-                {/* Redirect /login and /register to home since user is already authenticated */}
-                <Route path="/login" element={<Page><Dashboard /></Page>} />
-                <Route path="/register" element={<Page><Dashboard /></Page>} />
-
-                {/* 404 — catch all unmatched routes */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </NotificationProvider>
-      </AuthProvider>
-    );
-  }
-
-  // NOT authenticated → show ONLY Login/Register pages
+export default function App() {
   return (
     <AuthProvider>
-      <ErrorBoundary>
-        <Suspense fallback={<AuthPageSkeleton />}>
-          <Routes>
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<Login />} />
-          </Routes>
-        </Suspense>
-      </ErrorBoundary>
+      <NotificationProvider>
+        <ScrollToTop />
+        <PWAInstallBanner />
+        <ErrorBoundary>
+          <Suspense fallback={<RouteFallbackSkeleton />}>
+            <Routes>
+              <Route path="/fan" element={
+                <Suspense fallback={<FanPortalSkeleton />}>
+                  <FanPortal />
+                </Suspense>
+              } />
+
+              <Route path="/" element={<Page><Dashboard /></Page>} />
+              <Route path="/assistant" element={<Page><AIAssistant /></Page>} />
+              <Route path="/settings" element={<Page><Settings /></Page>} />
+
+              <Route path="/digital-twin" element={<Page roles={['operator', 'manager', 'admin']}><DigitalTwin /></Page>} />
+              <Route path="/crowd" element={<Page roles={['operator', 'manager', 'security', 'admin']}><CrowdManagement /></Page>} />
+              <Route path="/concessions" element={<Page roles={['operator', 'manager', 'admin']}><Concessions /></Page>} />
+
+              <Route path="/security" element={<Page roles={['security', 'admin']}><Security /></Page>} />
+
+              <Route path="/analytics" element={<Page roles={['manager', 'admin']}><Analytics /></Page>} />
+              <Route path="/broadcast" element={<Page roles={['manager', 'security', 'operator', 'admin']}><Broadcast /></Page>} />
+
+              <Route path="/admin-panel" element={<Page roles={['admin']}><AdminPanel /></Page>} />
+
+              {/* Redirect /login and /register directly to home dashboard */}
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/register" element={<Navigate to="/" replace />} />
+
+              {/* 404 — catch all unmatched routes */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
+      </NotificationProvider>
     </AuthProvider>
   );
-}
-
-export default function App() {
-  return <Auth0Gate />;
 }

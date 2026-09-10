@@ -105,7 +105,7 @@ export default function Sidebar() {
   const handleLogout = () => {
     closeMobileSidebar();
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (

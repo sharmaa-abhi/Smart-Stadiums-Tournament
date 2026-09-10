@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function UserProfilePopup({ isOpen, onClose }) {
-  const { user, logout } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   if (!isOpen || !user) return null;
@@ -127,6 +127,35 @@ export default function UserProfilePopup({ isOpen, onClose }) {
               ) : (
                 <span className="text-xs text-surface-500 italic">Default role permissions active</span>
               )}
+            </div>
+          </div>
+
+          {/* Quick Role Switcher */}
+          <div className="mt-5 space-y-2">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-surface-400 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              Switch Active Role Profile
+            </h4>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { id: 'admin', label: 'Admin', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
+                { id: 'manager', label: 'Manager', color: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+                { id: 'security', label: 'Security', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+                { id: 'operator', label: 'Operator', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' }
+              ].map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => switchRole?.(r.id)}
+                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                    user.role?.toLowerCase() === r.id
+                      ? `${r.color} shadow-glow font-bold scale-105 ring-1 ring-white/30`
+                      : 'bg-surface-950/60 border-surface-800 text-surface-400 hover:text-white hover:bg-surface-800'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
             </div>
           </div>
 

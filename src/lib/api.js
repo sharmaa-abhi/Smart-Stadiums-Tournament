@@ -52,13 +52,9 @@ class ApiClient {
         err.status = response.status;
         err.detail = data.detail;
 
-        // Auto-redirect on 401 (token expired/invalid)
+        // Handle 401 (token expired/invalid) gracefully
         if (response.status === 401) {
           this.setToken(null);
-          localStorage.removeItem('sg_user');
-          if (!window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
-          }
         }
 
         throw err;

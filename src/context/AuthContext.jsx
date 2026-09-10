@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import api from '../lib/api';
 import { AuthContext } from './contexts';
 
-const DEFAULT_ROLE_PERMISSIONS = {
+export const DEFAULT_ROLE_PERMISSIONS = {
   admin: [
     'manage:users', 'manage:roles', 'configure:system', 'configure:ai',
     'read:incidents', 'delete:incidents', 'read:audit_logs', 'manage:dashboard'
@@ -22,160 +21,86 @@ const DEFAULT_ROLE_PERMISSIONS = {
   ]
 };
 
-export function AuthProvider({ children }) {
-  const {
-    isLoading: auth0Loading,
-    isAuthenticated: auth0IsAuthenticated,
-    user: auth0User,
-    loginWithRedirect,
-    logout: auth0Logout,
-    getAccessTokenSilently,
-  } = useAuth0();
+export const createDefaultUser = (role = 'admin') => {
+  const r = (role || 'admin').toLowerCase();
+  return {
+    auth0_id: `user|${r}-bypass-id`,
+    name: `Stadium ${r.charAt(0).toUpperCase() + r.slice(1)}`,
+    email: `${r}@stadiumgenius.io`,
+    avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80`,
+    role: r,
+    account_status: 'active',
+    email_verified: true,
+    last_login: new Date().toISOString(),
+    permissions: DEFAULT_ROLE_PERMISSIONS[r] || []
+  };
+};
 
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem('sg_token'));
-  const [loading, setLoading] = useState(true);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('sg_user');
+      if (savedUser) {
+        return JSON.parse(savedUser);
+      }
+    } catch {
+      // Fallback if parsing fails
+    }
+    const initialRole = localStorage.getItem('sg_role') || 'admin';
+    return createDefaultUser(initialRole);
+  });
+
+  const [token, setToken] = useState(() => localStorage.getItem('sg_token') || 'sg-bypass-token-dev');
+  const [loading, setLoading] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
 
-  // Auth is valid when user object exists (Auth0 or Dev Login)
+  // Authentication is always valid in direct access mode
   const isAuthenticated = !!user;
 
-  // Sync authentication state with Auth0
+  // Persist user and active role
   useEffect(() => {
-    const initAuth = async () => {
-      if (auth0Loading) return;
-
-      // If Auth0 authenticated — sync user profile
-      if (auth0IsAuthenticated && auth0User) {
-        try {
-          // Get real JWT access token from Auth0
-          let accessToken = null;
-          try {
-            accessToken = await getAccessTokenSilently();
-          } catch (tokenErr) {
-            console.warn('Could not fetch silent token from Auth0:', tokenErr);
-          }
-
-          const pendingRole = localStorage.getItem('sg_auth0_role') || 'operator';
-
-          if (accessToken) {
-            localStorage.setItem('sg_token', accessToken);
-            setToken(accessToken);
-          }
-
-          // Sync with Backend
-          try {
-            const syncResult = await api.syncAuth0User();
-            setUser({
-              ...syncResult.user,
-              permissions: syncResult.permissions || DEFAULT_ROLE_PERMISSIONS[syncResult.user.role] || []
-            });
-          } catch {
-            // Backend unavailable — build user from Auth0 profile
-            const role = pendingRole.toLowerCase();
-            const fallbackUser = {
-              auth0_id: auth0User.sub,
-              name: auth0User.name || auth0User.nickname,
-              email: auth0User.email,
-              avatar: auth0User.picture,
-              role: role,
-              account_status: 'active',
-              email_verified: auth0User.email_verified ?? true,
-              last_login: new Date().toISOString(),
-              permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
-            };
-            setUser(fallbackUser);
-          }
-          localStorage.removeItem('sg_auth0_role');
-        } catch (err) {
-          console.error('Error in Auth0 login sync:', err);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        // Not authenticated via Auth0 — clear everything
-        localStorage.removeItem('sg_token');
-        setUser(null);
-        setToken(null);
-        setLoading(false);
-      }
-    };
-
-    initAuth();
-  }, [auth0Loading, auth0IsAuthenticated, auth0User, getAccessTokenSilently]);
-
-  // Auth0 Login — the ONLY way to authenticate
-  const login = useCallback(async (selectedRole, connection = null) => {
-    if (selectedRole) {
-      localStorage.setItem('sg_auth0_role', selectedRole);
+    if (user) {
+      localStorage.setItem('sg_user', JSON.stringify(user));
+      localStorage.setItem('sg_role', user.role);
     }
-    const params = {
-      authorizationParams: {
-        ...(connection ? { connection } : {}),
-      }
-    };
-    await loginWithRedirect(params);
-  }, [loginWithRedirect]);
+  }, [user]);
 
-  // Mock Dev Login — Instant local login without waiting for Auth0 Dashboard setup
-  const mockDevLogin = useCallback((selectedRole = 'operator') => {
-    const role = selectedRole.toLowerCase();
-    const fallbackUser = {
-      auth0_id: `mock|${role}-dev-id`,
-      name: `Stadium ${role.toUpperCase()} (Dev)`,
-      email: `${role}@stadiumgenius.io`,
-      avatar: `https://stadiumgenius.io/avatars/${role}.png`,
-      role: role,
-      account_status: 'active',
-      email_verified: true,
-      last_login: new Date().toISOString(),
-      permissions: DEFAULT_ROLE_PERMISSIONS[role] || []
-    };
-    const mockToken = `mock-${role}-jwt-token`;
-    localStorage.setItem('sg_token', mockToken);
-    setToken(mockToken);
-    setUser(fallbackUser);
-    setLoading(false);
+  // Role Switcher for instant UI testing across roles
+  const switchRole = useCallback((newRole = 'admin') => {
+    const r = (newRole || 'admin').toLowerCase();
+    const updatedUser = createDefaultUser(r);
+    localStorage.setItem('sg_role', r);
+    localStorage.setItem('sg_user', JSON.stringify(updatedUser));
+    setUser(updatedUser);
   }, []);
 
-  // Auth0 Signup — redirect to Auth0 with signup screen hint
+  const login = useCallback(async (selectedRole) => {
+    switchRole(selectedRole || 'admin');
+  }, [switchRole]);
+
+  const mockDevLogin = useCallback((selectedRole = 'admin') => {
+    switchRole(selectedRole);
+  }, [switchRole]);
+
   const signup = useCallback(async (selectedRole) => {
-    if (selectedRole) {
-      localStorage.setItem('sg_auth0_role', selectedRole);
-    }
-    await loginWithRedirect({
-      authorizationParams: {
-        screen_hint: 'signup',
-      }
-    });
-  }, [loginWithRedirect]);
+    switchRole(selectedRole || 'admin');
+  }, [switchRole]);
 
-  // Password Reset via Auth0
-  const triggerPasswordReset = useCallback(async (email) => {
-    await loginWithRedirect({
-      authorizationParams: {
-        screen_hint: 'reset_password',
-        login_hint: email,
-      }
-    });
-  }, [loginWithRedirect]);
+  const triggerPasswordReset = useCallback(async () => {
+    return Promise.resolve();
+  }, []);
 
-  // Logout — clears local state + Auth0 session
+  // Logout resets to default operator role
   const logout = useCallback(async () => {
     try {
       await api.logout();
     } catch {
-      // Ignore network errors on logout
+      // Ignore network errors
     }
-    localStorage.removeItem('sg_token');
-    localStorage.removeItem('sg_auth0_role');
-    setToken(null);
-    setUser(null);
+    switchRole('operator');
     setIsProfileOpen(false);
-
-    auth0Logout({ logoutParams: { returnTo: window.location.origin } });
-  }, [auth0Logout]);
+  }, [switchRole]);
 
   // Sidebar & Venue State
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -205,6 +130,7 @@ export function AuthProvider({ children }) {
 
   const hasPermission = useCallback((permissionCode) => {
     if (!user || !user.permissions) return false;
+    if (user.role === 'admin') return true;
     return user.permissions.includes(permissionCode);
   }, [user]);
 
@@ -223,7 +149,8 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, token, loading, isAuthenticated,
       login, signup, triggerPasswordReset, logout, mockDevLogin,
-      loginWithAuth0: login, // Alias for backward compat in components
+      switchRole,
+      loginWithAuth0: login,
       sidebarCollapsed, toggleSidebar, updateUser, activeVenueId, setActiveVenueId,
       mobileSidebarOpen, openMobileSidebar, closeMobileSidebar, toggleMobileSidebar,
       hasPermission, hasRole,

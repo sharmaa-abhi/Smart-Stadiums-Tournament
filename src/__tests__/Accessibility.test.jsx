@@ -2,8 +2,8 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
+import Sidebar from '../components/Sidebar';
+import BottomNav from '../components/BottomNav';
 import { useAuth } from '../context/AuthContext';
 
 // Mock AuthContext
@@ -16,15 +16,27 @@ vi.mock('../context/AuthContext', () => {
 describe('WCAG 2.2 AA Accessibility Audits', () => {
   beforeEach(() => {
     useAuth.mockReturnValue({
-      login: vi.fn(),
-      signup: vi.fn(),
+      user: {
+        role: 'admin',
+        name: 'Stadium Admin',
+        email: 'admin@stadiumgenius.io',
+        permissions: ['manage:dashboard']
+      },
+      sidebarCollapsed: false,
+      toggleSidebar: vi.fn(),
+      logout: vi.fn(),
+      closeMobileSidebar: vi.fn(),
+      openProfile: vi.fn(),
+      closeProfile: vi.fn(),
+      isProfileOpen: false,
+      mobileSidebarOpen: false
     });
   });
 
-  it('verifies Login page buttons have accessible names and aria attributes', () => {
+  it('verifies Sidebar elements have accessible names and aria attributes', () => {
     render(
       <BrowserRouter>
-        <Login />
+        <Sidebar />
       </BrowserRouter>
     );
 
@@ -32,7 +44,7 @@ describe('WCAG 2.2 AA Accessibility Audits', () => {
     const mainHeading = screen.getByRole('heading', { level: 1 });
     expect(mainHeading).toHaveTextContent(/StadiumGenius/);
 
-    // Verify all buttons have accessible text names (are not empty)
+    // Verify all buttons have accessible text names
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThan(0);
     buttons.forEach((btn) => {
@@ -44,22 +56,22 @@ describe('WCAG 2.2 AA Accessibility Audits', () => {
     expect(decorativeIcons.length).toBeGreaterThan(0);
   });
 
-  it('verifies Register page has correct structural semantics and descriptive landmarks', () => {
+  it('verifies BottomNav has correct structural semantics and navigation landmarks', () => {
     render(
       <BrowserRouter>
-        <Register />
+        <BottomNav />
       </BrowserRouter>
     );
 
-    // Check heading hierarchy
-    const mainHeading = screen.getByRole('heading', { level: 1 });
-    expect(mainHeading).toHaveTextContent(/StadiumGenius/);
+    // Check navigation landmark
+    const nav = screen.getByRole('navigation', { name: /Mobile Navigation/i });
+    expect(nav).toBeInTheDocument();
 
-    // Check presence of buttons
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach((btn) => {
-      // Verify buttons have accessible text names (are not empty)
-      expect(btn.textContent || btn.getAttribute('aria-label') || btn.title).toBeTruthy();
+    // Verify navigation links have accessible text
+    const links = screen.getAllByRole('link');
+    expect(links.length).toBeGreaterThan(0);
+    links.forEach((link) => {
+      expect(link.textContent).toBeTruthy();
     });
   });
 });
