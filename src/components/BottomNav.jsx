@@ -4,7 +4,7 @@ import { useAuth } from '../context/useAuth';
 
 const BOTTOM_NAV_BY_ROLE = {
   admin: [
-    { to: '/', icon: LayoutDashboard, label: 'Overview' },
+    { to: '/', icon: LayoutDashboard, label: 'Command' },
     { to: '/admin-panel', icon: UserCog, label: 'Users' },
     { to: '/assistant', icon: MessageSquareText, label: 'AI' },
     { to: '/fan', icon: Ticket, label: 'Fan Portal' },
@@ -14,7 +14,7 @@ const BOTTOM_NAV_BY_ROLE = {
     { to: '/', icon: LayoutDashboard, label: 'Ops' },
     { to: '/analytics', icon: TrendingUp, label: 'KPIs' },
     { to: '/crowd', icon: Users, label: 'Crowd' },
-    { to: '/assistant', icon: MessageSquareText, label: 'AI Advisor' },
+    { to: '/assistant', icon: MessageSquareText, label: 'AI' },
     { to: '/fan', icon: Ticket, label: 'Fan Portal' },
   ],
   security: [
@@ -39,21 +39,24 @@ export default function BottomNav() {
   const navItems = BOTTOM_NAV_BY_ROLE[role] || BOTTOM_NAV_BY_ROLE.operator;
 
   return (
-    <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#070a18]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-2 py-1.5 flex items-center justify-around shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+    <nav
+      aria-label="Mobile Navigation"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#07090d]/95 backdrop-blur-2xl border-t border-white/[0.08] px-2 py-1 flex items-center justify-around shadow-[0_-8px_24px_rgba(0,0,0,0.8)]"
+    >
       {navItems.map(({ to, icon: Icon, label }) => (
         <NavLink
           key={to}
           to={to}
           end={to === '/'}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all duration-200 min-w-[56px] min-h-[44px] ${
+            `flex flex-col items-center justify-center py-1.5 px-2 rounded-lg transition-all duration-150 min-w-[52px] min-h-[44px] ${
               isActive
-                ? 'text-cyan-300 font-bold bg-cyan-500/15 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
-                : 'text-white/45 hover:text-white/80 active:scale-95'
+                ? 'text-emerald-400 font-semibold bg-emerald-500/15 border border-emerald-500/30'
+                : 'text-white/40 hover:text-white/80 active:scale-95'
             }`
           }
         >
-          <Icon className="w-5 h-5 mb-0.5" />
+          <Icon className="w-4 h-4 mb-0.5" />
           <span className="text-[10px] font-mono tracking-tight truncate max-w-[64px]">{label}</span>
         </NavLink>
       ))}

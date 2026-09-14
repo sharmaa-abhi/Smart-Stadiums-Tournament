@@ -2,25 +2,31 @@
 
 /* ── Custom Theme ── */
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Outfit', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-  /* Stadium Genius brand palette */
+  /* Stadium Genius Command Center Palette */
   --color-brand-50: #eef5ff;
   --color-brand-100: #d9e8ff;
   --color-brand-200: #bcd7ff;
   --color-brand-300: #8ec0ff;
   --color-brand-400: #599eff;
-  --color-brand-500: #3378ff;
-  --color-brand-600: #1b57f5;
-  --color-brand-700: #1443e1;
-  --color-brand-800: #1736b6;
-  --color-brand-900: #19318f;
-  --color-brand-950: #142057;
+  --color-brand-500: #10b981; /* primary action accent: neon/emerald green */
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+  --color-brand-950: #022c22;
 
   --color-accent-400: #22d3ee;
   --color-accent-500: #06b6d4;
   --color-accent-600: #0891b2;
+
+  /* Neon Green for live metrics, positive trends & nominal states */
+  --color-neon-400: #4ade80;
+  --color-neon-500: #22c55e;
+  --color-neon-accent: #00ff88;
 
   --color-emerald-400: #34d399;
   --color-emerald-500: #10b981;
@@ -30,19 +36,22 @@
 
   --color-rose-400: #fb7185;
   --color-rose-500: #f43f5e;
+  --color-critical: #ff334b;
 
-  --color-surface-950: #0a0a1a;
-  --color-surface-900: #0f1029;
-  --color-surface-800: #161838;
-  --color-surface-700: #1e2148;
-  --color-surface-600: #282c5a;
+  /* Deep Black & Technical Charcoal Surfaces */
+  --color-surface-950: #07090d;
+  --color-surface-900: #0a0d14;
+  --color-surface-850: #0e121b;
+  --color-surface-800: #121824;
+  --color-surface-700: #182030;
+  --color-surface-600: #222c40;
 }
 
 /* ── Base Styles ── */
 @layer base {
   * {
     scrollbar-width: thin;
-    scrollbar-color: #1e2148 transparent;
+    scrollbar-color: #1a2234 transparent;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -50,195 +59,283 @@
 
   html, body {
     height: 100%;
+    background-color: #07090d;
+    color: #e2e8f0;
   }
 
   body {
-    background: #0a0a1a;
-    color: white;
-    font-family: 'Inter', system-ui, sans-serif;
+    background: #07090d;
+    color: #f1f5f9;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
   }
 
   select option {
-    background-color: #0f1029;
-    color: #ffffff;
+    background-color: #0a0d14;
+    color: #f1f5f9;
   }
 
   #root {
     min-height: 100vh;
     width: 100%;
     text-align: left;
+    background: #07090d;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', system-ui, sans-serif;
+    font-family: 'Space Grotesk', 'Outfit', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  /* Accessible focus indicators */
+  :focus-visible {
+    outline: 2px solid #22c55e;
+    outline-offset: 2px;
   }
 }
 
 /* ── Component Utilities ── */
 @layer components {
-  /* High-Tech Cyber-Glassmorphism */
+  /* Futuristic Technical Background Grid */
+  .stadium-grid {
+    background-color: #07090d;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 197, 94, 0.05), transparent);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
+  }
+
+  /* Command Center Premium Glass Card */
   .glass-card {
-    background: linear-gradient(135deg, rgba(14, 18, 36, 0.75) 0%, rgba(8, 10, 22, 0.88) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    background: linear-gradient(180deg, rgba(14, 18, 27, 0.82) 0%, rgba(10, 13, 20, 0.92) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .glass-card-hover {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card-hover:hover {
-    background: linear-gradient(135deg, rgba(20, 26, 52, 0.85) 0%, rgba(12, 16, 32, 0.95) 100%);
-    border-color: rgba(0, 240, 255, 0.25);
-    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.08);
+    background: linear-gradient(180deg, rgba(18, 24, 36, 0.88) 0%, rgba(12, 16, 24, 0.96) 100%);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 8px 28px -4px rgba(0, 0, 0, 0.7), 0 0 16px rgba(34, 197, 94, 0.06);
+    transform: translateY(-1px);
   }
 
-  /* Screenshot-inspired glowing cyber cards */
+  /* Command-center Tactical Cards */
   .cyber-card {
-    background: #0d1224;
+    background: #0a0d14;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 1rem;
+    border-radius: 0.875rem;
     position: relative;
     overflow: hidden;
   }
 
   .cyber-card-p1 {
-    background: linear-gradient(180deg, rgba(244, 63, 94, 0.08) 0%, rgba(13, 18, 36, 0.95) 100%);
-    border: 1.5px solid rgba(244, 63, 94, 0.6);
-    box-shadow: 0 0 25px rgba(244, 63, 94, 0.25), inset 0 0 15px rgba(244, 63, 94, 0.08);
+    background: linear-gradient(180deg, rgba(244, 63, 94, 0.08) 0%, rgba(14, 12, 18, 0.96) 100%);
+    border: 1px solid rgba(244, 63, 94, 0.45);
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.16), inset 0 1px 0 rgba(244, 63, 94, 0.3);
   }
 
   .cyber-card-p2 {
-    background: #0d1326;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.06) 0%, rgba(14, 14, 18, 0.96) 100%);
     border: 1px solid rgba(245, 158, 11, 0.35);
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.1), inset 0 1px 0 rgba(245, 158, 11, 0.2);
   }
 
   .cyber-card-p3 {
-    background: #0d1326;
-    border: 1px solid rgba(6, 182, 212, 0.3);
-    box-shadow: 0 0 15px rgba(6, 182, 212, 0.08);
+    background: linear-gradient(180deg, rgba(34, 211, 238, 0.04) 0%, rgba(10, 14, 20, 0.96) 100%);
+    border: 1px solid rgba(34, 211, 238, 0.25);
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.07);
   }
 
-  /* Neon Glows */
-  .glow-brand {
-    box-shadow: 0 0 30px rgba(51, 120, 255, 0.25), 0 0 60px rgba(51, 120, 255, 0.12);
-  }
-
-  .glow-accent {
-    box-shadow: 0 0 25px rgba(6, 182, 212, 0.3), 0 0 50px rgba(6, 182, 212, 0.15);
-  }
-
-  .glow-cyan {
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.35);
-  }
-
-  .glow-emerald {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
-  }
-
-  .glow-amber {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+  /* Subtle Tactical Glows */
+  .glow-neon {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
   }
 
   .glow-rose {
-    box-shadow: 0 0 25px rgba(244, 63, 94, 0.35);
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.25);
   }
 
-  /* Tactical Badges & HUD elements */
+  .glow-amber {
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.2);
+  }
+
+  /* Compact Command Badges */
   .badge-p1 {
-    background: #f43f5e;
-    color: #ffffff;
-    font-weight: 800;
-    letter-spacing: 0.05em;
-    box-shadow: 0 0 12px rgba(244, 63, 94, 0.6);
+    background: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
+    border: 1px solid rgba(244, 63, 94, 0.4);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
   }
 
   .badge-p2 {
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(245, 158, 11, 0.12);
     color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.4);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
   }
 
   .badge-p3 {
-    background: rgba(6, 182, 212, 0.15);
+    background: rgba(34, 211, 238, 0.1);
     color: #22d3ee;
-    border: 1px solid rgba(6, 182, 212, 0.4);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
   }
 
-  .text-gradient {
-    background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 50%, #34d399 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .badge-live {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
   }
 
-  .text-gradient-warm {
-    background: linear-gradient(135deg, #f59e0b 0%, #f43f5e 100%);
+  /* Standardized Command Buttons */
+  .btn-primary {
+    background: #22c55e;
+    color: #07090d;
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 0 14px rgba(34, 197, 94, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: #4ade80;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.35);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(241, 245, 249, 0.8);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+  }
+
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-danger {
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    color: #fb7185;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+
+  .btn-danger:hover {
+    background: rgba(244, 63, 94, 0.22);
+    border-color: rgba(244, 63, 94, 0.55);
+    color: #ffffff;
+  }
+
+  .btn-danger:active {
+    transform: scale(0.98);
+  }
+
+  /* Micro status indicators */
+  .pulse-dot-green {
+    animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .pulse-dot-red {
+    animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Text Gradients */
+  .text-gradient {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #06b6d4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .text-gradient-cyan {
-    background: linear-gradient(135deg, #00f0ff 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #22d3ee 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .pulse-dot {
-    animation: pulse-ring 2s ease-out infinite;
-  }
-
-  .stadium-grid {
-    background-color: #070913;
-    background-image:
-      radial-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
-      linear-gradient(rgba(51, 120, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(51, 120, 255, 0.02) 1px, transparent 1px);
-    background-size: 24px 24px, 48px 48px, 48px 48px;
-  }
-
-  /* HUD Scanlines & telemetry bars */
+  /* HUD Corner Accents */
   .hud-bracket-l {
-    border-left: 2px solid rgba(34, 211, 238, 0.4);
-    border-top: 2px solid rgba(34, 211, 238, 0.4);
+    border-left: 2px solid rgba(34, 197, 94, 0.35);
+    border-top: 2px solid rgba(34, 197, 94, 0.35);
   }
   .hud-bracket-r {
-    border-right: 2px solid rgba(34, 211, 238, 0.4);
-    border-bottom: 2px solid rgba(34, 211, 238, 0.4);
+    border-right: 2px solid rgba(34, 197, 94, 0.35);
+    border-bottom: 2px solid rgba(34, 197, 94, 0.35);
   }
 }
 
 /* ── Keyframes ── */
-@keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(51, 120, 255, 0.5); }
-  70% { box-shadow: 0 0 0 8px rgba(51, 120, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(51, 120, 255, 0); }
-}
-
-@keyframes scanline {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
+@keyframes pulse-green {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
   }
-  5% {
+  50% {
     opacity: 0.8;
-  }
-  95% {
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
   }
 }
 
-.animate-scanline {
-  animation: scanline 25s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+@keyframes pulse-red {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.6);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 6px rgba(244, 63, 94, 0);
+  }
 }
 
 @keyframes shimmer {
@@ -251,13 +348,13 @@
 }
 
 .animate-shimmer {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.03);
   background-image: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.03) 20%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.03) 80%,
+    rgba(255, 255, 255, 0.02) 20%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.02) 80%,
     rgba(255, 255, 255, 0) 100%
   );
   background-size: 200% 100%;
@@ -265,7 +362,7 @@
 }
 
 .skeleton-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 1rem;
+  border-radius: 0.75rem;
 }

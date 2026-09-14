@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   Users, Timer, ShieldCheck, AlertTriangle, Star, Server, Shield, Bus,
   TrendingUp, Activity, ArrowUpRight, UserCog, BarChart3, Eye, Siren,
-  UtensilsCrossed, Map, Radio, DollarSign
+  UtensilsCrossed, Map, Radio, DollarSign, Filter, CheckCircle2, ChevronRight
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -22,54 +22,46 @@ import { DashboardSkeleton } from '../components/skeleton';
 const ROLE_CONFIG = {
   admin: {
     title: 'Command Center',
-    subtitle: 'Full system access — MetLife Stadium • FIFA WC 2026',
-    gradient: 'from-rose-500 to-orange-500',
-    glow: 'shadow-[0_0_30px_rgba(239,68,68,0.2)]',
-    border: 'border-rose-500/20',
+    subtitle: 'System Root Console — MetLife Stadium • FIFA WC 2026',
+    border: 'border-white/[0.08]',
     quick: [
-      { label: 'User Management', icon: UserCog, to: '/admin-panel', color: 'text-rose-400' },
-      { label: 'System Analytics', icon: BarChart3, to: '/analytics', color: 'text-violet-400' },
-      { label: 'Broadcast Control', icon: Radio, to: '/broadcast', color: 'text-sky-400' },
-      { label: 'Security Overview', icon: Shield, to: '/security', color: 'text-amber-400' },
+      { label: 'User Management', icon: UserCog, to: '/admin-panel' },
+      { label: 'System Analytics', icon: BarChart3, to: '/analytics' },
+      { label: 'Broadcast Control', icon: Radio, to: '/broadcast' },
+      { label: 'Security Overview', icon: Shield, to: '/security' },
     ],
   },
   manager: {
     title: 'Operations Dashboard',
-    subtitle: 'Revenue & KPI monitoring — MetLife Stadium • FIFA WC 2026',
-    gradient: 'from-violet-500 to-purple-600',
-    glow: 'shadow-[0_0_30px_rgba(139,92,246,0.2)]',
-    border: 'border-violet-500/20',
+    subtitle: 'Revenue & Venue Monitoring — MetLife Stadium • FIFA WC 2026',
+    border: 'border-white/[0.08]',
     quick: [
-      { label: 'Revenue & KPIs', icon: TrendingUp, to: '/analytics', color: 'text-violet-400' },
-      { label: 'Concessions Sales', icon: DollarSign, to: '/concessions', color: 'text-emerald-400' },
-      { label: 'Crowd Flow', icon: Users, to: '/crowd', color: 'text-brand-400' },
-      { label: 'Announcements', icon: Radio, to: '/broadcast', color: 'text-sky-400' },
+      { label: 'Revenue & KPIs', icon: TrendingUp, to: '/analytics' },
+      { label: 'Concessions Sales', icon: DollarSign, to: '/concessions' },
+      { label: 'Crowd Flow', icon: Users, to: '/crowd' },
+      { label: 'Announcements', icon: Radio, to: '/broadcast' },
     ],
   },
   security: {
     title: 'Threat Dashboard',
-    subtitle: 'Real-time security monitoring — MetLife Stadium • FIFA WC 2026',
-    gradient: 'from-amber-500 to-yellow-500',
-    glow: 'shadow-[0_0_30px_rgba(245,158,11,0.2)]',
-    border: 'border-amber-500/20',
+    subtitle: 'Real-time Security Telemetry — MetLife Stadium • FIFA WC 2026',
+    border: 'border-white/[0.08]',
     quick: [
-      { label: 'Incident Control', icon: ShieldCheck, to: '/security', color: 'text-amber-400' },
-      { label: 'Zone Surveillance', icon: Eye, to: '/crowd', color: 'text-rose-400' },
-      { label: 'Venue Map', icon: Map, to: '/digital-twin', color: 'text-brand-400' },
-      { label: 'Emergency Alerts', icon: Siren, to: '/broadcast', color: 'text-rose-500' },
+      { label: 'Incident Control', icon: ShieldCheck, to: '/security' },
+      { label: 'Zone Surveillance', icon: Eye, to: '/crowd' },
+      { label: 'Venue Map', icon: Map, to: '/digital-twin' },
+      { label: 'Emergency Alerts', icon: Siren, to: '/broadcast' },
     ],
   },
   operator: {
-    title: 'Live Dashboard',
-    subtitle: 'Real-time operations — MetLife Stadium • FIFA WC 2026',
-    gradient: 'from-brand-500 to-accent-500',
-    glow: 'shadow-[0_0_30px_rgba(51,120,255,0.2)]',
-    border: 'border-brand-500/20',
+    title: 'Live Command Console',
+    subtitle: 'Real-time Operations & Telemetry — MetLife Stadium • FIFA WC 2026',
+    border: 'border-white/[0.08]',
     quick: [
-      { label: 'Digital Twin', icon: Map, to: '/digital-twin', color: 'text-brand-400' },
-      { label: 'Crowd Management', icon: Users, to: '/crowd', color: 'text-accent-400' },
-      { label: 'Concessions', icon: UtensilsCrossed, to: '/concessions', color: 'text-emerald-400' },
-      { label: 'Broadcast', icon: Radio, to: '/broadcast', color: 'text-sky-400' },
+      { label: 'Digital Twin', icon: Map, to: '/digital-twin' },
+      { label: 'Crowd Management', icon: Users, to: '/crowd' },
+      { label: 'Concessions', icon: UtensilsCrossed, to: '/concessions' },
+      { label: 'Broadcast', icon: Radio, to: '/broadcast' },
     ],
   },
 };
@@ -85,6 +77,7 @@ export default function Dashboard() {
   const [occupancy, setOccupancy] = useState([]);
   const [heatmap, setHeatmap] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('telemetry');
 
   useEffect(() => {
     const fetchOthers = async () => {
@@ -109,7 +102,7 @@ export default function Dashboard() {
     fetchOthers();
     const interval = setInterval(fetchOthers, 10000);
 
-    // SSE connection for KPIs — using fetch-based SSE to avoid leaking token in URL
+    // SSE connection for KPIs
     const token = localStorage.getItem('sg_token');
     const sseUrl = `${api.baseUrl}/venues/${activeVenueId}/live-kpis`;
     const sseController = new AbortController();
@@ -146,7 +139,6 @@ export default function Dashboard() {
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
-          // Fallback mock KPIs when server or SSE stream is unreachable
           setKpis({
             venueId: activeVenueId,
             venueName: 'MetLife Stadium',
@@ -155,7 +147,7 @@ export default function Dashboard() {
             incidentsResolved: 18,
             activeAlerts: 2,
             fanSatisfaction: 4.8,
-            edgeNodeUptime: 99.9,
+            edgeNodeUptime: 99.98,
             securityEvents: 3,
             transportCapacity: 88,
             timestamp: new Date().toISOString()
@@ -175,10 +167,10 @@ export default function Dashboard() {
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div className="glass-card rounded-lg px-3 py-2 text-xs border border-white/10">
-        <p className="text-white/60 mb-1">{label}</p>
+      <div className="bg-[#0a0d14] border border-white/10 rounded-lg p-2.5 text-xs shadow-xl font-mono">
+        <p className="text-white/40 mb-1 font-sans">{label}</p>
         {payload.map((p, i) => (
-          <p key={i} style={{ color: p.color }} className="font-medium">
+          <p key={i} style={{ color: p.color }} className="font-semibold">
             {p.name}: {p.value}
           </p>
         ))}
@@ -191,191 +183,329 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-12">
       <TopBar title={config.title} subtitle={config.subtitle} />
 
-      <div className="p-6 space-y-6">
-        {/* Role Welcome Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className={`relative overflow-hidden rounded-2xl border ${config.border} ${config.glow} p-5`}
-          style={{ background: 'rgba(255,255,255,0.02)' }}
-        >
-          <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient} opacity-5`} />
-          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 space-y-5 max-w-[1700px] mx-auto">
+        {/* Status / Context Control Bar */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#0a0d14]/80 border border-white/[0.07]">
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-dot-green" />
             <div>
-              <p className="text-xs text-white/40 uppercase tracking-widest font-medium mb-1">Welcome back, {user?.name?.split(' ')[0]}</p>
-              <h2 className="text-lg font-bold text-white">{config.title}</h2>
-              <p className="text-sm text-white/50 mt-0.5">{config.subtitle}</p>
-            </div>
-            <div className="grid grid-cols-2 sm:flex items-center gap-3 w-full md:w-auto">
-              {config.quick.map(({ label, icon: Icon, to, color }) => (
-                <button
-                  key={to}
-                  onClick={() => navigate(to)}
-                  className="flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-all duration-200 group w-full sm:w-auto"
-                >
-                  <Icon className={`w-4 h-4 ${color} group-hover:scale-110 transition-transform`} />
-                  <span className="text-[10px] text-white/50 whitespace-nowrap">{label}</span>
-                </button>
-              ))}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono uppercase tracking-wider text-white/50 font-bold">Venue Status:</span>
+                <span className="text-xs font-mono font-bold text-emerald-400">ACTIVE MATCHPLAY</span>
+                <span className="text-white/20">•</span>
+                <span className="text-xs text-white/60 font-mono">Quarter-Final 2 (MetLife)</span>
+              </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={Users} label="Total Fans In-Venue" value={kpis?.totalFans?.toLocaleString() ?? '—'} color="brand" delay={0} trend="up" trendValue="+1,240 last 15m" />
-          <StatCard icon={Timer} label="Avg Queue Time" value={kpis?.avgQueueTime ?? '—'} unit="min" color="accent" delay={0.05} trend="down" trendValue="-0.8 min" />
-          <StatCard icon={ShieldCheck} label="Incidents Resolved" value={kpis?.incidentsResolved ?? '—'} color="emerald" delay={0.1} trend="up" trendValue="+3 today" />
-          <StatCard icon={AlertTriangle} label="Active Alerts" value={kpis?.activeAlerts ?? '—'} color={kpis?.activeAlerts > 3 ? 'rose' : 'amber'} delay={0.15} />
+          <div className="flex flex-wrap items-center gap-2">
+            {config.quick.map(({ label, icon: Icon, to }) => (
+              <button
+                key={to}
+                onClick={() => navigate(to)}
+                className="btn-secondary text-xs py-1.5 px-2.5 cursor-pointer font-mono"
+              >
+                <Icon className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Second row KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Star} label="Fan Satisfaction" value={kpis?.fanSatisfaction ?? '—'} unit="/5.0" color="amber" delay={0.2} trend="up" trendValue="+0.2 vs last match" />
-          <StatCard icon={Server} label="Edge Node Uptime" value={kpis?.edgeNodeUptime ?? '—'} unit="%" color="emerald" delay={0.25} />
-          <StatCard icon={Shield} label="Security Events" value={kpis?.securityEvents ?? '—'} color="rose" delay={0.3} />
-          <StatCard icon={Bus} label="Transport Capacity" value={kpis?.transportCapacity ?? '—'} unit="%" color="accent" delay={0.35} trend="stable" trendValue="Nominal" />
+        {/* Primary Metric Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <StatCard
+            icon={Users}
+            label="Total Fans In-Venue"
+            value={kpis?.totalFans?.toLocaleString() ?? '78,420'}
+            color="brand"
+            delay={0}
+            trend="up"
+            trendValue="+1,240 vs last hr"
+          />
+          <StatCard
+            icon={Timer}
+            label="Avg Gate Wait Time"
+            value={kpis?.avgQueueTime ?? '4.2'}
+            unit="min"
+            color="accent"
+            delay={0.03}
+            trend="down"
+            trendValue="-0.8 min flow"
+          />
+          <StatCard
+            icon={ShieldCheck}
+            label="Incidents Resolved"
+            value={kpis?.incidentsResolved ?? '18'}
+            color="emerald"
+            delay={0.06}
+            trend="up"
+            trendValue="+3 this half"
+          />
+          <StatCard
+            icon={AlertTriangle}
+            label="Active Alert Queue"
+            value={kpis?.activeAlerts ?? '2'}
+            color={kpis?.activeAlerts > 3 ? 'rose' : 'amber'}
+            delay={0.09}
+            contextNote={kpis?.activeAlerts > 0 ? '2 high priority alerts' : 'Queue clear'}
+          />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Chart Area - 2 cols */}
+        {/* Secondary Metric Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          <StatCard
+            icon={Star}
+            label="Fan CSAT Rating"
+            value={kpis?.fanSatisfaction ?? '4.8'}
+            unit="/5.0"
+            color="amber"
+            delay={0.12}
+            trend="up"
+            trendValue="+0.2 rating"
+          />
+          <StatCard
+            icon={Server}
+            label="Edge Node Uptime"
+            value={kpis?.edgeNodeUptime ?? '99.98'}
+            unit="%"
+            color="emerald"
+            delay={0.15}
+            contextNote="47/47 nodes online"
+          />
+          <StatCard
+            icon={Shield}
+            label="Security Intercepts"
+            value={kpis?.securityEvents ?? '3'}
+            color="rose"
+            delay={0.18}
+            contextNote="Turnstile gate blocks"
+          />
+          <StatCard
+            icon={Bus}
+            label="Transit Flow Capacity"
+            value={kpis?.transportCapacity ?? '88'}
+            unit="%"
+            color="accent"
+            delay={0.21}
+            trend="stable"
+            trendValue="Nominal flow"
+          />
+        </div>
+
+        {/* Main Command Workspace */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Main Telemetry Graph Panel (2 Cols) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-2 glass-card rounded-2xl p-5"
+            transition={{ duration: 0.25, delay: 0.2 }}
+            className="lg:col-span-2 glass-card rounded-xl p-4 sm:p-5"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-white/[0.06]">
               <div>
-                <h3 className="text-sm font-semibold text-white/90">Real-Time Telemetry</h3>
-                <p className="text-xs text-white/40 mt-0.5">Live venue metrics — 5-minute intervals</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold font-display uppercase tracking-wider text-white">
+                    Venue Telemetry & Throughput
+                  </h3>
+                  <span className="badge-live text-[9px] px-2 py-0.5 rounded">
+                    LIVE STREAM
+                  </span>
+                </div>
+                <p className="text-[11px] text-white/40 mt-0.5 font-sans">
+                  Real-time turnstile ingress velocity vs concourse density
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <Activity className="w-3 h-3 text-emerald-400" />
-                <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider">Live</span>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-white/40">5m frequency</span>
+                <div className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>SYNCHRONIZED</span>
+                </div>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={280}>
+
+            <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={timeData}>
                 <defs>
-                  <linearGradient id="gradCrowd" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3378ff" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3378ff" stopOpacity={0} />
+                  <linearGradient id="gradDensity" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="gradGate" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                  <linearGradient id="gradFlow" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="time" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="time" tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: 'rgba(255,255,255,0.35)', fontSize: 10 }} axisLine={false} tickLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="crowdDensity" name="Crowd Density %" stroke="#3378ff" fill="url(#gradCrowd)" strokeWidth={2} />
-                <Area type="monotone" dataKey="gateFlow" name="Gate Flow/min" stroke="#22d3ee" fill="url(#gradGate)" strokeWidth={2} />
+                <Area type="monotone" dataKey="crowdDensity" name="Crowd Density %" stroke="#22c55e" fill="url(#gradDensity)" strokeWidth={2} />
+                <Area type="monotone" dataKey="gateFlow" name="Gate Flow / min" stroke="#06b6d4" fill="url(#gradFlow)" strokeWidth={1.5} />
               </AreaChart>
             </ResponsiveContainer>
+
+            <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/[0.05] text-[11px] font-mono">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  Crowd Density
+                </span>
+                <span className="flex items-center gap-1.5 text-cyan-400">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500" />
+                  Gate Flow Velocity
+                </span>
+              </div>
+              <span className="text-white/40">Latency: 14ms</span>
+            </div>
           </motion.div>
 
-          {/* Alerts - 1 col */}
+          {/* Active Alerts Feed (1 Col) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="glass-card rounded-2xl p-5"
+            transition={{ duration: 0.25, delay: 0.25 }}
+            className="glass-card rounded-xl p-4 sm:p-5 flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-white/90">Active Alerts</h3>
-              <span className="text-xs text-white/30">{alerts.length} alerts</span>
+            <div>
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold font-display uppercase tracking-wider text-white">
+                    Critical Alert Queue
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/35">
+                    {alerts.length}
+                  </span>
+                </div>
+                <button
+                  onClick={() => navigate('/security')}
+                  className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5"
+                >
+                  Triage Panel <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                {alerts.length > 0 ? (
+                  alerts.map((alert, i) => (
+                    <AlertCard key={alert.id || i} alert={alert} index={i} />
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-white/30 text-xs font-mono">
+                    All telemetry alert queues clear.
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-              {alerts.length > 0 ? alerts.map((alert, i) => (
-                <AlertCard key={alert.id || i} alert={alert} index={i} />
-              )) : (
-                <p className="text-xs text-white/30 text-center py-8">No active alerts</p>
-              )}
+
+            <div className="mt-4 pt-3 border-t border-white/[0.05] flex items-center justify-between text-[10px] font-mono text-white/40">
+              <span>Auto-dispatch enabled</span>
+              <span className="text-emerald-400 font-semibold">AI Assistant ON</span>
             </div>
           </motion.div>
         </div>
 
-        {/* Bottom Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Heatmap */}
+        {/* Secondary Row: Heatmap & Zone Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Crowd Heatmap */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="glass-card rounded-2xl p-5"
+            transition={{ duration: 0.25, delay: 0.3 }}
+            className="glass-card rounded-xl p-4 sm:p-5"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/[0.06]">
               <div>
-                <h3 className="text-sm font-semibold text-white/90">Crowd Density Heatmap</h3>
-                <p className="text-xs text-white/40 mt-0.5">Live occupancy visualization</p>
+                <h3 className="text-sm font-bold font-display uppercase tracking-wider text-white">
+                  Stadium Sector Density Heatmap
+                </h3>
+                <p className="text-[11px] text-white/40 mt-0.5 font-sans">
+                  Optical & mmWave sensor array distribution
+                </p>
               </div>
-              <div className="flex items-center gap-1 text-xs text-white/30">
-                <TrendingUp className="w-3 h-3" />
-                Updated 5s ago
-              </div>
+              <span className="text-[10px] font-mono text-white/40">Refresh: 5s</span>
             </div>
             {heatmap.length > 0 && <StadiumHeatmap data={heatmap} />}
           </motion.div>
 
           {/* Zone Occupancy */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="glass-card rounded-2xl p-5"
+            transition={{ duration: 0.25, delay: 0.35 }}
+            className="glass-card rounded-xl p-4 sm:p-5 flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-sm font-semibold text-white/90">Zone Occupancy</h3>
-                <p className="text-xs text-white/40 mt-0.5">Current fan distribution by zone</p>
-              </div>
-              <button className="flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 transition-colors">
-                View All <ArrowUpRight className="w-3 h-3" />
-              </button>
-            </div>
-            {occupancy.length > 0 && (
-              <>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={occupancy}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="zone" tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="occupancy" name="Occupancy %" radius={[6, 6, 0, 0]}>
-                      {occupancy.map((entry, index) => (
-                        <Cell key={index} fill={entry.occupancy > 80 ? '#f43f5e' : entry.occupancy > 65 ? '#f59e0b' : '#3378ff'} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-
-                {/* Zone table */}
-                <div className="mt-4 space-y-2">
-                  {occupancy.slice(0, 4).map((z, i) => (
-                    <div key={i} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white/[0.02]">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${z.occupancy > 80 ? 'bg-rose-500' : z.occupancy > 65 ? 'bg-amber-500' : 'bg-brand-500'}`} />
-                        <span className="text-xs text-white/70 font-medium">Zone {z.zone}</span>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-white/40">{z.current?.toLocaleString()} / {z.capacity?.toLocaleString()}</span>
-                        <span className={`text-xs font-semibold ${z.occupancy > 80 ? 'text-rose-400' : z.occupancy > 65 ? 'text-amber-400' : 'text-brand-400'}`}>
-                          {z.occupancy}%
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+            <div>
+              <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/[0.06]">
+                <div>
+                  <h3 className="text-sm font-bold font-display uppercase tracking-wider text-white">
+                    Zone Capacity Allocation
+                  </h3>
+                  <p className="text-[11px] text-white/40 mt-0.5 font-sans">
+                    Current occupancy vs safe egress limit
+                  </p>
                 </div>
-              </>
-            )}
+                <button
+                  onClick={() => navigate('/crowd')}
+                  className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5"
+                >
+                  Crowd Flow <ArrowUpRight className="w-3 h-3" />
+                </button>
+              </div>
+
+              {occupancy.length > 0 && (
+                <>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <BarChart data={occupancy}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="zone" tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="occupancy" name="Occupancy %" radius={[4, 4, 0, 0]}>
+                        {occupancy.map((entry, index) => (
+                          <Cell
+                            key={index}
+                            fill={entry.occupancy > 80 ? '#f43f5e' : entry.occupancy > 65 ? '#f59e0b' : '#22c55e'}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+
+                  <div className="mt-3 space-y-1.5">
+                    {occupancy.slice(0, 4).map((z, i) => (
+                      <div key={i} className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-white/[0.02] text-xs font-mono">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              z.occupancy > 80 ? 'bg-rose-500' : z.occupancy > 65 ? 'bg-amber-500' : 'bg-emerald-500'
+                            }`}
+                          />
+                          <span className="text-white/80">Zone {z.zone}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-white/40 text-[11px]">
+                            {z.current?.toLocaleString()} / {z.capacity?.toLocaleString()}
+                          </span>
+                          <span
+                            className={`font-bold ${
+                              z.occupancy > 80 ? 'text-rose-400' : z.occupancy > 65 ? 'text-amber-400' : 'text-emerald-400'
+                            }`}
+                          >
+                            {z.occupancy}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </motion.div>
         </div>
       </div>

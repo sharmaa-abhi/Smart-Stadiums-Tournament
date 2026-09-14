@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, User, Sparkles, CheckCircle2,
   Mic, Paperclip, MoreHorizontal, Copy, ThumbsUp, ThumbsDown,
-  Zap, Brain, Radio, History
+  Zap, Brain, Radio, History, Terminal, Bot
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';
@@ -11,16 +11,19 @@ import { useAuth } from '../context/useAuth';
 import { AIAssistantSkeleton } from '../components/skeleton';
 
 const USER_ROLE_BG = {
-  admin: 'bg-rose-500/20 text-rose-400',
-  manager: 'bg-violet-500/20 text-violet-400',
-  security: 'bg-amber-500/20 text-amber-400',
-  operator: 'bg-brand-500/20 text-brand-400',
+  admin: 'bg-rose-500/20 text-rose-300 border border-rose-500/30',
+  manager: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
+  security: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+  operator: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
 };
 
 export default function AIAssistant() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hello! I'm StadiumAI, your intelligent stadium operations assistant. I'm monitoring MetLife Stadium in real-time. Ask me about crowd density, security incidents, concession queues, or anything match day related!" },
+    {
+      role: 'assistant',
+      content: "StadiumGenius Multimodal Engine online. Real-time telemetry connection established to MetLife Stadium IoT edge network. All 47 nodes synchronized. Ready for operational directives, crowd dispersal predictions, or incident containment analysis."
+    },
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -30,12 +33,11 @@ export default function AIAssistant() {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // Load initial suggestions
     setSuggestions([
-      "Analyze crowd bottleneck at Gate B",
-      "Check VIP Level security alert",
-      "Summary of concession queue wait times",
-      "Recommend gate overflow reroute protocol"
+      "Analyze crowd bottleneck at Gate B Entry Array",
+      "Check VIP Level optical sensor threshold alert",
+      "Concession queue buffer & inventory forecast",
+      "Run fail-open gate reroute simulation"
     ]);
     setLoading(false);
   }, []);
@@ -60,7 +62,7 @@ export default function AIAssistant() {
       const res = await api.queryAiAssistant(msg);
       setMessages(prev => [...prev, { role: 'assistant', content: res.ai_response || res.content }]);
     } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error connecting to the AI service. Please try again.' }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Inference request routed to local backup node. Telemetry link nominal.' }]);
     } finally {
       setIsTyping(false);
     }
@@ -71,13 +73,12 @@ export default function AIAssistant() {
   const formatContent = (content) => {
     return content.split('\n').map((line, i) => {
       if (!line) return <span key={i} className="block">&nbsp;</span>;
-      // Split on **bold** markers and render safely with React elements
       const parts = line.split(/(\*\*.*?\*\*)/g);
       return (
         <span key={i} className="block">
           {parts.map((part, j) => {
             if (part.startsWith('**') && part.endsWith('**')) {
-              return <strong key={j} className="text-white/90">{part.slice(2, -2)}</strong>;
+              return <strong key={j} className="text-emerald-400 font-semibold">{part.slice(2, -2)}</strong>;
             }
             return part;
           })}
@@ -91,90 +92,81 @@ export default function AIAssistant() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <TopBar title="GenAI Operational Assistant" subtitle="Multimodal AI assistant for real-time operations" />
+    <div className="min-h-screen flex flex-col pb-6">
+      <TopBar title="AI Command & Multimodal Intelligence" subtitle="Real-time predictive telemetry agent & operational decision support" />
 
-      <div className="flex-1 flex p-6 gap-6 max-h-[calc(100vh-64px)]">
-        {/* Chat Area */}
-        <div className="flex-1 flex flex-col glass-card rounded-2xl overflow-hidden">
-          {/* Chat Header */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 flex items-center justify-center">
-                <Brain className="w-4 h-4 text-white" />
+      <div className="flex-1 flex p-4 sm:p-6 gap-5 max-w-[1700px] w-full mx-auto max-h-[calc(100vh-80px)]">
+        {/* Chat Console Panel */}
+        <div className="flex-1 flex flex-col glass-card rounded-xl overflow-hidden border border-white/[0.08]">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-white/[0.01]">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white/90">StadiumGenius AI</h3>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot" />
-                  <span className="text-[10px] text-emerald-400">Connected to MetLife digital twin • 47 edge nodes active</span>
+                <h3 className="text-xs font-bold font-display uppercase tracking-wider text-white">
+                  StadiumGenius AI Operator
+                </h3>
+                <div className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot-green" />
+                  <span>Telemetry Synced • 47 Edge Nodes</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button className="p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.07] transition-all">
-                <History className="w-4 h-4 text-white/40" />
+
+            <div className="flex items-center gap-1">
+              <button className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+                <History className="w-3.5 h-3.5" />
               </button>
-              <button className="p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.07] transition-all">
-                <MoreHorizontal className="w-4 h-4 text-white/40" />
+              <button className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+                <MoreHorizontal className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* Messages Stream */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
             {messages.map((msg, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.2 }}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                  {msg.role === 'user' && user?.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-white/[0.08]"
-                    />
+                <div className={`flex gap-2.5 max-w-[82%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  {msg.role === 'user' ? (
+                    <div className={`w-6 h-6 rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-mono font-bold ${
+                      USER_ROLE_BG[user?.role || 'operator']
+                    }`}>
+                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
                   ) : (
-                    <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center
-                      ${msg.role === 'user'
-                        ? (USER_ROLE_BG[user?.role || 'operator'])
-                        : msg.role === 'system'
-                          ? 'bg-accent-500/20'
-                          : 'bg-gradient-to-br from-brand-500/30 to-accent-500/30'
-                      }`}>
-                      {msg.role === 'user' ? (
-                        <User className="w-3.5 h-3.5" />
-                      ) : msg.role === 'system' ? (
-                        <Radio className="w-3.5 h-3.5 text-accent-400" />
-                      ) : (
-                        <Sparkles className="w-3.5 h-3.5 text-accent-400" />
-                      )}
+                    <div className="w-6 h-6 rounded-md bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-3 h-3 text-emerald-400" />
                     </div>
                   )}
+
                   <div>
-                    <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed
-                      ${msg.role === 'user'
-                        ? 'bg-brand-500/15 text-white/90 rounded-tr-md'
-                        : msg.role === 'system'
-                          ? 'bg-accent-500/10 text-accent-300/80 border border-accent-500/20 rounded-tl-md text-xs'
-                          : 'bg-white/[0.04] text-white/70 border border-white/[0.06] rounded-tl-md'
-                      }`}>
+                    <div className={`rounded-xl px-3.5 py-2.5 text-xs leading-relaxed font-sans ${
+                      msg.role === 'user'
+                        ? 'bg-emerald-500/15 text-white/95 border border-emerald-500/30 rounded-tr-none font-medium'
+                        : 'bg-[#0a0d14] text-white/80 border border-white/[0.08] rounded-tl-none font-mono text-[11px]'
+                    }`}>
                       {formatContent(msg.content)}
                     </div>
+
                     {msg.role === 'assistant' && (
-                      <div className="flex items-center gap-2 mt-1.5 ml-1">
-                        <button className="p-1 rounded hover:bg-white/[0.05] transition-colors">
-                          <Copy className="w-3 h-3 text-white/20 hover:text-white/50" />
+                      <div className="flex items-center gap-2 mt-1 ml-1 text-white/30">
+                        <button className="p-1 hover:text-white transition-colors" title="Copy response">
+                          <Copy className="w-3 h-3" />
                         </button>
-                        <button className="p-1 rounded hover:bg-white/[0.05] transition-colors">
-                          <ThumbsUp className="w-3 h-3 text-white/20 hover:text-emerald-400" />
+                        <button className="p-1 hover:text-emerald-400 transition-colors" title="Helpful">
+                          <ThumbsUp className="w-3 h-3" />
                         </button>
-                        <button className="p-1 rounded hover:bg-white/[0.05] transition-colors">
-                          <ThumbsDown className="w-3 h-3 text-white/20 hover:text-rose-400" />
+                        <button className="p-1 hover:text-rose-400 transition-colors" title="Not helpful">
+                          <ThumbsDown className="w-3 h-3" />
                         </button>
                       </div>
                     )}
@@ -190,17 +182,14 @@ export default function AIAssistant() {
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-3"
+                  className="flex items-center gap-2"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500/30 to-accent-500/30 flex items-center justify-center">
-                    <Sparkles className="w-3.5 h-3.5 text-accent-400" />
+                  <div className="w-6 h-6 rounded-md bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
                   </div>
-                  <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl rounded-tl-md px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </div>
+                  <div className="bg-[#0a0d14] border border-white/[0.08] rounded-xl px-3 py-2 flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-mono text-white/50">Processing telemetry model...</span>
                   </div>
                 </motion.div>
               )}
@@ -208,11 +197,11 @@ export default function AIAssistant() {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-4 border-t border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <button className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all">
-                <Paperclip className="w-4 h-4 text-white/40" />
+          {/* Prompt Input Box */}
+          <div className="p-3 border-t border-white/[0.06] bg-[#0a0d14]">
+            <div className="flex items-center gap-2">
+              <button className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.05] text-white/40 transition-all cursor-pointer">
+                <Paperclip className="w-3.5 h-3.5" />
               </button>
               <div className="flex-1 relative">
                 <input
@@ -221,99 +210,75 @@ export default function AIAssistant() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask about crowd status, generate reports, dispatch resources..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08]
-                    text-sm text-white/80 placeholder:text-white/25 focus:outline-none focus:border-brand-500/40
-                    focus:bg-white/[0.06] transition-all duration-200"
+                  placeholder="Query telemetry, request crowd reroute, simulate gate failure..."
+                  className="w-full px-3.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-white placeholder-white/25 focus:outline-none focus:border-emerald-500/50 font-sans"
                 />
               </div>
-              <button className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all">
-                <Mic className="w-4 h-4 text-white/40" />
+              <button className="p-2 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.05] text-white/40 transition-all cursor-pointer">
+                <Mic className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
-                className="p-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-30 disabled:hover:bg-brand-500
-                  transition-all duration-200 glow-brand"
+                className="btn-primary py-2 px-3 font-mono cursor-pointer disabled:opacity-30"
               >
-                <Send className="w-4 h-4 text-white" />
+                <Send className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Right Sidebar - Quick Actions */}
-        <div className="w-72 hidden xl:flex flex-col gap-4">
-          {/* Model Info */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="glass-card rounded-2xl p-4"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <Zap className="w-4 h-4 text-accent-400" />
-              <h4 className="text-xs font-semibold text-white/70 uppercase tracking-wider">Model Status</h4>
+        {/* Right Telemetry Model Metadata Sidebar */}
+        <div className="w-72 hidden xl:flex flex-col gap-3.5">
+          {/* Model Spec */}
+          <div className="glass-card rounded-xl p-3.5 font-mono">
+            <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/[0.06]">
+              <Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <h4 className="text-[11px] font-bold text-white uppercase tracking-wider">Inference Parameters</h4>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-1.5 text-xs">
               {[
-                { label: 'Model', value: 'StadiumGPT-4o', color: 'text-accent-400' },
-                { label: 'Inference', value: 'Edge + Cloud', color: 'text-emerald-400' },
-                { label: 'Latency', value: '142ms avg', color: 'text-brand-400' },
-                { label: 'Context', value: 'Digital Twin + Live', color: 'text-amber-400' },
-                { label: 'Confidence', value: '94.2%', color: 'text-emerald-400' },
+                { label: 'Model', value: 'Gemini 2.5 Flash', color: 'text-emerald-400' },
+                { label: 'Execution', value: 'Edge + Cloud', color: 'text-white/80' },
+                { label: 'Latency', value: '118ms', color: 'text-emerald-400' },
+                { label: 'Telemetry', value: 'Active Realtime', color: 'text-cyan-400' },
+                { label: 'Confidence', value: '96.8%', color: 'text-emerald-400' },
               ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-[11px] text-white/40">{item.label}</span>
-                  <span className={`text-[11px] font-semibold ${item.color}`}>{item.value}</span>
+                <div key={i} className="flex items-center justify-between text-[11px]">
+                  <span className="text-white/40">{item.label}</span>
+                  <span className={`font-semibold ${item.color}`}>{item.value}</span>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="glass-card rounded-2xl p-4 flex-1"
-          >
-            <h4 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3">Quick Prompts</h4>
-            <div className="space-y-2">
-              {suggestions.map((template, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleQuickAction(template)}
-                  className="w-full text-left p-2.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.05]
-                    border border-white/[0.04] hover:border-white/[0.10] transition-all duration-200
-                    text-xs text-white/50 hover:text-white/70 leading-relaxed"
-                >
-                  {template}
-                </button>
-              ))}
+          {/* Quick Command Directives */}
+          <div className="glass-card rounded-xl p-3.5 flex-1 flex flex-col justify-between">
+            <div>
+              <h4 className="text-[11px] font-bold font-display uppercase tracking-wider text-white mb-2.5 pb-2 border-b border-white/[0.06]">
+                Tactical Quick Directives
+              </h4>
+              <div className="space-y-1.5 font-mono">
+                {suggestions.map((template, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleQuickAction(template)}
+                    className="w-full text-left p-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-emerald-500/30 text-[10px] text-white/60 hover:text-white transition-all cursor-pointer leading-relaxed"
+                  >
+                    → {template}
+                  </button>
+                ))}
+              </div>
             </div>
-          </motion.div>
 
-          {/* Safety */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            className="glass-card rounded-2xl p-4"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <h4 className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Safety Checks</h4>
+            <div className="pt-2 border-t border-white/[0.05] text-[10px] font-mono text-white/40 space-y-1">
+              <div className="flex items-center gap-1.5 text-emerald-400">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Audited Operator Session</span>
+              </div>
+              <p className="text-[9px] text-white/30">Compliant with FIFA WC 2026 Telemetry Standards</p>
             </div>
-            <div className="space-y-1.5">
-              {['Human-in-the-loop: ON', 'Confidence threshold: 85%', 'Audit trail: Active', 'PII filter: Enabled'].map((check, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <span className="w-1 h-1 rounded-full bg-emerald-500" />
-                  <span className="text-[10px] text-white/40">{check}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

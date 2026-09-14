@@ -3,13 +3,14 @@ import {
   LayoutDashboard, Map, ShieldAlert, MessageSquareText, Users,
   UtensilsCrossed, Radio, BarChart3, Settings, Zap, ChevronLeft,
   ChevronRight, LogOut, UserCog, TrendingUp,
-  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket
+  Building2, Eye, Siren, DollarSign, Shield, Activity, Ticket,
+  Terminal
 } from 'lucide-react';
 
 import { useAuth } from '../context/useAuth';
 import UserProfilePopup from './UserProfilePopup';
 
-// ── Unique nav items per role ──────────────────────────────────────────────
+// ── Navigation configuration per role ──
 const NAV_BY_ROLE = {
   admin: [
     { to: '/', icon: LayoutDashboard, label: 'Command Center', desc: 'System overview' },
@@ -56,40 +57,37 @@ const NAV_BY_ROLE = {
 
 const ROLE_BRAND = {
   admin: {
-    gradient: 'from-rose-500 to-orange-500',
-    glow: 'shadow-[0_0_20px_rgba(239,68,68,0.4)]',
-    badge: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-    label: 'Administrator',
+    accentBg: 'bg-rose-500/15',
+    accentText: 'text-rose-400',
+    border: 'border-rose-500/30',
+    badge: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+    label: 'ADMIN',
     icon: Shield,
   },
   manager: {
-    gradient: 'from-violet-500 to-purple-600',
-    glow: 'shadow-[0_0_20px_rgba(139,92,246,0.4)]',
-    badge: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
-    label: 'Manager',
+    accentBg: 'bg-violet-500/15',
+    accentText: 'text-violet-400',
+    border: 'border-violet-500/30',
+    badge: 'bg-violet-500/10 text-violet-300 border-violet-500/30',
+    label: 'MANAGER',
     icon: TrendingUp,
   },
   security: {
-    gradient: 'from-amber-500 to-yellow-500',
-    glow: 'shadow-[0_0_20px_rgba(245,158,11,0.4)]',
-    badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    label: 'Security Officer',
+    accentBg: 'bg-amber-500/15',
+    accentText: 'text-amber-400',
+    border: 'border-amber-500/30',
+    badge: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+    label: 'SECURITY',
     icon: ShieldAlert,
   },
   operator: {
-    gradient: 'from-brand-500 to-accent-500',
-    glow: 'shadow-[0_0_20px_rgba(51,120,255,0.4)]',
-    badge: 'bg-brand-500/20 text-brand-300 border-brand-500/30',
-    label: 'Operator',
+    accentBg: 'bg-emerald-500/15',
+    accentText: 'text-emerald-400',
+    border: 'border-emerald-500/30',
+    badge: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
+    label: 'OPERATOR',
     icon: Zap,
   },
-};
-
-const ACTIVE_STYLE = {
-  admin: 'bg-rose-500/15 text-rose-400 shadow-[inset_0_0_0_1px_rgba(239,68,68,0.25)]',
-  manager: 'bg-violet-500/15 text-violet-400 shadow-[inset_0_0_0_1px_rgba(139,92,246,0.25)]',
-  security: 'bg-amber-500/15 text-amber-400 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.25)]',
-  operator: 'bg-brand-500/15 text-brand-400 shadow-[inset_0_0_0_1px_rgba(51,120,255,0.2)]',
 };
 
 export default function Sidebar() {
@@ -99,7 +97,6 @@ export default function Sidebar() {
   const role = user?.role || 'operator';
   const navItems = NAV_BY_ROLE[role] || NAV_BY_ROLE.operator;
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
-  const activeStyle = ACTIVE_STYLE[role] || ACTIVE_STYLE.operator;
   const RoleIcon = brand.icon;
 
   const handleLogout = () => {
@@ -110,60 +107,61 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Drawer Overlay Backdrop */}
+      {/* Mobile Backdrop */}
       {mobileSidebarOpen && (
         <div
           onClick={closeMobileSidebar}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden transition-opacity"
           aria-hidden="true"
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-screen z-50 flex flex-col transition-all duration-300 ease-in-out
-          ${collapsed ? 'w-[72px]' : 'w-[260px]'}
+        className={`fixed top-0 left-0 h-screen z-50 flex flex-col transition-all duration-250 ease-out
+          ${collapsed ? 'w-[68px]' : 'w-[252px]'}
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          bg-[#070a18]/95 backdrop-blur-2xl border-r border-white/[0.08] shadow-[0_0_40px_rgba(0,0,0,0.8)]`}
+          bg-[#07090d] border-r border-white/[0.07] select-none`}
       >
-        {/* Logo + Role Badge */}
-        <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06] relative">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-shrink-0">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow} border border-white/20`}>
-                <RoleIcon className="w-5 h-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse border-2 border-surface-950 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+        {/* Modern Clean Command Center Logo */}
+        <div className="flex items-center justify-between px-3.5 py-4 border-b border-white/[0.07]">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Minimal Technical Emblem */}
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 relative group">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot-green absolute -top-0.5 -right-0.5" />
+              <Terminal className="w-4 h-4 text-emerald-400" />
             </div>
+
             {(!collapsed || mobileSidebarOpen) && (
-              <div className="overflow-hidden">
+              <div className="overflow-hidden min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="text-base font-black font-display tracking-tight text-white whitespace-nowrap">
-                    STADIUM<span className="text-cyan-400">GENIUS</span>
+                  <h1 className="text-sm font-black font-display tracking-tight text-white whitespace-nowrap">
+                    STADIUM<span className="text-emerald-400">GENIUS</span>
                   </h1>
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider border ${brand.badge}`}>
+                  <span className={`inline-flex items-center px-1.5 py-0.2 rounded text-[8px] font-mono font-bold uppercase tracking-wider border ${brand.badge}`}>
                     {brand.label}
                   </span>
-                  <span className="text-[9px] font-mono text-cyan-400/80 font-semibold tracking-tighter">
-                    FIFA '26
+                  <span className="text-[9px] font-mono text-white/40 tracking-tighter">
+                    FIFA'26 • V2.4
                   </span>
                 </div>
               </div>
             )}
           </div>
+
           {/* Mobile Close Button */}
           <button
             onClick={closeMobileSidebar}
-            className="md:hidden text-white/50 hover:text-white p-2 rounded-lg hover:bg-white/10"
+            className="md:hidden text-white/50 hover:text-white p-1.5 rounded-lg hover:bg-white/[0.06]"
             aria-label="Close menu"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
+        {/* Navigation Items */}
+        <nav className="flex-1 py-3 px-2 space-y-1 overflow-y-auto" aria-label="Main Navigation">
           {navItems.map(({ to, icon: Icon, label, desc }) => (
             <NavLink
               key={`${role}-${to}`}
@@ -171,89 +169,94 @@ export default function Sidebar() {
               end={to === '/'}
               onClick={closeMobileSidebar}
               className={({ isActive }) =>
-                `group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
-                ${isActive ? activeStyle : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04]'}
-                ${collapsed && !mobileSidebarOpen ? 'justify-center' : ''}`
+                `group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-150
+                ${
+                  isActive
+                    ? 'bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30 shadow-[inset_0_1px_0_rgba(74,222,128,0.2)]'
+                    : 'text-white/55 hover:text-white hover:bg-white/[0.04]'
+                }
+                ${collapsed && !mobileSidebarOpen ? 'justify-center px-0' : ''}`
               }
             >
-              <Icon className="w-[18px] h-[18px] flex-shrink-0 transition-colors" />
+              <Icon className={`w-4 h-4 flex-shrink-0 transition-colors ${collapsed && !mobileSidebarOpen ? '' : ''}`} />
               {(!collapsed || mobileSidebarOpen) && (
-                <div className="overflow-hidden">
-                  <span className="block whitespace-nowrap leading-tight">{label}</span>
-                  <span className="block text-[10px] text-white/30 leading-tight whitespace-nowrap">{desc}</span>
+                <div className="overflow-hidden min-w-0">
+                  <span className="block whitespace-nowrap leading-snug">{label}</span>
+                  <span className="block text-[10px] text-white/30 leading-none whitespace-nowrap font-mono mt-0.5">{desc}</span>
                 </div>
               )}
             </NavLink>
           ))}
         </nav>
 
-        {/* Bottom — User info + Logout */}
-        <div className="px-3 pb-4 space-y-1 border-t border-white/[0.06] pt-3">
+        {/* Bottom Section: Profile + Actions */}
+        <div className="p-2 border-t border-white/[0.07] space-y-1">
           {user && (!collapsed || mobileSidebarOpen) && (
             <button
               onClick={() => { closeMobileSidebar(); openProfile(); }}
-              className="flex items-center gap-3 px-3 py-2.5 mb-1 w-full rounded-xl hover:bg-white/[0.06] transition-colors text-left group"
+              className="flex items-center gap-2.5 p-2 w-full rounded-lg hover:bg-white/[0.05] transition-colors text-left group border border-transparent hover:border-white/[0.06]"
+              aria-label="Open User Profile"
             >
               {user.avatar ? (
                 <img
                   src={user.avatar}
                   alt={user.name}
-                  className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-white/[0.08] group-hover:border-cyan-400/50"
+                  className="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-white/10"
                 />
               ) : (
-                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white flex-shrink-0`}>
+                <div className="w-7 h-7 rounded-md bg-white/[0.06] border border-white/10 flex items-center justify-center text-[11px] font-mono font-bold text-white flex-shrink-0">
                   {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                 </div>
               )}
-              <div className="overflow-hidden flex-1">
-                <p className="text-xs font-semibold text-white/80 truncate group-hover:text-cyan-300">{user.name}</p>
-                <p className="text-[9px] text-white/40 truncate">{user.email}</p>
+              <div className="overflow-hidden flex-1 min-w-0">
+                <p className="text-xs font-semibold text-white/85 truncate group-hover:text-white leading-tight">{user.name}</p>
+                <p className="text-[10px] text-white/35 truncate font-mono">{user.email}</p>
               </div>
             </button>
           )}
+
           {user && collapsed && !mobileSidebarOpen && (
-            <div className="flex justify-center py-2">
-              <button onClick={openProfile} title="View Profile">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-8 h-8 rounded-xl object-cover border border-white/[0.08] hover:border-cyan-400"
-                  />
-                ) : (
-                  <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center text-xs font-bold text-white`}>
-                    {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                  </div>
-                )}
+            <div className="flex justify-center py-1">
+              <button
+                onClick={openProfile}
+                title="View Profile"
+                aria-label="View Profile"
+                className="w-7 h-7 rounded-md bg-white/[0.06] border border-white/10 flex items-center justify-center text-[11px] font-mono font-bold text-white hover:border-emerald-400"
+              >
+                {user.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
               </button>
             </div>
           )}
 
-          <button
-            onClick={handleLogout}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
-              text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/[0.06] transition-all duration-200
-              ${collapsed && !mobileSidebarOpen ? 'justify-center' : ''}`}
-          >
-            <LogOut className="w-[18px] h-[18px] flex-shrink-0" />
-            {(!collapsed || mobileSidebarOpen) && <span>Logout</span>}
-          </button>
+          <div className="grid grid-cols-2 gap-1 pt-1">
+            <button
+              onClick={handleLogout}
+              aria-label="Logout"
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-medium text-rose-400/70 hover:text-rose-300 hover:bg-rose-500/10 transition-all ${
+                collapsed && !mobileSidebarOpen ? 'col-span-2 justify-center' : ''
+              }`}
+            >
+              <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+              {(!collapsed || mobileSidebarOpen) && <span className="font-mono text-[11px]">Logout</span>}
+            </button>
 
-          <button
-            onClick={toggleSidebar}
-            className={`hidden md:flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full
-              text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all duration-200
-              ${collapsed ? 'justify-center' : ''}`}
-          >
-            {collapsed ? (
-              <ChevronRight className="w-[18px] h-[18px] mx-auto" />
-            ) : (
-              <>
-                <ChevronLeft className="w-[18px] h-[18px]" />
-                <span>Collapse</span>
-              </>
-            )}
-          </button>
+            <button
+              onClick={toggleSidebar}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={`hidden md:flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-white/35 hover:text-white/70 hover:bg-white/[0.04] transition-all justify-center ${
+                collapsed ? 'col-span-2' : ''
+              }`}
+            >
+              {collapsed ? (
+                <ChevronRight className="w-3.5 h-3.5" />
+              ) : (
+                <>
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="font-mono text-[10px]">Collapse</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -261,4 +264,3 @@ export default function Sidebar() {
     </>
   );
 }
-

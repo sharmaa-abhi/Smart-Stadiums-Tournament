@@ -4,7 +4,7 @@ import {
   Camera, Layers3,
   Eye, Play, Pause, Volume2, Maximize2, Share2,
   Sparkles, Trophy, Timer, Signal,
-  Megaphone, Plus, Trash2
+  Megaphone, Plus, Trash2, Radio
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
@@ -13,29 +13,29 @@ import { useAuth } from '../context/useAuth';
 import { BroadcastSkeleton } from '../components/skeleton';
 
 const feeds = [
-  { id: 1, name: 'Main Camera — Center', angle: 'Wide', status: 'live', fps: 60, resolution: '4K HDR', viewers: '2.4M' },
-  { id: 2, name: 'Tactical Overhead', angle: 'Top-down', status: 'live', fps: 60, resolution: '4K', viewers: '890K' },
-  { id: 3, name: 'Referee Bodycam', angle: 'POV', status: 'live', fps: 120, resolution: '1080p Stabilized', viewers: '1.2M' },
-  { id: 4, name: 'Goal-line (North)', angle: 'Fixed', status: 'live', fps: 240, resolution: '4K Super Slow', viewers: '450K' },
-  { id: 5, name: '3D Avatar Replay', angle: 'Virtual', status: 'processing', fps: 60, resolution: '4K Rendered', viewers: '670K' },
-  { id: 6, name: 'Fan Cam Section 108', angle: 'Crowd', status: 'live', fps: 30, resolution: '1080p', viewers: '180K' },
+  { id: 1, name: 'Main Cam — Tactical Pitch', angle: 'Wide', status: 'live', fps: 60, resolution: '4K HDR', viewers: '2.4M' },
+  { id: 2, name: 'Tactical Overhead Drone', angle: 'Top-down', status: 'live', fps: 60, resolution: '4K', viewers: '890K' },
+  { id: 3, name: 'Referee Optical POV', angle: 'POV', status: 'live', fps: 120, resolution: '1080p Stabilized', viewers: '1.2M' },
+  { id: 4, name: 'Goal-line North Sensor', angle: 'Fixed', status: 'live', fps: 240, resolution: '4K Ultra Slow', viewers: '450K' },
+  { id: 5, name: '3D Spatial Reconstruction', angle: 'Virtual', status: 'processing', fps: 60, resolution: '4K Rendered', viewers: '670K' },
+  { id: 6, name: 'Concourse Fan Cam 108', angle: 'Crowd', status: 'live', fps: 30, resolution: '1080p', viewers: '180K' },
 ];
 
 const aiOverlays = [
-  { name: 'Player Tracking Heatmap', status: 'active', type: 'real-time' },
-  { name: 'Ball Speed & Trajectory', status: 'active', type: 'real-time' },
-  { name: 'Tactical Formation View', status: 'active', type: 'real-time' },
-  { name: 'xG Probability Meter', status: 'active', type: 'ML inference' },
-  { name: 'Sprint Distance Overlay', status: 'standby', type: 'on-demand' },
-  { name: 'Offside Line Projection', status: 'active', type: 'real-time' },
+  { name: 'Player Spatial Tracking', status: 'active', type: 'Real-time' },
+  { name: 'Ball Trajectory & Velocity', status: 'active', type: 'Real-time' },
+  { name: 'Tactical Formation Overlay', status: 'active', type: 'Real-time' },
+  { name: 'xG Expected Probability', status: 'active', type: 'ML Inference' },
+  { name: 'Sprint Velocity Heatmap', status: 'standby', type: 'On-Demand' },
+  { name: 'Offside Projection Plane', status: 'active', type: 'Real-time' },
 ];
 
 const highlights = [
-  { time: "23'", event: 'Goal — Player #10', type: 'goal', confidence: '99%', clips: 4 },
-  { time: "31'", event: 'Yellow Card — Player #7', type: 'card', confidence: '97%', clips: 2 },
-  { time: "45'", event: 'Save of the Match', type: 'save', confidence: '95%', clips: 3 },
-  { time: "52'", event: 'Tactical Shift — 4-3-3 → 3-5-2', type: 'tactical', confidence: '91%', clips: 1 },
-  { time: "67'", event: 'Near Miss — Crossbar Hit', type: 'chance', confidence: '98%', clips: 3 },
+  { time: "23'", event: 'Goal — Strike #10 (Bottom Left)', type: 'goal', confidence: '99%', clips: 4 },
+  { time: "31'", event: 'Tactical Booking — Defense #7', type: 'card', confidence: '97%', clips: 2 },
+  { time: "45'", event: 'Goalkeeper Reaction Save', type: 'save', confidence: '95%', clips: 3 },
+  { time: "52'", event: 'Formation Shift — 4-3-3 → 3-5-2', type: 'tactical', confidence: '91%', clips: 1 },
+  { time: "67'", event: 'Near Miss — Crossbar Deflection', type: 'chance', confidence: '98%', clips: 3 },
 ];
 
 export default function Broadcast() {
@@ -97,13 +97,9 @@ export default function Broadcast() {
   };
 
   const priorityColors = {
-    urgent: 'bg-rose-500/15 text-rose-400 border-rose-500/20',
-    high: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-    normal: 'bg-brand-500/15 text-brand-400 border-brand-500/20',
-  };
-
-  const channelIcons = {
-    all: '📡', screens: '🖥️', pa: '📢', app: '📱',
+    urgent: 'bg-rose-500/15 text-rose-300 border-rose-500/35',
+    high: 'bg-amber-500/15 text-amber-300 border-amber-500/35',
+    normal: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35',
   };
 
   if (loadingBroadcasts) {
@@ -111,283 +107,282 @@ export default function Broadcast() {
   }
 
   return (
-    <div className="min-h-screen">
-      <TopBar title="Broadcast & Fan Engagement" subtitle="AI-enhanced production, real-time overlays & immersive fan experiences" />
+    <div className="min-h-screen pb-12">
+      <TopBar title="Broadcast & Media Distribution" subtitle="Low-latency stream orchestration, AI overlays & PA audio channels" />
 
-      <div className="p-6 space-y-6">
-        {/* KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Eye} label="Total Viewers" value="5.8M" color="brand" delay={0} trend="up" trendValue="+340K last 10m" />
-          <StatCard icon={Camera} label="Active Cameras" value="42" color="accent" delay={0.05} />
-          <StatCard icon={Sparkles} label="AI Overlays Active" value={aiOverlays.filter(a => a.status === 'active').length.toString()} color="emerald" delay={0.1} />
-          <StatCard icon={Timer} label="Stream Latency" value="1.2" unit="sec" color="amber" delay={0.15} />
+      <div className="p-4 sm:p-6 space-y-5 max-w-[1700px] mx-auto">
+        {/* Metric Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          <StatCard
+            icon={Eye}
+            label="Global OTT Viewers"
+            value="5.8M"
+            color="brand"
+            delay={0}
+            trend="up"
+            trendValue="+340K / 10m"
+          />
+          <StatCard
+            icon={Camera}
+            label="Live Pitch Feeds"
+            value="42"
+            color="accent"
+            delay={0.04}
+            contextNote="All cameras 4K HDR"
+          />
+          <StatCard
+            icon={Sparkles}
+            label="AI Overlays Active"
+            value={aiOverlays.filter(a => a.status === 'active').length.toString()}
+            color="emerald"
+            delay={0.08}
+            contextNote="Computer Vision synced"
+          />
+          <StatCard
+            icon={Timer}
+            label="Glass-to-Glass Latency"
+            value="1.2"
+            unit="sec"
+            color="amber"
+            delay={0.12}
+            trend="down"
+            trendValue="-0.3s target"
+          />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Feed Viewer */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Main Feed Video Panel */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-2 glass-card rounded-2xl overflow-hidden"
+            transition={{ duration: 0.25, delay: 0.15 }}
+            className="lg:col-span-2 glass-card rounded-xl overflow-hidden"
           >
-            {/* Video Player Area */}
-            <div className="relative aspect-video bg-gradient-to-br from-surface-900 to-surface-800 flex items-center justify-center overflow-hidden">
-              {/* Simulated video feed with animated gradient */}
-              <div className="absolute inset-0 stadium-grid opacity-50" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-500/5 via-transparent to-accent-500/5" />
+            {/* Video Viewport */}
+            <div className="relative aspect-video bg-[#05070a] flex items-center justify-center overflow-hidden">
+              <div className="absolute inset-0 opacity-25" style={{
+                backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+                backgroundSize: '24px 24px'
+              }} />
 
-              {/* Center play area simulation */}
+              {/* Video Placeholder Content */}
               <div className="relative z-10 text-center">
-                <div className="w-20 h-20 rounded-full bg-white/[0.05] backdrop-blur-sm border border-white/[0.10]
-                  flex items-center justify-center mb-3 mx-auto group cursor-pointer hover:bg-white/[0.10] transition-all">
-                  <Play className="w-8 h-8 text-white/70 group-hover:text-white transition-colors ml-1" />
+                <div className="w-16 h-16 rounded-xl bg-white/[0.04] backdrop-blur-md border border-white/[0.12] flex items-center justify-center mb-2.5 mx-auto group cursor-pointer hover:bg-white/[0.08] transition-all">
+                  <Play className="w-6 h-6 text-white/80 group-hover:text-emerald-400 transition-colors ml-0.5" />
                 </div>
-                <h3 className="text-sm font-semibold text-white/80">{selectedFeed.name}</h3>
-                <p className="text-[10px] text-white/40 mt-1">{selectedFeed.resolution} • {selectedFeed.fps}fps</p>
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider font-display">{selectedFeed.name}</h3>
+                <p className="text-[10px] text-white/40 font-mono mt-0.5">{selectedFeed.resolution} • {selectedFeed.fps} FPS</p>
               </div>
 
-              {/* Live badge */}
+              {/* Live Badge */}
               {selectedFeed.status === 'live' && (
-                <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/90 backdrop-blur-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">LIVE</span>
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[9px] font-bold tracking-wider">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white pulse-dot-red" />
+                  <span>LIVE</span>
                 </div>
               )}
 
-              {/* Viewer count */}
-              <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-sm">
-                <Eye className="w-3 h-3 text-white/60" />
-                <span className="text-[10px] text-white/70 font-medium">{selectedFeed.viewers} viewers</span>
+              {/* Viewer Telemetry */}
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/60 border border-white/10 text-[10px] font-mono text-white/80">
+                <Eye className="w-3 h-3 text-white/50" />
+                <span>{selectedFeed.viewers} stream viewers</span>
               </div>
 
-              {/* AI overlay badges */}
-              <div className="absolute bottom-4 left-4 flex items-center gap-2">
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent-500/20 backdrop-blur-sm border border-accent-500/30">
-                  <Sparkles className="w-2.5 h-2.5 text-accent-400" />
-                  <span className="text-[9px] text-accent-300 font-medium">AI Enhanced</span>
-                </div>
-                <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-brand-500/20 backdrop-blur-sm border border-brand-500/30">
-                  <Layers3 className="w-2.5 h-2.5 text-brand-400" />
-                  <span className="text-[9px] text-brand-300 font-medium">3D Tracking</span>
-                </div>
+              {/* Overlays Tags */}
+              <div className="absolute bottom-3 left-3 flex items-center gap-1.5 font-mono text-[9px]">
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">
+                  AI CV Active
+                </span>
+                <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/35">
+                  Optical Calibration 0.2ms
+                </span>
               </div>
 
-              {/* Controls */}
-              <div className="absolute bottom-4 right-4 flex items-center gap-2">
-                <button className="p-1.5 rounded-md bg-black/40 hover:bg-black/60 transition-colors">
-                  <Volume2 className="w-3.5 h-3.5 text-white/60" />
+              {/* Quick Controls */}
+              <div className="absolute bottom-3 right-3 flex items-center gap-1">
+                <button className="p-1 rounded bg-black/50 hover:bg-black text-white/60 hover:text-white transition-all">
+                  <Volume2 className="w-3.5 h-3.5" />
                 </button>
-                <button className="p-1.5 rounded-md bg-black/40 hover:bg-black/60 transition-colors">
-                  <Share2 className="w-3.5 h-3.5 text-white/60" />
+                <button className="p-1 rounded bg-black/50 hover:bg-black text-white/60 hover:text-white transition-all">
+                  <Share2 className="w-3.5 h-3.5" />
                 </button>
-                <button className="p-1.5 rounded-md bg-black/40 hover:bg-black/60 transition-colors">
-                  <Maximize2 className="w-3.5 h-3.5 text-white/60" />
+                <button className="p-1 rounded bg-black/50 hover:bg-black text-white/60 hover:text-white transition-all">
+                  <Maximize2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* Feed Selector Thumbnails */}
-            <div className="p-4 border-t border-white/[0.06]">
+            {/* Thumbnail Camera Grid */}
+            <div className="p-3 border-t border-white/[0.06] bg-[#07090d]">
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {feeds.map((feed) => (
                   <button
                     key={feed.id}
                     onClick={() => setSelectedFeed(feed)}
-                    className={`flex-shrink-0 w-32 p-2 rounded-lg transition-all duration-200
-                      ${selectedFeed.id === feed.id
-                        ? 'bg-brand-500/15 border border-brand-500/30'
-                        : 'bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.05]'
-                      }`}
+                    className={`flex-shrink-0 w-28 p-1.5 rounded-lg transition-all text-left cursor-pointer border ${
+                      selectedFeed.id === feed.id
+                        ? 'bg-emerald-500/15 border-emerald-500/40'
+                        : 'bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.05]'
+                    }`}
                   >
-                    <div className="aspect-video bg-surface-800 rounded-md mb-1.5 flex items-center justify-center relative overflow-hidden">
-                      <div className="stadium-grid absolute inset-0 opacity-30" />
-                      <Camera className="w-4 h-4 text-white/20 relative z-10" />
+                    <div className="aspect-video bg-[#0a0d14] rounded mb-1 flex items-center justify-center relative overflow-hidden border border-white/[0.05]">
+                      <Camera className="w-3.5 h-3.5 text-white/25" />
                       {feed.status === 'live' && (
-                        <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                        <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-rose-500" />
                       )}
                     </div>
-                    <p className="text-[9px] text-white/60 font-medium truncate">{feed.name}</p>
+                    <p className="text-[9px] font-mono text-white/70 truncate">{feed.name}</p>
                   </button>
                 ))}
               </div>
             </div>
           </motion.div>
 
-          {/* Right Panel */}
+          {/* Right Panel Telemetry & Overlays */}
           <div className="space-y-4">
-            {/* AI Overlays */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="glass-card rounded-2xl p-4"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-accent-400" />
-                <h4 className="text-xs font-semibold text-white/70 uppercase tracking-wider">AI Visual Overlays</h4>
+            {/* Visual Overlays */}
+            <div className="glass-card rounded-xl p-3.5 font-mono text-xs">
+              <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/[0.06]">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <h4 className="text-[11px] font-bold text-white uppercase tracking-wider">Active Visual Overlays</h4>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {aiOverlays.map((overlay, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 px-2.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${overlay.status === 'active' ? 'bg-emerald-500' : 'bg-white/20'}`} />
-                      <span className="text-xs text-white/70">{overlay.name}</span>
+                  <div key={i} className="flex items-center justify-between p-1.5 rounded bg-white/[0.02] border border-white/[0.03]">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${overlay.status === 'active' ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                      <span className="text-white/75 text-[11px] font-sans">{overlay.name}</span>
                     </div>
-                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded
-                      ${overlay.status === 'active' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-white/[0.04] text-white/30'}`}>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded ${
+                      overlay.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.04] text-white/30'
+                    }`}>
                       {overlay.type}
                     </span>
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
 
-            {/* AI Highlights */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="glass-card rounded-2xl p-4"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Trophy className="w-4 h-4 text-amber-400" />
-                <h4 className="text-xs font-semibold text-white/70 uppercase tracking-wider">AI-Generated Highlights</h4>
+            {/* AI Generated Highlights */}
+            <div className="glass-card rounded-xl p-3.5 font-mono text-xs">
+              <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/[0.06]">
+                <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <h4 className="text-[11px] font-bold text-white uppercase tracking-wider">Auto Highlight Feed</h4>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {highlights.map((h, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.08 + 0.5 }}
-                    className="flex items-center gap-3 p-2.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer group"
-                  >
-                    <div className="w-10 text-center">
-                      <span className="text-xs font-bold text-accent-400">{h.time}</span>
-                    </div>
+                  <div key={i} className="flex items-center gap-2 p-1.5 rounded bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer border border-white/[0.03]">
+                    <span className="font-bold text-cyan-400 text-[11px] w-6">{h.time}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white/80 font-medium truncate">{h.event}</p>
-                      <p className="text-[9px] text-white/30">{h.clips} clips • {h.confidence} confidence</p>
+                      <p className="text-[11px] font-sans font-semibold text-white/80 truncate">{h.event}</p>
+                      <p className="text-[9px] text-white/30">{h.clips} clips • {h.confidence}</p>
                     </div>
-                    <Play className="w-3 h-3 text-white/20 group-hover:text-brand-400 transition-colors" />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Stream Health */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="glass-card rounded-2xl p-4"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <Signal className="w-4 h-4 text-emerald-400" />
-                <h4 className="text-xs font-semibold text-white/70 uppercase tracking-wider">Stream Health</h4>
-              </div>
-              <div className="space-y-2.5">
-                {[
-                  { label: 'CDN Bandwidth', value: '48.2 Gbps', color: 'text-emerald-400' },
-                  { label: 'Buffer Rate', value: '0.02%', color: 'text-emerald-400' },
-                  { label: 'Avg Bitrate', value: '12.4 Mbps', color: 'text-brand-400' },
-                  { label: 'Edge Nodes', value: '142 / 142', color: 'text-emerald-400' },
-                ].map((m, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-[11px] text-white/40">{m.label}</span>
-                    <span className={`text-[11px] font-semibold ${m.color}`}>{m.value}</span>
+                    <Play className="w-3 h-3 text-white/30 hover:text-emerald-400 transition-colors" />
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
+
+            {/* CDN Metrics */}
+            <div className="glass-card rounded-xl p-3.5 font-mono text-xs">
+              <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/[0.06]">
+                <Signal className="w-3.5 h-3.5 text-emerald-400" />
+                <h4 className="text-[11px] font-bold text-white uppercase tracking-wider">Distribution Telemetry</h4>
+              </div>
+              <div className="space-y-1 text-[11px]">
+                {[
+                  { label: 'Edge Bandwidth', value: '48.2 Gbps', color: 'text-emerald-400' },
+                  { label: 'Packet Drop', value: '0.01%', color: 'text-emerald-400' },
+                  { label: 'Encoding Bitrate', value: '14.8 Mbps', color: 'text-white/80' },
+                  { label: 'Edge POPs', value: '142 / 142', color: 'text-emerald-400' },
+                ].map((m, i) => (
+                  <div key={i} className="flex items-center justify-between py-0.5">
+                    <span className="text-white/40">{m.label}:</span>
+                    <span className={`font-bold ${m.color}`}>{m.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Broadcast Messages Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-card rounded-2xl p-5"
-        >
-          <div className="flex items-center justify-between mb-4">
+        {/* Stadium Broadcast Announcements */}
+        <div className="glass-card rounded-xl p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
-              <Megaphone className="w-4 h-4 text-brand-400" />
-              <h3 className="text-sm font-semibold text-white/90">Stadium Broadcasts</h3>
-              <span className="text-xs text-white/30">{broadcasts.filter(b => b.status === 'active').length} active</span>
+              <Megaphone className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-sm font-bold font-display uppercase tracking-wider text-white">
+                Venue PA & Visual Broadcast Control
+              </h3>
+              <span className="text-xs font-mono text-white/40 ml-2">
+                {broadcasts.filter(b => b.status === 'active').length} Active Channels
+              </span>
             </div>
             <button
               onClick={() => setShowNewForm(!showNewForm)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/15 border border-brand-500/30
-                text-xs text-brand-400 hover:bg-brand-500/25 transition-all"
+              className="btn-secondary text-xs py-1.5 px-3 font-mono cursor-pointer"
             >
               <Plus className="w-3 h-3" />
-              New Broadcast
+              {showNewForm ? 'Close Form' : 'New Broadcast Message'}
             </button>
           </div>
 
-          {/* New Broadcast Form */}
+          {/* Form */}
           <AnimatePresence>
             {showNewForm && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-3"
+                className="mb-3 p-3 rounded-lg bg-[#0a0d14] border border-white/[0.08] space-y-2.5 font-mono"
               >
                 <input
                   type="text"
-                  placeholder="Broadcast title..."
+                  placeholder="Broadcast alert headline..."
                   value={newMsg.title}
                   onChange={e => setNewMsg(p => ({ ...p, title: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white/80
-                    placeholder:text-white/20 focus:outline-none focus:border-brand-500/40 transition-all"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50"
                 />
                 <textarea
-                  placeholder="Message content..."
+                  placeholder="Full audio transcription / text content..."
                   value={newMsg.message}
                   onChange={e => setNewMsg(p => ({ ...p, message: e.target.value }))}
                   rows={2}
-                  className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-white/80
-                    placeholder:text-white/20 focus:outline-none focus:border-brand-500/40 transition-all resize-none"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50 resize-none font-sans"
                 />
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   <select
                     value={newMsg.channel}
                     onChange={e => setNewMsg(p => ({ ...p, channel: e.target.value }))}
-                    className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-white/60
-                      focus:outline-none focus:border-brand-500/40 transition-all"
+                    className="px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] text-xs text-white/80 focus:outline-none focus:border-emerald-500/50"
                   >
-                    <option value="all">📡 All Channels</option>
-                    <option value="screens">🖥️ Screens</option>
-                    <option value="pa">📢 PA System</option>
-                    <option value="app">📱 Fan App</option>
+                    <option value="all">All Channels (PA + Displays + App)</option>
+                    <option value="screens">LED Jumbotrons Only</option>
+                    <option value="pa">PA Audio Speaker Array</option>
+                    <option value="app">Fan Portal Push</option>
                   </select>
                   <select
                     value={newMsg.priority}
                     onChange={e => setNewMsg(p => ({ ...p, priority: e.target.value }))}
-                    className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-white/60
-                      focus:outline-none focus:border-brand-500/40 transition-all"
+                    className="px-2.5 py-1 rounded bg-white/[0.04] border border-white/[0.08] text-xs text-white/80 focus:outline-none focus:border-emerald-500/50"
                   >
                     <option value="normal">Normal</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
+                    <option value="high">High Priority</option>
+                    <option value="urgent">Urgent / Emergency</option>
                   </select>
-                  <div className="flex-1 flex items-center gap-2 justify-end">
+                  <div className="ml-auto flex items-center gap-2">
                     <button
                       onClick={() => setShowNewForm(false)}
-                      className="px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-white/40 hover:text-white/60 transition-all"
+                      className="btn-secondary py-1 text-xs"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleCreateBroadcast}
                       disabled={!newMsg.title || !newMsg.message || submitting}
-                      className="px-4 py-1.5 rounded-lg bg-brand-500 text-xs text-white font-medium
-                        hover:bg-brand-600 disabled:opacity-40 transition-all"
+                      className="btn-primary py-1 px-3 text-xs disabled:opacity-40"
                     >
-                      {submitting ? 'Sending...' : 'Send Broadcast'}
+                      {submitting ? 'Transmitting...' : 'Dispatch Broadcast'}
                     </button>
                   </div>
                 </div>
@@ -396,52 +391,48 @@ export default function Broadcast() {
           </AnimatePresence>
 
           {/* Broadcast List */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 font-mono text-xs">
             {broadcasts.length === 0 ? (
-              <p className="text-xs text-white/30 text-center py-6">No broadcasts yet</p>
+              <p className="text-white/30 text-center py-6">No broadcast messages in active queue.</p>
             ) : broadcasts.map((b) => (
-              <motion.div
+              <div
                 key={b.id}
-                layout
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] transition-all group"
+                className="flex items-center gap-3 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-all group"
               >
-                <span className="text-lg leading-none mt-0.5">{channelIcons[b.channel] || '📡'}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-semibold text-white/80 truncate">{b.title}</span>
-                    <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded border ${priorityColors[b.priority] || priorityColors.normal}`}>
-                      {b.priority?.toUpperCase()}
+                    <span className="font-bold text-white/90 text-xs font-sans">{b.title}</span>
+                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded border ${priorityColors[b.priority] || priorityColors.normal}`}>
+                      {b.priority}
                     </span>
-                    <span className={`ml-auto text-[9px] font-medium px-1.5 py-0.5 rounded ${
-                      b.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' :
-                      b.status === 'scheduled' ? 'bg-amber-500/10 text-amber-400' :
-                      'bg-white/[0.04] text-white/30'
-                    }`}>{b.status}</span>
+                    <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${
+                      b.status === 'active' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/[0.04] text-white/40'
+                    }`}>
+                      {b.status}
+                    </span>
+                    <span className="text-[10px] text-white/30 ml-auto">{new Date(b.created_at).toLocaleTimeString()}</span>
                   </div>
-                  <p className="text-[11px] text-white/40 line-clamp-2">{b.message}</p>
-                  <p className="text-[9px] text-white/20 mt-1">{b.channel} • {new Date(b.created_at).toLocaleTimeString()}</p>
+                  <p className="text-[11px] text-white/50 font-sans truncate">{b.message}</p>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100">
                   <button
                     onClick={() => handleToggleBroadcast(b)}
-                    title={b.status === 'active' ? 'Pause' : 'Activate'}
-                    className="p-1.5 rounded-lg hover:bg-white/[0.08] transition-all"
+                    className="p-1 rounded text-white/40 hover:text-white transition-all"
                   >
-                    {b.status === 'active' ? <Pause className="w-3 h-3 text-amber-400" /> : <Play className="w-3 h-3 text-emerald-400" />}
+                    {b.status === 'active' ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
                   </button>
                   <button
                     onClick={() => handleDeleteBroadcast(b.id)}
-                    className="p-1.5 rounded-lg hover:bg-rose-500/10 transition-all"
+                    className="p-1 rounded text-white/30 hover:text-rose-400 transition-all"
                   >
-                    <Trash2 className="w-3 h-3 text-rose-400/60 hover:text-rose-400" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

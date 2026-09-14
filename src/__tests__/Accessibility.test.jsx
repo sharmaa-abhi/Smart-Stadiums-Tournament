@@ -4,14 +4,15 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
-// Mock AuthContext
-vi.mock('../context/AuthContext', () => {
-  return {
-    useAuth: vi.fn(),
-  };
-});
+// Mock useAuth
+vi.mock('../context/useAuth', () => ({
+  useAuth: vi.fn(),
+}));
+vi.mock('../context/AuthContext', () => ({
+  useAuth: vi.fn(),
+}));
 
 describe('WCAG 2.2 AA Accessibility Audits', () => {
   beforeEach(() => {
@@ -42,7 +43,7 @@ describe('WCAG 2.2 AA Accessibility Audits', () => {
 
     // Verify main heading exists
     const mainHeading = screen.getByRole('heading', { level: 1 });
-    expect(mainHeading).toHaveTextContent(/StadiumGenius/);
+    expect(mainHeading).toHaveTextContent(/stadiumgenius/i);
 
     // Verify all buttons have accessible text names
     const buttons = screen.getAllByRole('button');

@@ -209,21 +209,22 @@ export default function Security() {
 
         {/* Tab Navigation */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-2 overflow-x-auto pb-1"
         >
           {tabs.map(tab => {
             const TabIcon = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 whitespace-nowrap
-                  ${activeTab === tab.id
-                    ? 'bg-brand-500/15 text-brand-400 border border-brand-500/30'
-                    : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:bg-white/[0.06] hover:text-white/70'
-                  }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  isActive
+                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-[0_0_12px_rgba(34,197,94,0.15)]'
+                    : 'bg-white/[0.03] text-white/50 border border-white/[0.06] hover:bg-white/[0.06] hover:text-white'
+                }`}
               >
                 <TabIcon className="w-3.5 h-3.5" />
                 {tab.label}
@@ -234,8 +235,7 @@ export default function Security() {
           <div className="ml-auto">
             <button
               onClick={() => setShowIncidentModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20
-              text-xs font-medium text-rose-400 hover:bg-rose-500/20 transition-all"
+              className="btn-danger text-xs py-1.5 px-3 font-mono cursor-pointer"
             >
               <Siren className="w-3.5 h-3.5" />
               Report Incident

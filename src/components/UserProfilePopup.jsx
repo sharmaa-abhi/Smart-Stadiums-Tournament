@@ -15,14 +15,14 @@ export default function UserProfilePopup({ isOpen, onClose }) {
     switch (role?.toLowerCase()) {
       case 'admin':
       case 'administrator':
-        return 'bg-purple-500/15 text-purple-400 border-purple-500/30';
+        return 'bg-rose-500/15 text-rose-300 border-rose-500/35';
       case 'manager':
-        return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
+        return 'bg-violet-500/15 text-violet-300 border-violet-500/35';
       case 'security':
-        return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+        return 'bg-amber-500/15 text-amber-300 border-amber-500/35';
       case 'operator':
       default:
-        return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+        return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35';
     }
   };
 
@@ -32,114 +32,114 @@ export default function UserProfilePopup({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
       <div 
-        className="relative w-full max-w-lg bg-surface-900 border border-surface-700/60 rounded-2xl shadow-2xl overflow-hidden text-surface-100"
+        className="relative w-full max-w-md bg-[#0a0d14] border border-white/[0.09] rounded-xl shadow-[0_20px_60px_rgba(0,0,0,0.95)] overflow-hidden text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Banner */}
-        <div className="h-28 bg-gradient-to-r from-cyan-600/30 via-indigo-600/30 to-purple-600/30 border-b border-surface-700/50 relative p-4 flex justify-between items-start">
-          <div className="flex items-center gap-2 px-3 py-1 bg-surface-950/60 backdrop-blur-sm border border-surface-700/50 rounded-full text-xs font-mono text-cyan-400">
-            <Activity className="w-3.5 h-3.5 animate-pulse" />
-            <span>SESSION ACTIVE</span>
+        <div className="h-20 bg-gradient-to-r from-emerald-950/40 via-surface-900 to-black border-b border-white/[0.07] relative p-3 flex justify-between items-start">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-black/60 border border-white/10 rounded text-[10px] font-mono text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot-green" />
+            <span>SESSION ACTIVE • 5G NSA</span>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-surface-950/60 text-surface-400 hover:text-white hover:bg-surface-800 transition-colors"
+            className="p-1 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors"
+            aria-label="Close user profile"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Profile Card Main */}
-        <div className="px-6 pb-6 pt-0 relative">
+        <div className="px-5 pb-5 pt-0 relative">
           {/* Avatar positioning */}
-          <div className="-mt-14 mb-4 flex justify-between items-end">
+          <div className="-mt-10 mb-3 flex justify-between items-end">
             <div className="relative">
               {user.avatar ? (
                 <img 
                   src={user.avatar} 
                   alt={user.name} 
-                  className="w-24 h-24 rounded-2xl border-4 border-surface-900 object-cover shadow-xl" 
+                  className="w-16 h-16 rounded-xl border-2 border-[#0a0d14] object-cover shadow-lg" 
                 />
               ) : (
-                <div className="w-24 h-24 rounded-2xl border-4 border-surface-900 bg-surface-800 flex items-center justify-center text-3xl font-bold text-cyan-400 shadow-xl">
+                <div className="w-16 h-16 rounded-xl border-2 border-[#0a0d14] bg-white/[0.07] flex items-center justify-center text-xl font-mono font-bold text-white shadow-lg">
                   {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
               )}
-              <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-surface-900 shadow-glow" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border border-[#0a0d14]" />
             </div>
 
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${getRoleBadgeColor(user.role)}`}>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${getRoleBadgeColor(user.role)}`}>
               {user.role}
             </span>
           </div>
 
           {/* Name & Email */}
-          <div className="space-y-1">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <div className="space-y-0.5">
+            <h3 className="text-base font-bold text-white font-display flex items-center gap-2">
               {user.name || 'Stadium User'}
-              <Sparkles className="w-4 h-4 text-cyan-400" />
             </h3>
-            <p className="text-sm text-surface-400 flex items-center gap-1.5">
-              <Mail className="w-4 h-4 text-surface-500" />
+            <p className="text-xs text-white/45 flex items-center gap-1.5 font-mono">
+              <Mail className="w-3.5 h-3.5 text-white/30" />
               {user.email}
               {user.email_verified !== false && (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 ml-1" title="Email Verified" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-1" title="Email Verified" />
               )}
             </p>
           </div>
 
           {/* Account Status & Last Login */}
-          <div className="mt-4 grid grid-cols-2 gap-3 p-3 bg-surface-950/60 border border-surface-800 rounded-xl text-xs">
+          <div className="mt-3 grid grid-cols-2 gap-2 p-2.5 bg-black/40 border border-white/[0.05] rounded-lg text-xs font-mono">
             <div>
-              <span className="text-surface-500 block mb-0.5">Account Status</span>
+              <span className="text-white/40 text-[10px] block mb-0.5">Account Status</span>
               <span className="font-semibold text-emerald-400 flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                {user.account_status || 'Active'}
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                {user.account_status || 'Active On Duty'}
               </span>
             </div>
             <div>
-              <span className="text-surface-500 block mb-0.5">Last Authentication</span>
-              <span className="font-mono text-surface-300 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-surface-400" />
+              <span className="text-white/40 text-[10px] block mb-0.5">Last Authentication</span>
+              <span className="text-white/70 flex items-center gap-1">
+                <Clock className="w-3 h-3 text-white/30" />
                 {user.last_login ? new Date(user.last_login).toLocaleTimeString() : 'Just Now'}
               </span>
             </div>
           </div>
 
           {/* Permissions Chips */}
-          <div className="mt-5 space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-surface-400 flex items-center gap-1.5">
-              <Shield className="w-4 h-4 text-cyan-400" />
-              Granted System Permissions ({user.permissions?.length || 0})
+          <div className="mt-4 space-y-1.5">
+            <h4 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/40 flex items-center gap-1">
+              <Shield className="w-3 h-3 text-emerald-400" />
+              Assigned Permissions ({user.permissions?.length || 0})
             </h4>
-            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
+            <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-1">
               {user.permissions && user.permissions.length > 0 ? (
                 user.permissions.map((perm, idx) => (
                   <span 
                     key={idx}
-                    className="px-2.5 py-1 bg-surface-800/80 hover:bg-surface-800 border border-surface-700/50 rounded-lg text-xs font-mono text-cyan-300 transition-colors"
+                    className="px-2 py-0.5 bg-white/[0.03] border border-white/[0.06] rounded text-[10px] font-mono text-emerald-300/80"
                   >
                     {perm}
                   </span>
                 ))
               ) : (
-                <span className="text-xs text-surface-500 italic">Default role permissions active</span>
+                <span className="text-[10px] text-white/40 italic">Default role permissions active</span>
               )}
             </div>
           </div>
 
           {/* Quick Role Switcher */}
-          <div className="mt-5 space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-surface-400 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+          <div className="mt-4 space-y-1.5">
+            <h4 className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/40 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-400" />
               Switch Active Role Profile
             </h4>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {[
-                { id: 'admin', label: 'Admin', color: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
-                { id: 'manager', label: 'Manager', color: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+                { id: 'admin', label: 'Admin', color: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
+                { id: 'manager', label: 'Manager', color: 'bg-violet-500/20 text-violet-300 border-violet-500/40' },
                 { id: 'security', label: 'Security', color: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
                 { id: 'operator', label: 'Operator', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' }
               ].map((r) => (
@@ -147,10 +147,10 @@ export default function UserProfilePopup({ isOpen, onClose }) {
                   key={r.id}
                   type="button"
                   onClick={() => switchRole?.(r.id)}
-                  className={`py-1.5 px-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`py-1 px-1 rounded-lg text-xs font-mono font-semibold border transition-all cursor-pointer text-center ${
                     user.role?.toLowerCase() === r.id
-                      ? `${r.color} shadow-glow font-bold scale-105 ring-1 ring-white/30`
-                      : 'bg-surface-950/60 border-surface-800 text-surface-400 hover:text-white hover:bg-surface-800'
+                      ? `${r.color} font-bold ring-1 ring-white/20`
+                      : 'bg-white/[0.02] border-white/[0.06] text-white/50 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
                   {r.label}
@@ -160,12 +160,12 @@ export default function UserProfilePopup({ isOpen, onClose }) {
           </div>
 
           {/* Action Footer */}
-          <div className="mt-6 pt-4 border-t border-surface-800 flex justify-between items-center">
+          <div className="mt-5 pt-3 border-t border-white/[0.06] flex justify-between items-center">
             <button
               onClick={() => setShowLogoutConfirm(true)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl font-medium text-sm transition-all"
+              className="btn-danger w-full py-2 font-mono text-xs cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
               Sign Out Session
             </button>
           </div>
@@ -173,25 +173,25 @@ export default function UserProfilePopup({ isOpen, onClose }) {
 
         {/* Logout Confirmation Modal */}
         {showLogoutConfirm && (
-          <div className="absolute inset-0 bg-surface-950/90 backdrop-blur-md flex items-center justify-center p-6 z-20 animate-fade-in">
-            <div className="text-center space-y-4 max-w-xs">
-              <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center mx-auto border border-red-500/30">
-                <AlertTriangle className="w-6 h-6" />
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-20">
+            <div className="text-center space-y-3 max-w-xs">
+              <div className="w-10 h-10 rounded-full bg-rose-500/15 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/30">
+                <AlertTriangle className="w-5 h-5" />
               </div>
-              <h4 className="text-lg font-bold text-white">Confirm Sign Out</h4>
-              <p className="text-xs text-surface-400">
-                Are you sure you want to log out of StadiumGenius? Active session tokens will be revoked.
+              <h4 className="text-sm font-bold text-white font-display">Confirm Session Sign Out</h4>
+              <p className="text-xs text-white/50 leading-relaxed font-sans">
+                Active telemetry session tokens will be cleared and you will be returned to the main portal.
               </p>
-              <div className="flex gap-3 pt-2">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-2 bg-surface-800 hover:bg-surface-700 text-surface-200 text-xs font-medium rounded-xl border border-surface-700 transition-colors"
+                  className="btn-secondary py-1.5"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow-lg transition-colors"
+                  className="btn-danger py-1.5"
                 >
                   Sign Out
                 </button>
