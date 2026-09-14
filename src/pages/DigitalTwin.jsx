@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Layers, Eye, RotateCcw, ZoomIn, ZoomOut, Maximize2, Play,
-  MapPin, Thermometer, Wind, Droplets, Wifi, Radio, Cpu, ShieldCheck
+  Thermometer, Wind, Droplets, Wifi, Cpu, ShieldCheck
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import StadiumHeatmap from '../components/StadiumHeatmap';

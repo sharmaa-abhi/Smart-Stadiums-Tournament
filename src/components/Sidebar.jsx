@@ -97,7 +97,6 @@ export default function Sidebar() {
   const role = user?.role || 'operator';
   const navItems = NAV_BY_ROLE[role] || NAV_BY_ROLE.operator;
   const brand = ROLE_BRAND[role] || ROLE_BRAND.operator;
-  const RoleIcon = brand.icon;
 
   const handleLogout = () => {
     closeMobileSidebar();

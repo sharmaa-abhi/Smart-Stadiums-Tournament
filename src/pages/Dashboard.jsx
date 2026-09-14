@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Users, Timer, ShieldCheck, AlertTriangle, Star, Server, Shield, Bus,
-  TrendingUp, Activity, ArrowUpRight, UserCog, BarChart3, Eye, Siren,
-  UtensilsCrossed, Map, Radio, DollarSign, Filter, CheckCircle2, ChevronRight
+  TrendingUp, ArrowUpRight, UserCog, BarChart3, Eye, Siren,
+  UtensilsCrossed, Map, Radio, DollarSign, ChevronRight
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -77,7 +77,6 @@ export default function Dashboard() {
   const [occupancy, setOccupancy] = useState([]);
   const [heatmap, setHeatmap] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('telemetry');
 
   useEffect(() => {
     const fetchOthers = async () => {

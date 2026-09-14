@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Send, User, Sparkles, CheckCircle2,
+  Send, Sparkles, CheckCircle2,
   Mic, Paperclip, MoreHorizontal, Copy, ThumbsUp, ThumbsDown,
-  Zap, Brain, Radio, History, Terminal, Bot
+  Zap, History, Bot
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import api from '../lib/api';

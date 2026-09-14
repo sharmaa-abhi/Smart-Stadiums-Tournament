@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Clock, Radio, AlertOctagon, CheckCircle2,
-  Users, Zap, RefreshCw, ArrowRight
+  Users, Zap, RefreshCw
 } from 'lucide-react';
 
 export default function IncidentTriageCard({ incident, onAction }) {

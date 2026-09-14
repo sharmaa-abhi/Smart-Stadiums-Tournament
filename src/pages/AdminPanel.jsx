@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
-  Users, Shield, Activity, Trash2,
-  RefreshCw, Search, ChevronDown, BarChart3, Clock,
-  CheckCircle, Eye, UserPlus, Server
+  Users, Shield, RefreshCw, Search, BarChart3, Eye,
+  ChevronDown, Trash2, Activity, CheckCircle, Clock
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import api from '../lib/api';

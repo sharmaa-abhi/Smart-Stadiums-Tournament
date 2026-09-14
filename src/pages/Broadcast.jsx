@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Camera, Layers3,
+  Camera,
   Eye, Play, Pause, Volume2, Maximize2, Share2,
   Sparkles, Trophy, Timer, Signal,
-  Megaphone, Plus, Trash2, Radio
+  Megaphone, Plus, Trash2
 } from 'lucide-react';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';

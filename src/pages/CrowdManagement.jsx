@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Users, TrendingUp, ArrowUpRight, ArrowDownRight, AlertTriangle,
-  CheckCircle2, Clock, MapPin, Navigation, UserCheck
+  Users, TrendingUp,
+  Clock, MapPin, Navigation, UserCheck
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

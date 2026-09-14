@@ -1,4 +1,4 @@
-import { Bell, Search, Globe, Clock, Shield, TrendingUp, ShieldAlert, Zap, X, Menu, Radio, Command, Terminal, CheckCircle2 } from 'lucide-react';
+import { Bell, Search, Globe, Clock, Shield, TrendingUp, ShieldAlert, Zap, X, Menu, Radio } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useNotifications } from '../context/useNotifications';
