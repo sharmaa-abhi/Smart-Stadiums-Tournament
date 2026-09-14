@@ -1,4 +1,4 @@
-import { Bell, Search, Globe, Wifi, Clock, Shield, TrendingUp, ShieldAlert, Zap, X, Menu } from 'lucide-react';
+import { Bell, Search, Globe, Clock, Shield, TrendingUp, ShieldAlert, Zap, X, Menu, Radio } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useNotifications } from '../context/useNotifications';
@@ -98,21 +98,31 @@ export default function TopBar({ title, subtitle }) {
           />
         </div>
 
-        {/* Status indicators */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-          <Wifi className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-xs text-emerald-400 font-medium">5G Connected</span>
+        {/* Tactical status indicators matching screenshot */}
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/25">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+          <span className="text-[11px] font-mono text-emerald-400 font-bold uppercase tracking-wider">5G SA Telemetry Live</span>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-          <Globe className="w-3.5 h-3.5 text-accent-400" />
-          <span className="text-xs text-white/50">47 Edge Nodes</span>
+        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25">
+          <Globe className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-[11px] font-mono text-cyan-300 font-bold uppercase tracking-wider">47 Nodes Synced</span>
         </div>
+
+        {/* Tactical Radio Comms Quick Action */}
+        <button
+          onClick={() => alert('🎙️ Tactical Radio Comms (Channel 4) Connected.\nEncrypted audio link established with Stadium Security & MetLife Field Operations.')}
+          className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(244,63,94,0.15)] active:scale-95"
+          title="Open Tactical Radio Comms (Channel 4)"
+        >
+          <Radio className="w-3.5 h-3.5 animate-pulse text-rose-400" />
+          <span>Radio Comms (Ch 4)</span>
+        </button>
 
         {/* Time */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08]">
           <Clock className="w-3.5 h-3.5 text-white/40" />
-          <span className="text-xs text-white/60 font-mono tabular-nums">
+          <span className="text-xs text-white/80 font-mono font-bold tabular-nums">
             {time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         </div>

@@ -123,25 +123,32 @@ export default function Sidebar() {
         className={`fixed top-0 left-0 h-screen z-50 flex flex-col transition-all duration-300 ease-in-out
           ${collapsed ? 'w-[72px]' : 'w-[260px]'}
           ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          bg-surface-950/95 backdrop-blur-2xl border-r border-white/[0.08] shadow-2xl`}
+          bg-[#070a18]/95 backdrop-blur-2xl border-r border-white/[0.08] shadow-[0_0_40px_rgba(0,0,0,0.8)]`}
       >
         {/* Logo + Role Badge */}
-        <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 py-5 border-b border-white/[0.06] relative">
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow}`}>
+              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${brand.gradient} flex items-center justify-center ${brand.glow} border border-white/20`}>
                 <RoleIcon className="w-5 h-5 text-white" />
               </div>
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full pulse-dot border-2 border-surface-950" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse border-2 border-surface-950 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
             </div>
             {(!collapsed || mobileSidebarOpen) && (
               <div className="overflow-hidden">
-                <h1 className="text-base font-bold font-display tracking-tight text-white whitespace-nowrap">
-                  Stadium<span className="text-gradient">Genius</span>
-                </h1>
-                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest border ${brand.badge}`}>
-                  {brand.label}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <h1 className="text-base font-black font-display tracking-tight text-white whitespace-nowrap">
+                    STADIUM<span className="text-cyan-400">GENIUS</span>
+                  </h1>
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider border ${brand.badge}`}>
+                    {brand.label}
+                  </span>
+                  <span className="text-[9px] font-mono text-cyan-400/80 font-semibold tracking-tighter">
+                    FIFA '26
+                  </span>
+                </div>
               </div>
             )}
           </div>

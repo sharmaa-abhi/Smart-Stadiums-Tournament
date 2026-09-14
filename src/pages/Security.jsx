@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
+import IncidentTriageCard from '../components/IncidentTriageCard';
 import api from '../lib/api';
 import { useAuth } from '../context/useAuth';
 import { SecuritySkeleton } from '../components/skeleton';
@@ -445,19 +446,150 @@ export default function Security() {
               </motion.div>
             </div>
 
-            {/* Incident Table */}
+            {/* LIVE QUEUE • ACTIVE TRIAGE (Screenshot-Inspired Tactical Center) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.45 }}
+              className="space-y-4"
+            >
+              {/* Header bar: Live Queue • Active Triage & Auto-refresh */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+                <div className="flex items-center gap-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+                  <h3 className="text-base sm:text-lg font-black font-display text-white tracking-tight">
+                    LIVE QUEUE <span className="text-white/30">•</span> ACTIVE TRIAGE
+                  </h3>
+                  <span className="text-xs font-mono text-cyan-400/80 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                    Auto-refresh (1s)
+                  </span>
+                </div>
+
+                {/* Subheader info / nodes */}
+                <div className="flex items-center gap-2 text-xs font-mono text-white/50">
+                  <span className="text-rose-400 font-bold">2 SLA BREACH RISKS</span>
+                  <span>•</span>
+                  <span>47 TELEMETRY STREAMS</span>
+                </div>
+              </div>
+
+              {/* Triage Tactical Filters Row */}
+              <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
+                {/* Severity Pills */}
+                <button className="px-3 py-1.5 rounded-xl bg-white/[0.06] border border-white/10 text-xs font-mono font-bold text-white hover:bg-white/10 transition-all">
+                  All <span className="text-white/40 ml-1">14</span>
+                </button>
+                <button className="px-3 py-1.5 rounded-xl bg-rose-500/20 border border-rose-500/50 text-xs font-mono font-bold text-rose-300 shadow-[0_0_12px_rgba(244,63,94,0.3)] transition-all flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  Critical <span className="bg-rose-500 text-white px-1.5 py-0.2 rounded-full text-[10px]">2</span>
+                </button>
+                <button className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-mono font-bold text-amber-300 hover:bg-amber-500/20 transition-all flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  Warning <span className="bg-amber-500/30 text-amber-300 px-1.5 py-0.2 rounded-full text-[10px]">5</span>
+                </button>
+                <button className="px-3 py-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono font-bold text-cyan-300 hover:bg-cyan-500/20 transition-all flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                  Investigating <span className="bg-cyan-500/30 text-cyan-300 px-1.5 py-0.2 rounded-full text-[10px]">3</span>
+                </button>
+
+                {/* Dropdowns / Risk Selectors */}
+                <div className="ml-auto flex items-center gap-2">
+                  <select className="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white/80 focus:outline-none focus:border-cyan-400 font-mono">
+                    <option>Zone: All Sectors</option>
+                    <option>Gate Arrays (North/East)</option>
+                    <option>VIP Concourse</option>
+                    <option>Field Perimeter</option>
+                  </select>
+
+                  <div className="px-3 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-mono font-bold tracking-tight">
+                    SLA: Breach Risk
+                  </div>
+                </div>
+              </div>
+
+              {/* Tactical Cards Grid (Matching Screenshots 1 & 2) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {/* Card 1: Critical P1 - Turnstile Sensor #12 Flapping (Screenshot 2) */}
+                <IncidentTriageCard
+                  incident={{
+                    id: 'INC-8821',
+                    incident_id: 'INC-8821',
+                    priority: 'p1',
+                    time: '12s ago',
+                    title: 'Turnstile Sensor #12 Flapping',
+                    zone: 'Gate B Entry Array',
+                    subLocation: 'Sub-Array Optical Gateway',
+                    packetLoss: 42.8,
+                    ingressThroughput: '142 fans/min',
+                    assignedTeam: 'Tech Team 4 Dispatched',
+                    teamLead: 'J. Martinez',
+                    route: 'Tunnel B4',
+                    eta: '2m 40s'
+                  }}
+                  onAction={(id, act) => {
+                    alert(`⚡ [TACTICAL OVERRIDE] Action "${act}" executed on incident ${id}. Telemetry synced.`);
+                  }}
+                />
+
+                {/* Card 2: Warning P2 - Turnstile Gate F Optical Handshake Latency (Screenshot 1) */}
+                <IncidentTriageCard
+                  incident={{
+                    id: 'INC-8819',
+                    incident_id: 'INC-8819',
+                    priority: 'p2',
+                    time: '2m ago',
+                    slaRemaining: '8m remaining',
+                    title: 'Turnstile Gate F Optical Handshake Latency',
+                    zone: 'Gate F East Concourse',
+                    subLocation: 'FastTrack Array 3',
+                    latencySpike: '680ms',
+                    backpressure: '78 fans in queue buffer',
+                    assignedTeam: 'Tech Ops Team 2',
+                    teamLead: 'R. Kowalski',
+                    route: 'East Portal 1',
+                    eta: '4m 15s'
+                  }}
+                  onAction={(id, act) => {
+                    alert(`⚡ [DISPATCH] Action "${act}" applied to incident ${id}.`);
+                  }}
+                />
+
+                {/* Card 3: Investigating P3 - VIP Concourse Sub-Array 4 Bandwidth Throttle (Screenshot 1) */}
+                <IncidentTriageCard
+                  incident={{
+                    id: 'INC-8815',
+                    incident_id: 'INC-8815',
+                    priority: 'p3',
+                    time: '4m ago',
+                    title: 'VIP Concourse Sub-Array 4 Bandwidth Throttle',
+                    zone: 'VIP Concourse North',
+                    subLocation: 'Assigned: NetOps 1',
+                    mmWaveDrop: '6.2%',
+                    assignedTeam: 'NetOps Sub-Unit 1',
+                    teamLead: 'A. Chen',
+                    route: 'Mezzanine Core',
+                    eta: 'En route'
+                  }}
+                  onAction={(id, act) => {
+                    alert(`⚡ [SPECTRUM] Action "${act}" applied to ${id}. RF spectrum rebalanced.`);
+                  }}
+                />
+              </div>
+            </motion.div>
+
+            {/* Standard Incident Database Table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.55 }}
               className="glass-card rounded-2xl p-5"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm font-semibold text-white/90">Incident Management</h3>
+                  <h3 className="text-sm font-semibold text-white/90">Master Incident Log & History</h3>
                 </div>
-                <span className="text-xs text-white/30">{incidents.length} total • {incidents.filter(i => i.status !== 'resolved').length} active</span>
+                <span className="text-xs text-white/30 font-mono">{incidents.length} total • {incidents.filter(i => i.status !== 'resolved').length} active</span>
               </div>
 
               <div className="overflow-x-auto">
@@ -465,7 +597,7 @@ export default function Security() {
                   <thead>
                     <tr className="border-b border-white/[0.06]">
                       {['ID', 'Type', 'Zone', 'Time', 'Priority', 'Status', 'Response', 'Assignee', ''].map(h => (
-                        <th key={h} className="text-left text-[10px] font-semibold text-white/40 uppercase tracking-wider py-2.5 px-3">
+                        <th key={h} className="text-left text-[10px] font-semibold text-white/40 uppercase tracking-wider py-2.5 px-3 font-mono">
                           {h}
                         </th>
                       ))}
@@ -477,10 +609,10 @@ export default function Security() {
                         key={inc.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: i * 0.06 }}
-                        className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                        transition={{ delay: i * 0.05 }}
+                        className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors cursor-pointer"
                       >
-                        <td className="py-3 px-3 text-xs font-mono text-accent-400">{inc.incident_id}</td>
+                        <td className="py-3 px-3 text-xs font-mono text-cyan-400 font-bold">{inc.incident_id}</td>
                         <td className="py-3 px-3">
                           <div className="flex items-center gap-2">
                             {inc.type === 'Lost Child' ? <Baby className="w-3.5 h-3.5 text-rose-400" /> :
@@ -490,18 +622,18 @@ export default function Security() {
                             <span className="text-xs text-white/80">{inc.type}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-3 text-xs text-white/50">{inc.zone}</td>
+                        <td className="py-3 px-3 text-xs text-white/60 font-mono">{inc.zone}</td>
                         <td className="py-3 px-3 text-xs text-white/40 font-mono">{inc.time}</td>
                         <td className="py-3 px-3">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${priorityColors[inc.priority]}`}>
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase ${priorityColors[inc.priority]}`}>
                             {inc.priority}
                           </span>
                         </td>
                         <td className="py-3 px-3">
-                          <span className={`text-xs font-medium capitalize ${statusColors[inc.status]}`}>{inc.status}</span>
+                          <span className={`text-xs font-mono font-semibold capitalize ${statusColors[inc.status]}`}>{inc.status}</span>
                         </td>
                         <td className="py-3 px-3 text-xs text-emerald-400 font-mono">{inc.response}</td>
-                        <td className="py-3 px-3 text-xs text-white/40">{inc.assignee}</td>
+                        <td className="py-3 px-3 text-xs text-white/50">{inc.assignee}</td>
                         <td className="py-3 px-3">
                           {inc.status !== 'resolved' ? (
                             <button
@@ -509,7 +641,7 @@ export default function Security() {
                                 e.stopPropagation();
                                 handleResolveIncident(inc.id);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-[10px] font-semibold transition-all duration-200"
+                              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-[10px] font-mono font-bold transition-all duration-200 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
                             >
                               Resolve
                             </button>

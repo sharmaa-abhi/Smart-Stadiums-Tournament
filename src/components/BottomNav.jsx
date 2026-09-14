@@ -39,7 +39,7 @@ export default function BottomNav() {
   const navItems = BOTTOM_NAV_BY_ROLE[role] || BOTTOM_NAV_BY_ROLE.operator;
 
   return (
-    <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-950/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 flex items-center justify-around shadow-2xl">
+    <nav aria-label="Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#070a18]/95 backdrop-blur-2xl border-t border-cyan-500/20 px-2 py-1.5 flex items-center justify-around shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
       {navItems.map(({ to, icon: Icon, label }) => (
         <NavLink
           key={to}
@@ -48,13 +48,13 @@ export default function BottomNav() {
           className={({ isActive }) =>
             `flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all duration-200 min-w-[56px] min-h-[44px] ${
               isActive
-                ? 'text-cyan-400 font-semibold bg-white/[0.08]'
-                : 'text-white/50 hover:text-white/80 active:scale-95'
+                ? 'text-cyan-300 font-bold bg-cyan-500/15 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                : 'text-white/45 hover:text-white/80 active:scale-95'
             }`
           }
         >
           <Icon className="w-5 h-5 mb-0.5" />
-          <span className="text-[10px] tracking-tight truncate max-w-[64px]">{label}</span>
+          <span className="text-[10px] font-mono tracking-tight truncate max-w-[64px]">{label}</span>
         </NavLink>
       ))}
     </nav>

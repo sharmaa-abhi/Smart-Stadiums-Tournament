@@ -129,3 +129,4 @@ export function AuthProvider({ children }) {
   );
 }
 
+export { useAuth } from './useAuth';
